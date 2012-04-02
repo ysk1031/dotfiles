@@ -1,2 +1,5 @@
 let g:netrw_dirhistmax  =10
-let g:netrw_dirhist_cnt =0
+let g:netrw_dirhist_cnt =3
+let g:netrw_dirhist_1='/Users/Yusuke/.rvm/rubies/ruby-1.9.2-p290/lib/ruby/gems/1.9.1'
+let g:netrw_dirhist_2='/Users/Yusuke/dropbox/master/from_kohama/SSA法forPV【修論最終ver】'
+let g:netrw_dirhist_3='/Users/Yusuke/work/foo/app/views/users'
