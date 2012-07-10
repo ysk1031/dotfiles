@@ -55,11 +55,8 @@ set incsearch  " インクリメンタルサーチ
 set hlsearch   " 検索文字をハイライト
 
 "Escの2回押しでハイライト消去
-nmap <ESC><ESC> ;nohlsearch<CR><ESC>
+nmap <ESC><ESC> :nohlsearch<CR><ESC>
 
-" ;でコマンド入力( ;と:を入れ替)
-noremap ; :
-noremap : ;
 
 set ffs=unix,dos,mac  " 改行文字
 set encoding=utf-8    " デフォルトエンコーディング
