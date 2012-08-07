@@ -21,6 +21,7 @@ set clipboard=unnamed   "ヤンクした文字は、システムのクリップ�
 set list   " 不可視文字表示
 set listchars=tab:>.,trail:_,extends:>,precedes:<   " 不可視文字の表示形式
 set display=uhex      " 印字不可能文字を16進数で表示
+set colorcolumn = 80  " 80字のところで縦線を引く
 
 " 全角スペース表示
 highlight ZenkakuSpace cterm=underline ctermfg=lightblue guibg=darkgray
