@@ -4,7 +4,7 @@ colorscheme railscasts    " 使用するカラースキーム（/.vim/colors/ �
 set autoindent   " 自動でインデント
 set smartindent   " 新しい行を開始したときに、新しい行のインデントを現在行と同じ量にする
 set nocompatible   " vi非互換モード
-set number   " 行番号表示
+ set number   " 行番号表示
 set ambiwidth=double
 set showmode   " 現在のモードを表示
 set title   " 編集中のファイル名を表示
