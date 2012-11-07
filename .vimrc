@@ -1,5 +1,5 @@
 syntax on   " カラー表示
-colorscheme railscasts    " 使用するカラースキーム（/.vim/colors/ に置いてある）
+colorscheme molokai    " 使用するカラースキーム（/.vim/colors/ に置いてある）
 
 set autoindent   " 自動でインデント
 set smartindent   " 新しい行を開始したときに、新しい行のインデントを現在行と同じ量にする
@@ -26,7 +26,7 @@ set display=uhex      " 印字不可能文字を16進数で表示
 highlight ZenkakuSpace cterm=underline ctermfg=lightblue guibg=darkgray
 match ZenkakuSpace /　/
 
-set cursorline   " カーソル行をハイライト
+"set cursorline   " カーソル行をハイライト
 
 " カレントウィンドウにのみ罫線を引く
 augroup cch
