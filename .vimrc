@@ -4,8 +4,8 @@ colorscheme molokai    " 使用するカラースキーム（/.vim/colors/ に�
 set autoindent   " 自動でインデント
 set smartindent   " 新しい行を開始したときに、新しい行のインデントを現在行と同じ量にする
 set nocompatible   " vi非互換モード
- set number   " 行番号表示
-set ambiwidth=double
+set number   " 行番号表示
+set ambiwidth=double   " 全角文字（2バイト文字）の扱い
 set showmode   " 現在のモードを表示
 set title   " 編集中のファイル名を表示
 set ruler   " カーソルが何行目の何列目に置かれているかを表示する
@@ -17,7 +17,7 @@ set ts=2 sw=2 sts=0   " タブは半角2文字分のスペース
 set noswapfile   " スワップファイルを作らない
 set vb t_vb=   " ビープを鳴らさない
 set whichwrap=b,s,h,l,<,>,[,]   " カーソルを行頭、行末で止まらないようにする
-set clipboard=unnamed   "ヤンクした文字は、システムのクリップボードに入れる
+set clipboard=unnamed, autoselect   "ヤンクした文字は、システムのクリップボードに入れる
 set list   " 不可視文字表示
 set listchars=tab:>.,trail:_,extends:>,precedes:<   " 不可視文字の表示形式
 set display=uhex      " 印字不可能文字を16進数で表示
