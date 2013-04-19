@@ -116,6 +116,9 @@ autocmd BufWritePre * :%s/\t/  /ge
 filetype on
 autocmd Filetype rb, html set cindent
 
+nnoremap <Leader>t :tabnew<CR>
+nnoremap <Leader>n :tabnext<CR>
+nnoremap <Leader>p :tabprev<CR>
 
 " neocomplcache settings
 " Launches neocomplcache automatically on vim startup.
