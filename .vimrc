@@ -12,6 +12,7 @@ NeoBundle 'git://github.com/Shougo/vimproc.git'
 NeoBundle 'git://github.com/tpope/vim-endwise.git'
 NeoBundle 'git://github.com/tpope/vim-rails.git'
 NeoBundle 'git://github.com/tpope/vim-surround.git'
+NeoBundle 'git://github.com/scrooloose/syntastic.git'
 
 syntax on   " カラー表示
 colorscheme hybrid    " 使用するカラースキーム（/.vim/colors/ に置いてある）
