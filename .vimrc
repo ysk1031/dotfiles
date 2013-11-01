@@ -13,9 +13,14 @@ NeoBundle 'git://github.com/tpope/vim-endwise.git'
 NeoBundle 'git://github.com/tpope/vim-rails.git'
 NeoBundle 'git://github.com/tpope/vim-surround.git'
 NeoBundle 'git://github.com/scrooloose/syntastic.git'
+NeoBundle 'git://github.com/ngmy/vim-rubocop.git'
+NeoBundle 'git://github.com/croaker/mustang-vim.git'
+NeoBundle 'git://github.com/jpo/vim-railscasts-theme'
+NeoBundle 'git://github.com/tomasr/molokai'
+NeoBundle 'git://github.com/w0ng/vim-hybrid'
 
 syntax on   " カラー表示
-colorscheme hybrid    " 使用するカラースキーム（/.vim/colors/ に置いてある）
+colorscheme hybrid   " 使用するカラースキーム
 
 filetype plugin on
 filetype indent on
