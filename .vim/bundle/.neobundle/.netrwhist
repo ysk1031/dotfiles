@@ -1,5 +1,10 @@
 let g:netrw_dirhistmax  =10
-let g:netrw_dirhist_cnt =3
-let g:netrw_dirhist_1='/Users/Aono/work/jobshare/app/controllers'
-let g:netrw_dirhist_2='/Users/Aono/work/jobshare/app'
-let g:netrw_dirhist_3='/Users/Aono/dotfiles/.vim/bundle/vimproc'
+let g:netrw_dirhist_cnt =8
+let g:netrw_dirhist_1='/Users/Yusuke/work/jobshare/app/assets/images'
+let g:netrw_dirhist_2='/Users/Yusuke/work/jobshare/app/assets'
+let g:netrw_dirhist_3='/Users/Yusuke/work/jobshare/app'
+let g:netrw_dirhist_4='/Users/Yusuke/work/jobshare'
+let g:netrw_dirhist_5='/Users/Yusuke/work'
+let g:netrw_dirhist_6='/Users/Yusuke/work/jobshare/app/views/client/company_content'
+let g:netrw_dirhist_7='/Users/Yusuke/work/chikusho_generator/app/assets/stylesheets'
+let g:netrw_dirhist_8='/Users/Yusuke/work/chikusho_generator/app/views/home'
