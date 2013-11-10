@@ -1,2 +1,3 @@
-/.vim/.netrwhist
+.vim/.netrwhist
+.vim/bundle/.neobundle/.netrwhist
 .DS_Store
