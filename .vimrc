@@ -7,20 +7,22 @@ if has('vim_starting')
   call neobundle#rc(expand('~/.vim/bundle'))
 endif
 
-NeoBundle 'git://github.com/Shougo/neobundle.vim.git'
-NeoBundle 'git://github.com/Shougo/vimproc.git'
-NeoBundle 'git://github.com/tpope/vim-endwise.git'
-NeoBundle 'git://github.com/tpope/vim-rails.git'
-NeoBundle 'git://github.com/tpope/vim-surround.git'
-NeoBundle 'git://github.com/mattn/emmet-vim.git'
-NeoBundle 'git://github.com/scrooloose/syntastic.git'
-NeoBundle 'git://github.com/ngmy/vim-rubocop.git'
-" NeoBundle 'git://github.com/jpo/vim-railscasts-theme'
-" NeoBundle 'git://github.com/tomasr/molokai'
-NeoBundle 'git://github.com/w0ng/vim-hybrid'
+NeoBundle 'Shougo/neobundle.vim.git'
+NeoBundle 'Shougo/vimproc.git'
+NeoBundle 'tpope/vim-endwise.git'
+NeoBundle 'tpope/vim-rails.git'
+NeoBundle 'tpope/vim-surround.git'
+NeoBundle 'mattn/emmet-vim.git'
+NeoBundle 'scrooloose/syntastic.git'
+NeoBundle 'ngmy/vim-rubocop.git'
+NeoBundle 'scrooloose/nerdtree.git'
+NeoBundle 'itchyny/lightline.vim'
+NeoBundle 'git://github.com/jpo/vim-railscasts-theme'
+NeoBundle 'git://github.com/tomasr/molokai'
+NeoBundle 'w0ng/vim-hybrid'
 
 syntax on   " カラー表示
-colorscheme hybrid   " 使用するカラースキーム
+colorscheme molokai   " 使用するカラースキーム
 
 filetype plugin on
 filetype indent on
@@ -44,6 +46,7 @@ set clipboard=unnamed   "ヤンクした文字は、システムのクリップ�
 set list   " 不可視文字表示
 set listchars=tab:>.,trail:_,extends:>,precedes:<   " 不可視文字の表示形式
 set display=uhex      " 印字不可能文字を16進数で表示
+set autoread    " ファイル変更があった場合に自動再読み込み
 
 " 全角スペース表示
 " highlight ZenkakuSpace cterm=underline ctermfg=lightblue guibg=darkgray
@@ -142,3 +145,12 @@ autocmd Filetype rb, html set cindent
 nnoremap <Leader>t :tabnew<CR>
 nnoremap <Leader>n :tabnext<CR>
 nnoremap <Leader>p :tabprev<CR>
+
+let g:lightline = {
+      \ 'colorscheme': 'wombat',
+      \ 'component': {
+      \   'readonly': '%{&readonly?"x":""}',
+      \ },
+      \ 'separator': { 'left': '', 'right': '' },
+      \ 'subseparator': { 'left': '|', 'right': '|' }
+      \ }
