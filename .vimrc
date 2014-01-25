@@ -17,12 +17,13 @@ NeoBundle 'scrooloose/syntastic.git'
 NeoBundle 'ngmy/vim-rubocop.git'
 NeoBundle 'scrooloose/nerdtree.git'
 NeoBundle 'itchyny/lightline.vim'
-NeoBundle 'git://github.com/jpo/vim-railscasts-theme'
-NeoBundle 'git://github.com/tomasr/molokai'
-NeoBundle 'w0ng/vim-hybrid'
+NeoBundle 'altercation/vim-colors-solarized.git'
+" NeoBundle 'git://github.com/tomasr/molokai'
+" NeoBundle 'w0ng/vim-hybrid'
 
-syntax on   " カラー表示
-colorscheme molokai   " 使用するカラースキーム
+syntax enable   " カラー表示
+set background=dark
+colorscheme solarized   " 使用するカラースキーム
 
 filetype plugin on
 filetype indent on
