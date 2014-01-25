@@ -24,6 +24,7 @@ NeoBundle 'altercation/vim-colors-solarized.git'
 syntax enable   " カラー表示
 set background=dark
 colorscheme solarized   " 使用するカラースキーム
+let g:solarized_termcolors=256
 
 filetype plugin on
 filetype indent on
