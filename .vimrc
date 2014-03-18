@@ -16,9 +16,9 @@ NeoBundle 'mattn/emmet-vim.git'
 NeoBundle 'scrooloose/syntastic.git'
 NeoBundle 'ngmy/vim-rubocop.git'
 NeoBundle 'scrooloose/nerdtree.git'
-NeoBundle 'itchyny/lightline.vim'
 NeoBundle 'altercation/vim-colors-solarized.git'
-" NeoBundle 'git://github.com/tomasr/molokai'
+NeoBundle 'airblade/vim-gitgutter.git'
+
 " NeoBundle 'w0ng/vim-hybrid'
 
 syntax enable   " カラー表示
@@ -32,7 +32,7 @@ filetype indent on
 set autoindent   " 自動でインデント
 set smartindent   " 新しい行を開始したときに、新しい行のインデントを現在行と同じ量にする
 set number   " 行番号表示
-" set ambiwidth=double   " 全角文字（2バイト文字）の扱い
+set ambiwidth=double   " 全角文字（2バイト文字）の扱い
 set showmode   " 現在のモードを表示
 set title   " 編集中のファイル名を表示
 set ruler   " カーソルが何行目の何列目に置かれているかを表示する
@@ -54,7 +54,7 @@ set autoread    " ファイル変更があった場合に自動再読み込み
 " highlight ZenkakuSpace cterm=underline ctermfg=lightblue guibg=darkgray
 " match ZenkakuSpace /　/
 
-"set cursorline   " カーソル行をハイライト
+" set cursorline   " カーソル行をハイライト
 
 " カレントウィンドウにのみ罫線を引く
 augroup cch
@@ -70,7 +70,7 @@ highlight CursorLine ctermbg=black guibg=black
 set wildmenu               " コマンド補完を強化
 set wildchar=<tab>         " コマンド補完を開始するキー
 set wildmode=list:full     " リスト表示，最長マッチ
-set history=1000           " コマンド・検索パターンの履歴数
+set history=100           " コマンド・検索パターンの履歴数
 set complete+=k            " 補完に辞書ファイル追加
 
 " 前回終了したカーソル行から開く
@@ -106,6 +106,11 @@ set fileformats=unix,dos,mac
 " if exists('&ambiwidth')
   " set ambiwidth=double
 " endif
+
+set textwidth=80
+if exists('&colorcolumn')
+  set colorcolumn=+1
+endif
 
 " 入力モード時、ステータスラインのカラーを変更
 augroup InsertHook
