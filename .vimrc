@@ -15,13 +15,16 @@ NeoBundle 'tpope/vim-surround.git'
 NeoBundle 'mattn/emmet-vim.git'
 NeoBundle 'scrooloose/syntastic.git'
 NeoBundle 'ngmy/vim-rubocop.git'
-NeoBundle 'scrooloose/nerdtree.git'
 NeoBundle 'altercation/vim-colors-solarized.git'
 NeoBundle 'ervandew/supertab.git'
+NeoBundle 'w0ng/vim-hybrid'
+NeoBundle 'rizzatti/funcoo.vim'
+NeoBundle 'rizzatti/dash.vim'
 
-syntax enable   " カラー表示
+
+syntax enable
 set background=dark
-colorscheme solarized   " 使用するカラースキーム
+colorscheme solarized
 let g:solarized_termcolors=256
 
 filetype plugin on
@@ -42,22 +45,12 @@ set ts=2 sw=2 sts=0   " タブは半角2文字分のスペース
 set noswapfile   " スワップファイルを作らない
 set vb t_vb=   " ビープを鳴らさない
 set whichwrap=b,s,h,l,<,>,[,]   " カーソルを行頭、行末で止まらないようにする
-" set clipboard=unnamed   "ヤンクした文字は、システムのクリップボードに入れる
 set list   " 不可視文字表示
 set listchars=tab:>.,trail:_,extends:>,precedes:<   " 不可視文字の表示形式
 set display=uhex      " 印字不可能文字を16進数で表示
 set autoread    " ファイル変更があった場合に自動再読み込み
-" set cursorline   " カーソル行をハイライト
 
-
-" カレントウィンドウにのみ罫線を引く
-augroup cch
-  autocmd! cch
-  autocmd WinLeave * set nocursorline
-  autocmd WinEnter,BufRead * set cursorline
-augroup END
-
-:hi clear CursorLine
+hi clear CursorLine
 :hi CursorLine gui=underline
 highlight CursorLine ctermbg=black guibg=black
 
@@ -146,12 +139,3 @@ autocmd Filetype rb, html set cindent
 nnoremap <Leader>t :tabnew<CR>
 nnoremap <Leader>n :tabnext<CR>
 nnoremap <Leader>p :tabprev<CR>
-
-let g:lightline = {
-      \ 'colorscheme': 'wombat',
-      \ 'component': {
-      \   'readonly': '%{&readonly?"x":""}',
-      \ },
-      \ 'separator': { 'left': '', 'right': '' },
-      \ 'subseparator': { 'left': '|', 'right': '|' }
-      \ }
