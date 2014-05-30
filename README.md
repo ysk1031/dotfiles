@@ -3,3 +3,4 @@
 * vimrc
 * gemrc
 * tmux.conf
+* Brewfile
