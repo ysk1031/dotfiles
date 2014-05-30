@@ -20,6 +20,7 @@ NeoBundle 'ervandew/supertab.git'
 NeoBundle 'w0ng/vim-hybrid'
 NeoBundle 'rizzatti/funcoo.vim'
 NeoBundle 'rizzatti/dash.vim'
+NeoBundle 'kchmck/vim-coffee-script'
 
 
 syntax enable
@@ -139,3 +140,6 @@ autocmd Filetype rb, html set cindent
 nnoremap <Leader>t :tabnew<CR>
 nnoremap <Leader>n :tabnext<CR>
 nnoremap <Leader>p :tabprev<CR>
+
+" Check coding-convention by rubocop
+let g:syntastic_ruby_checkers = ['rubocop']
