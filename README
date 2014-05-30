@@ -1,1 +1,5 @@
-vimの設定です
+ドットファイル管理用レポジトリ
+
+* vimrc
+* gemrc
+* tmux.conf
