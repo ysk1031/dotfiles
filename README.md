@@ -4,3 +4,4 @@
 * gemrc
 * tmux.conf
 * Brewfile
+* tigrc
