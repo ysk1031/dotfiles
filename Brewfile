@@ -17,3 +17,5 @@ install wget
 install nkf
 install mecab
 install mecab-ipadic
+
+cleanup

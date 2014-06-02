@@ -9,6 +9,7 @@ endif
 
 NeoBundle 'Shougo/neobundle.vim.git'
 NeoBundle 'Shougo/vimproc.git'
+NeoBundle 'Shougo/unite.vim'
 NeoBundle 'tpope/vim-endwise.git'
 NeoBundle 'tpope/vim-rails.git'
 NeoBundle 'tpope/vim-surround.git'
@@ -18,8 +19,6 @@ NeoBundle 'ngmy/vim-rubocop.git'
 NeoBundle 'altercation/vim-colors-solarized.git'
 NeoBundle 'ervandew/supertab.git'
 NeoBundle 'w0ng/vim-hybrid'
-NeoBundle 'rizzatti/funcoo.vim'
-NeoBundle 'rizzatti/dash.vim'
 NeoBundle 'kchmck/vim-coffee-script'
 
 
