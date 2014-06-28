@@ -11,7 +11,6 @@ install hub
 install tig
 install readline
 install imagemagick
-install ctags
 install node
 install wget
 install nkf
