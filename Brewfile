@@ -2,6 +2,7 @@ update
 
 upgrade
 
+install git
 install rbenv
 install ruby-build
 install mysql
