@@ -2,6 +2,7 @@ update
 
 upgrade
 
+install zsh
 install git
 install rbenv
 install ruby-build
@@ -15,6 +16,7 @@ install imagemagick
 install node
 install wget
 install nkf
+install go
 install mecab
 install mecab-ipadic
 
