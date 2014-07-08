@@ -5,3 +5,5 @@
 * tmux.conf
 * Brewfile
 * tigrc
+* my.zsh (zsh config in oh-my-zsh)
+* config.json (for peco)
