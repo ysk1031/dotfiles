@@ -1,0 +1,10 @@
+{
+  "Keymap": {
+    "M-v": "peco.SelectPreviousPage",
+    "C-v": "peco.SelectNextPage"
+  },
+  "Style": {
+    "Selected": ["underline", "on_cyan", "black"],
+    "Matched": ["red", "on_black"]
+  }
+}
