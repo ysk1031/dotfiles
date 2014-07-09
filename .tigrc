@@ -1,3 +1,6 @@
 set main-view = id date author commit-title:graph=yes,refs=yes
 set vertical-split = no
 set split-view-height = 80%
+
+bind main G !@hub browse -- commit/%(commit)
+bind diff G !@hub browse -- commit/%(commit)
