@@ -20,4 +20,7 @@ install go
 install mecab
 install mecab-ipadic
 
+tap peco/peco
+install peco
+
 cleanup
