@@ -15,6 +15,7 @@ alias gb='git branch -a'
 alias gg='git grep'
 alias gf='git fetch --prune'
 alias hb='hub browse'
+alias vg='vagrant'
 alias -g B='`git branch -a | peco | sed -e "s/^\*[ ]*//g"`'
 
 # peco
