@@ -22,7 +22,7 @@
   ]
   'themes': [
     'atom-dark-ui'
-    'solarized-light-syntax'
+    'solarized-dark-syntax'
   ]
 'linter-rubocop':
   'rubocopExecutablePath': '/Users/Yusuke/.rbenv/shims/'
