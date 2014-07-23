@@ -49,6 +49,7 @@ set list   " 不可視文字表示
 set listchars=tab:>.,trail:_,extends:>,precedes:<   " 不可視文字の表示形式
 set display=uhex      " 印字不可能文字を16進数で表示
 set autoread    " ファイル変更があった場合に自動再読み込み
+set backspace=indent,eol,start
 
 hi clear CursorLine
 :hi CursorLine gui=underline
