@@ -15,6 +15,7 @@ install readline
 install imagemagick
 install node
 install wget
+install jq
 install nkf
 install go
 install mecab
