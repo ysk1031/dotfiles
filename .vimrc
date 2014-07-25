@@ -1,34 +1,32 @@
-set nocompatible
-
 if has('vim_starting')
-  filetype plugin off
-  filetype indent off
-  execute 'set runtimepath+=' . expand('~/.vim/bundle/neobundle.vim')
-  call neobundle#rc(expand('~/.vim/bundle'))
+  set runtimepath+=/Users/Aono/.vim/bundle/neobundle.vim/
 endif
 
-NeoBundle 'Shougo/neobundle.vim.git'
-NeoBundle 'Shougo/vimproc.git'
-NeoBundle 'Shougo/unite.vim'
+call neobundle#begin(expand('/Users/Aono/.vim/bundle'))
+
+NeoBundleFetch 'Shougo/neobundle.vim'
+
+NeoBundle 'tpope/vim-fugitive'
+NeoBundle 'kien/ctrlp.vim'
+NeoBundle 'Shougo/vimshell', { 'rev' : '3787e5' }
+NeoBundle 'altercation/vim-colors-solarized'
 NeoBundle 'tpope/vim-endwise.git'
-NeoBundle 'tpope/vim-rails.git'
-NeoBundle 'tpope/vim-surround.git'
-NeoBundle 'mattn/emmet-vim.git'
 NeoBundle 'scrooloose/syntastic.git'
 NeoBundle 'ngmy/vim-rubocop.git'
-NeoBundle 'altercation/vim-colors-solarized.git'
 NeoBundle 'ervandew/supertab.git'
-NeoBundle 'w0ng/vim-hybrid'
 NeoBundle 'kchmck/vim-coffee-script'
+
+call neobundle#end()
+
+filetype plugin indent on
+
+NeoBundleCheck
 
 
 syntax enable
 set background=dark
 colorscheme solarized
 let g:solarized_termcolors=256
-
-filetype plugin on
-filetype indent on
 
 set autoindent   " 自動でインデント
 set smartindent   " 新しい行を開始したときに、新しい行のインデントを現在行と同じ量にする
@@ -50,25 +48,19 @@ set listchars=tab:>.,trail:_,extends:>,precedes:<   " 不可視文字の表示�
 set display=uhex      " 印字不可能文字を16進数で表示
 set autoread    " ファイル変更があった場合に自動再読み込み
 set backspace=indent,eol,start
-
-hi clear CursorLine
-:hi CursorLine gui=underline
-highlight CursorLine ctermbg=black guibg=black
-
 set wildmenu               " コマンド補完を強化
 set wildchar=<tab>         " コマンド補完を開始するキー
 set wildmode=list:full     " リスト表示，最長マッチ
 set history=100           " コマンド・検索パターンの履歴数
 set complete+=k            " 補完に辞書ファイル追加
-
-" 前回終了したカーソル行から開く
-autocmd BufReadPost * if line("'\"") > 0 && line("'\"") <= line("$") | exe "normal g`\"" | endif
-
 set wrapscan   " 最後まで検索したら先頭へ戻る
 set ignorecase " 大文字小文字無視
 set smartcase  " 検索文字列に大文字が含まれている場合は区別して検索する
 set incsearch  " インクリメンタルサーチ
 set hlsearch   " 検索文字をハイライト
+
+" 前回終了したカーソル行から開く
+autocmd BufReadPost * if line("'\"") > 0 && line("'\"") <= line("$") | exe "normal g`\"" | endif
 
 "Escの2回押しでハイライト消去
 nmap <ESC><ESC> :nohlsearch<CR><ESC>
@@ -90,22 +82,12 @@ endif
 
 " 改行コードの自動認識
 set fileformats=unix,dos,mac
-" □とか○の文字があってもカーソル位置がずれないようにする
-" if exists('&ambiwidth')
-  " set ambiwidth=double
-" endif
 
+" 80列目にマーク
 set textwidth=80
 if exists('&colorcolumn')
   set colorcolumn=+1
 endif
-
-" 入力モード時、ステータスラインのカラーを変更
-augroup InsertHook
-autocmd!
-autocmd InsertEnter * highlight StatusLine guifg=#ccdc90 guibg=#2E4340
-autocmd InsertLeave * highlight StatusLine guifg=#2E4340 guibg=#ccdc90
-augroup END
 
 " cvsの時は文字コードをeuc-jpに設定
 autocmd FileType cvs :set fileencoding=euc-jp
