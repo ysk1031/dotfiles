@@ -18,25 +18,24 @@
     'feedback'
     'metrics'
     'tree-view'
-    'Sublime-Style-Column-Selection'
     'archive-view'
     'autosave'
-    'deprecation-cop'
+    'background-tips'
     'dev-live-reload'
     'grammar-selector'
     'image-view'
     'link'
-    'linter-scss-lint'
-    'linter-csslint'
     'open-on-github'
     'package-generator'
     'release-notes'
     'styleguide'
     'welcome'
+    'deprecation-cop'
   ]
+  'projectHome': '/Users/Yusuke/work/'
   'themes': [
     'atom-dark-ui'
-    'solarized-dark-syntax'
+    'base16-tomorrow-dark-theme'
   ]
 'linter-rubocop':
   'rubocopExecutablePath': '/Users/Yusuke/.rbenv/shims/'
@@ -48,3 +47,6 @@
   'showHightlighting': false
   'showStatusBarWhenCursorIsInErrorRange': true
   'lintOnChange': false
+'find-and-replace':
+  'focusEditorAfterSearch': true
+  'openProjectFindResultsInRightPane': true

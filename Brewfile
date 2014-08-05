@@ -4,6 +4,7 @@ upgrade
 
 install zsh
 install git
+install vim
 install rbenv
 install ruby-build
 install mysql
