@@ -6,9 +6,6 @@ call neobundle#begin(expand('/Users/Aono/.vim/bundle'))
 
 NeoBundleFetch 'Shougo/neobundle.vim'
 
-NeoBundle 'tpope/vim-fugitive'
-NeoBundle 'kien/ctrlp.vim'
-NeoBundle 'Shougo/vimshell', { 'rev' : '3787e5' }
 NeoBundle 'altercation/vim-colors-solarized'
 NeoBundle 'tpope/vim-endwise.git'
 NeoBundle 'scrooloose/syntastic.git'
@@ -34,7 +31,6 @@ set number   " 行番号表示
 set ambiwidth=double   " 全角文字（2バイト文字）の扱い
 set showmode   " 現在のモードを表示
 set title   " 編集中のファイル名を表示
-set ruler   " カーソルが何行目の何列目に置かれているかを表示する
 set showmatch   " 括弧の対応をハイライト
 set showcmd   " コマンドをステータス行に表示
 set laststatus=2   " 常にステータスラインを表示
@@ -89,19 +85,11 @@ if exists('&colorcolumn')
   set colorcolumn=+1
 endif
 
-" cvsの時は文字コードをeuc-jpに設定
-autocmd FileType cvs :set fileencoding=euc-jp
 " 以下のファイルの時は文字コードをutf-8に設定
-autocmd FileType svn :set fileencoding=utf-8
 autocmd FileType js :set fileencoding=utf-8
 autocmd FileType css :set fileencoding=utf-8
 autocmd FileType html :set fileencoding=utf-8
 autocmd FileType xml :set fileencoding=utf-8
-autocmd FileType java :set fileencoding=utf-8
-autocmd FileType scala :set fileencoding=utf-8
-
-" ワイルドカードで表示するときに優先度を低くする拡張子
-set suffixes=.bak,~,.swp,.o,.info,.aux,.log,.dvi,.bbl,.blg,.brf,.cb,.ind,.idx,.ilg,.inx,.out,.toc
 
 " 指定文字コードで強制的にファイルを開く
 command! Cp932 edit ++enc=cp932
