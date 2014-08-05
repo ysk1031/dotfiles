@@ -15,19 +15,34 @@
   'disabledPackages': [
     'autoflow'
     'bookmarks'
-    'exception-reporting'
     'feedback'
     'metrics'
     'tree-view'
+    'archive-view'
+    'autosave'
+    'background-tips'
+    'dev-live-reload'
+    'grammar-selector'
+    'image-view'
+    'link'
+    'open-on-github'
+    'package-generator'
+    'release-notes'
+    'styleguide'
+    'welcome'
+    'linter-scss-lint'
+    'deprecation-cop'
+    'keybinding-resolver'
   ]
+  'projectHome': '/Users/Aono/work/'
   'themes': [
     'atom-dark-ui'
-    'solarized-dark-syntax'
+    'base16-tomorrow-dark-theme'
   ]
 'linter-rubocop':
-  'rubocopExecutablePath': '/Users/Yusuke/.rbenv/shims/'
+  'rubocopExecutablePath': '/Users/Aono/.rbenv/shims/'
 'linter-scss-lint':
-  'scssLintExecutablePath': '/Users/Yusuke/.rbenv/shims/'
+  'scssLintExecutablePath': '/Users/Aono/.rbenv/shims/'
 'autocomplete':
   'includeCompletionsFromAllBuffers': true
 'linter':
