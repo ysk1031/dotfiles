@@ -12,6 +12,7 @@ install redis
 install tmux
 install hub
 install tig
+install tree
 install readline
 install imagemagick
 install node
