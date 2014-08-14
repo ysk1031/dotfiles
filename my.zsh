@@ -6,6 +6,9 @@ zstyle ':completion:*' recent-dirs-insert both
 
 setopt hist_ignore_all_dups
 
+# gh
+eval "$(gh alias -s)"
+
 alias a='atom'
 alias r='rails'
 alias ao='RAILS_ENV=aono'
@@ -14,7 +17,6 @@ alias gd='git diff'
 alias gb='git branch -a'
 alias gg='git grep'
 alias gf='git fetch --prune'
-alias hb='hub browse'
 alias vg='vagrant'
 alias -g B='`git branch -a | peco | sed -e "s/^\*[ ]*//g"`'
 
