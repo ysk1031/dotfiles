@@ -10,7 +10,7 @@ install ruby-build
 install mysql
 install redis
 install tmux
-install hub
+install gh
 install tig
 install tree
 install readline
