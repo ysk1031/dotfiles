@@ -20,8 +20,14 @@ install wget
 install jq
 install nkf
 install go
-install mecab
-install mecab-ipadic
+
+# for nokogiri
+install libxml2
+install libxslt
+install libiconv
+
+# install mecab
+# install mecab-ipadic
 
 tap peco/peco
 install peco
