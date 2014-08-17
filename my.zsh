@@ -46,6 +46,17 @@ function peco_cdr() {
 zle -N peco_cdr
 bindkey '^xb' peco_cdr
 
+function peco-src () {
+  local selected_dir=$(ghq list --full-path | peco --query "$LBUFFER")
+  if [ -n "$selected_dir" ]; then
+    BUFFER="cd ${selected_dir}"
+    zle accept-line
+  fi
+  zle clear-screen
+}
+zle -N peco-src
+bindkey '^]' peco-src
+
 function cdgem() {
   local gem_name=$(bundle list | sed -e 's/^ *\* *//g' | peco | cut -d \  -f 1)
   if [ -n "$gem_name" ]; then
