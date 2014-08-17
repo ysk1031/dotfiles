@@ -26,4 +26,7 @@ install mecab-ipadic
 tap peco/peco
 install peco
 
+tap motemen/ghq
+install ghq
+
 cleanup
