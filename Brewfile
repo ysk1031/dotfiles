@@ -22,9 +22,9 @@ install nkf
 install go
 
 # for nokogiri
-install libxml2
-install libxslt
-install libiconv
+# install libxml2
+# install libxslt
+# install libiconv
 
 # install mecab
 # install mecab-ipadic

@@ -47,7 +47,7 @@ zle -N peco_cdr
 bindkey '^xb' peco_cdr
 
 function peco-src () {
-  local selected_dir=$(ghq list --full-path | peco --query "$LBUFFER")
+  local selected_dir=$(ghq list -p | peco --query "$LBUFFER")
   if [ -n "$selected_dir" ]; then
     BUFFER="cd ${selected_dir}"
     zle accept-line
