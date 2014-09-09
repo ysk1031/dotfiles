@@ -8,6 +8,7 @@ NeoBundleFetch 'Shougo/neobundle.vim'
 
 NeoBundle 'altercation/vim-colors-solarized'
 NeoBundle 'chriskempson/vim-tomorrow-theme'
+NeoBundle 'w0ng/vim-hybrid'
 
 NeoBundle 'kien/ctrlp.vim'
 NeoBundle 'tpope/vim-endwise.git'
@@ -25,8 +26,9 @@ NeoBundleCheck
 
 syntax enable
 set background=dark
-colorscheme solarized
-let g:solarized_termcolors=256
+let g:hybrid_use_iTerm_colors = 1
+colorscheme hybrid
+" let g:solarized_termcolors=256
 
 set autoindent   " 自動でインデント
 set smartindent   " 新しい行を開始したときに、新しい行のインデントを現在行と同じ量にする
@@ -57,7 +59,7 @@ set laststatus=2   " 常にステータスライン表示
 " 前回終了したカーソル行から開く
 autocmd BufReadPost * if line("'\"") > 0 && line("'\"") <= line("$") | exe "normal g`\"" | endif
 
-"Escの2回押しでハイライト消去
+" Escの2回押しでハイライト消去
 nmap <ESC><ESC> :nohlsearch<CR><ESC>
 
 set ffs=unix,dos,mac  " 改行文字
@@ -80,3 +82,8 @@ autocmd BufWritePre * :%s/\s\+$//ge  " 保存時に行末の空白を除去す�
 autocmd BufWritePre * :%s/\t/  /ge   " 保存時にtabをスペースに変換する
 
 let g:syntastic_ruby_checkers = ['rubocop']   " Check coding-convention by rubocop
+
+" s - tで新規タブ
+nnoremap st :<C-u>tabnew<CR>
+
+au BufRead,BufNewFile *.cap set filetype=ruby   " .capをrubyのsyntax highlightで開く
