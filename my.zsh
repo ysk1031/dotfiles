@@ -9,6 +9,8 @@ setopt hist_ignore_all_dups
 # gh
 eval "$(gh alias -s)"
 
+
+alias v='vim'
 alias a='atom'
 alias r='rails'
 alias ao='RAILS_ENV=aono'
@@ -19,6 +21,7 @@ alias gg='git grep'
 alias gf='git fetch --prune'
 alias vg='vagrant'
 alias -g B='`git branch -a | peco | sed -e "s/^\*[ ]*//g"`'
+
 
 # peco
 function peco_select_history() {

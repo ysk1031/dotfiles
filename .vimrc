@@ -11,6 +11,7 @@ NeoBundle 'chriskempson/vim-tomorrow-theme'
 NeoBundle 'w0ng/vim-hybrid'
 
 NeoBundle 'kien/ctrlp.vim'
+NeoBundle 'tpope/vim-fugitive'
 NeoBundle 'tpope/vim-endwise.git'
 NeoBundle 'scrooloose/syntastic.git'
 NeoBundle 'ngmy/vim-rubocop.git'
@@ -31,7 +32,7 @@ colorscheme hybrid
 " let g:solarized_termcolors=256
 
 set autoindent   " 自動でインデント
-set smartindent   " 新しい行を開始したときに、新しい行のインデントを現在行と同じ量にする
+set smartindent   " 新しい行の開始時、インデントを現在行と同じにする
 set number   " 行番号表示
 set ambiwidth=double   " 全角文字（2バイト文字）の扱い
 set title   " 編集中のファイル名を表示
@@ -55,6 +56,7 @@ set smartcase  " 検索文字列に大文字が含まれている場合は区別
 set incsearch  " インクリメンタルサーチ
 set hlsearch   " 検索文字をハイライト
 set laststatus=2   " 常にステータスライン表示
+set whichwrap=b,s,h,l,<,>,[,]   " カーソルを行頭、行末で止まらないようにする
 
 " 前回終了したカーソル行から開く
 autocmd BufReadPost * if line("'\"") > 0 && line("'\"") <= line("$") | exe "normal g`\"" | endif
@@ -83,7 +85,8 @@ autocmd BufWritePre * :%s/\t/  /ge   " 保存時にtabをスペースに変換�
 
 let g:syntastic_ruby_checkers = ['rubocop']   " Check coding-convention by rubocop
 
-" s - tで新規タブ
+au BufRead,BufNewFile *.cap set filetype=ruby   " .capをrubyのsyntax highlightで開く
+
+" Open new tab
 nnoremap st :<C-u>tabnew<CR>
 
-au BufRead,BufNewFile *.cap set filetype=ruby   " .capをrubyのsyntax highlightで開く
