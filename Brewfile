@@ -1,3 +1,5 @@
+# Check https://github.com/Homebrew/homebrew-bundle
+
 brew 'zsh'
 brew 'git'
 brew 'rbenv'
