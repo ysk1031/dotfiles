@@ -1,0 +1,16 @@
+[user]
+	name = ysk1031
+	email = yusukeaono.1031@gmail.com
+[color]
+	ui = auto
+[alias]
+	co = checkout
+	ci = commit
+	st = status
+	br = branch
+[pager]
+	log = diff-highlight | less
+	show = diff-highlight | less
+	diff = diff-highlight | less
+[ghq]
+	root = ~/src
