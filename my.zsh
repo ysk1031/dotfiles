@@ -15,6 +15,18 @@ zle -N peco_select_history
 bindkey '^r' peco_select_history
 
 
+function peco-github-prs () {
+    local pr=$(hub issue 2> /dev/null | grep 'pull' | peco --query "$LBUFFER" | sed -e 's/.*( \(.*\) )$/\1/')
+    if [ -n "$pr" ]; then
+        BUFFER="open ${pr}"
+        zle accept-line
+    fi
+    zle clear-screen
+}
+zle -N peco-github-prs
+bindkey '^g^p' peco-github-prs
+
+
 function peco-src () {
   local selected_dir=$(ghq list -p | peco --query "$LBUFFER")
   if [ -n "$selected_dir" ]; then
