@@ -14,3 +14,5 @@
 	diff = diff-highlight | less
 [ghq]
 	root = ~/src
+[commit]
+	template = ~/.gitmessage.txt
