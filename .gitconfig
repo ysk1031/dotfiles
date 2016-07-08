@@ -16,3 +16,7 @@
 	root = ~/src
 [commit]
 	template = ~/.gitmessage.txt
+[diff]
+	compactionHeuristic = true
+[core]
+	ignorecase = false
