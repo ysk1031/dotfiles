@@ -2,21 +2,24 @@
 	name = ysk1031
 	email = yusukeaono.1031@gmail.com
 [color]
-	ui = auto
+	diff = auto
+	status = auto
+	branch = auto
+[core]
+	precomposeunicode = true
+	quotepath = false
 [alias]
 	co = checkout
 	ci = commit
 	st = status
 	br = branch
+[ghq]
+	root = ~/src
+[credential]
+	helper = osxkeychain
 [pager]
 	log = diff-highlight | less
 	show = diff-highlight | less
 	diff = diff-highlight | less
-[ghq]
-	root = ~/src
-[commit]
-	template = ~/.gitmessage.txt
 [diff]
 	compactionHeuristic = true
-[core]
-	ignorecase = false
