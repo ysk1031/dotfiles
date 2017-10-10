@@ -8,6 +8,8 @@
 [core]
 	precomposeunicode = true
 	quotepath = false
+	editor = vim -c \"set fenc=utf-8\"
+	excludesfile = /Users/Yusuke/.gitignore_global
 [alias]
 	co = checkout
 	ci = commit
@@ -23,3 +25,11 @@
 	diff = diff-highlight | less
 [diff]
 	compactionHeuristic = true
+[difftool "sourcetree"]
+	cmd = opendiff \"$LOCAL\" \"$REMOTE\"
+	path = 
+[mergetool "sourcetree"]
+	cmd = /Applications/Sourcetree.app/Contents/Resources/opendiff-w.sh \"$LOCAL\" \"$REMOTE\" -ancestor \"$BASE\" -merge \"$MERGED\"
+	trustExitCode = true
+[commit]
+	template = /Users/Yusuke/.stCommitMsg
