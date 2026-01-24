@@ -26,3 +26,19 @@ Verify the configuration:
 ```bash
 git config --list | grep user
 ```
+
+### Ghostty Terminal
+
+Ghostty's configuration is managed in this repository. To set up the symlink:
+
+```bash
+# Backup existing config (if not already done)
+mv ~/Library/Application\ Support/com.mitchellh.ghostty/config \
+   ~/Library/Application\ Support/com.mitchellh.ghostty/config.backup
+
+# Create symlink
+ln -s /path/to/dotfiles/ghostty/config \
+      ~/Library/Application\ Support/com.mitchellh.ghostty/config
+```
+
+After creating the symlink, restart Ghostty to apply the configuration.
