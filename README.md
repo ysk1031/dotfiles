@@ -27,6 +27,26 @@ Verify the configuration:
 git config --list | grep user
 ```
 
+### Zsh
+
+Portable zsh settings (aliases, functions, keybindings) are managed in `my.zsh`. To set up the symlink:
+
+```bash
+ln -s ~/src/github.com/ysk1031/dotfiles/my.zsh ~/.my.zsh
+```
+
+Then add the following line to the end of `~/.zshrc`:
+
+```zsh
+# Load portable zsh settings from dotfiles
+source ~/.my.zsh
+```
+
+Included settings:
+- **Aliases**: `g`, `gst`, `gd`, `gb`, `gf` (git), `ls`, `ll` (eza), `grep` (rg), `lzd` (lazydocker), `claude` (safety wrapper)
+- **Functions**: `peco_select_history`, `peco-src`, `lg`
+- **Keybindings**: `Ctrl+r` (history search), `Ctrl+]` (ghq selector), `Ctrl+g` (lazygit)
+
 ### Ghostty Terminal
 
 Ghostty's configuration is managed in this repository. To set up the symlink:
