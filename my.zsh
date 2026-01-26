@@ -18,32 +18,32 @@ alias ll='eza -l --group-directories-first'
 alias grep='rg'
 alias lzd='lazydocker'
 
-# Function: History search with peco (Ctrl+r)
-function peco_select_history() {
+# Function: History search with fzf (Ctrl+r)
+function fzf_select_history() {
   local tac
   if which tac > /dev/null; then
     tac="tac"
   else
     tac="tail -r"
   fi
-  BUFFER=$(fc -l -n 1 | eval $tac | peco --query "$LBUFFER")
+  BUFFER=$(fc -l -n 1 | eval $tac | fzf --query "$LBUFFER")
   CURSOR=$#BUFFER
   zle clear-screen
 }
-zle -N peco_select_history
-bindkey '^r' peco_select_history
+zle -N fzf_select_history
+bindkey '^r' fzf_select_history
 
-# Function: ghq repository selector with peco (Ctrl+])
-function peco-src() {
-  local selected_dir=$(ghq list -p | peco --query "$LBUFFER")
+# Function: ghq repository selector with fzf (Ctrl+])
+function fzf-src() {
+  local selected_dir=$(ghq list -p | fzf --query "$LBUFFER")
   if [ -n "$selected_dir" ]; then
     BUFFER="cd ${selected_dir}"
     zle accept-line
   fi
   zle clear-screen
 }
-zle -N peco-src
-bindkey '^]' peco-src
+zle -N fzf-src
+bindkey '^]' fzf-src
 
 # Function: lazygit with directory change support (Ctrl+g)
 function lg() {
