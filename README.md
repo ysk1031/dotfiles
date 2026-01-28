@@ -32,7 +32,7 @@ git config --list | grep user
 Portable zsh settings (aliases, functions, keybindings) are managed in `my.zsh`. To set up the symlink:
 
 ```bash
-ln -s ~/src/github.com/ysk1031/dotfiles/my.zsh ~/.my.zsh
+ln -s /path/to/dotfiles/my.zsh ~/.my.zsh
 ```
 
 Then add the following line to the end of `~/.zshrc`:
