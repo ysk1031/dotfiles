@@ -6,6 +6,12 @@
 
 This repository uses `.gitconfig.local` to keep personal information (name, email) out of version control.
 
+To set up the symlink:
+
+```bash
+ln -sf /path/to/dotfiles/.gitconfig ~/.gitconfig
+```
+
 After cloning, create `~/.gitconfig.local` based on the example:
 
 ```bash
