@@ -80,9 +80,10 @@ BODY: <body or empty if not needed>
 If subagent returns STATUS: NO_CHANGES or STATUS: NEEDS_SPLIT, display the message and stop.
 
 If subagent returns STATUS: OK:
-1. Display the proposed commit message (TITLE and BODY if present)
-2. Use AskUserQuestion:
-   - question: "このコミットメッセージでよろしいですか？"
+1. Use AskUserQuestion:
+   - question: Include the proposed commit message in the question text
+     Example (no body): "提案コミットメッセージ:\n\n`<type>: <description>`\n\nこのコミットメッセージでよろしいですか？"
+     Example (with body): "提案コミットメッセージ:\n\n`<type>: <description>`\n\n<body>\n\nこのコミットメッセージでよろしいですか？"
    - header: "Commit"
    - options:
      1. label: "Accept", description: "このままコミットを実行"
