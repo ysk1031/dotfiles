@@ -98,6 +98,9 @@ If subagent returns STATUS: OK:
 
 ### Phase 3: Execute Commit (main agent with Bash)
 
+**Determine Co-Authored-By name**: Use your own model name for the Co-Authored-By trailer.
+Format: `Co-Authored-By: Claude <model> <noreply@anthropic.com>` where `<model>` is your model name (e.g., "Opus 4.6", "Sonnet 4.5") as stated in your system prompt.
+
 Execute the commit:
 
 For title only:
@@ -105,7 +108,7 @@ For title only:
 git commit -m "$(cat <<'EOF'
 <type>: <description>
 
-Co-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>
+Co-Authored-By: Claude <model> <noreply@anthropic.com>
 EOF
 )"
 ```
@@ -117,7 +120,7 @@ git commit -m "$(cat <<'EOF'
 
 <body>
 
-Co-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>
+Co-Authored-By: Claude <model> <noreply@anthropic.com>
 EOF
 )"
 ```
@@ -127,7 +130,7 @@ Then verify: `git status && git log -1`
 ---
 
 ### Rules
-- NEVER skip Co-Authored-By
+- NEVER skip Co-Authored-By (always use your actual model name, never hardcode a specific version)
 - NEVER use --amend unless explicitly requested
 - NEVER use --no-verify
 - Keep first line under 72 characters
