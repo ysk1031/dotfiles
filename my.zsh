@@ -20,7 +20,7 @@ alias lzd='lazydocker'
 
 # Function: History search with fzf (Ctrl+r)
 function fzf_select_history() {
-  BUFFER=$(fc -l -n 1 | fzf --tac --no-sort --query "$LBUFFER")
+  BUFFER=$(fc -l -n 1 | fzf --tac --scheme=history --query "$LBUFFER")
   CURSOR=$#BUFFER
   zle clear-screen
 }
@@ -29,7 +29,7 @@ bindkey '^r' fzf_select_history
 
 # Function: ghq repository selector with fzf (Ctrl+])
 function fzf-src() {
-  local selected_dir=$(ghq list -p | fzf --no-sort --query "$LBUFFER")
+  local selected_dir=$(ghq list -p | fzf --query "$LBUFFER")
   if [ -n "$selected_dir" ]; then
     BUFFER="cd ${selected_dir}"
     zle accept-line
