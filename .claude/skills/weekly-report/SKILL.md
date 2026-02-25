@@ -2,7 +2,8 @@
 name: weekly-report
 description: Aggregate development activity (GitHub + Claude Code) from the past week and generate a review report
 allowed-tools: Task, AskUserQuestion, Bash
-argument-hint: [--repos owner/repo1,owner/repo2] [--days N] [--output path]
+argument-hint: [--repos owner/repo1,repo2 to specify repositories] [--days N to set lookback period] [--output path to set output file]
+context: fork
 ---
 
 # Weekly Development Review Report Skill
@@ -182,15 +183,15 @@ Display the message and stop.
 
 **STATUS: NO_DATA**:
 Use AskUserQuestion:
-- question: "No data found in the specified period. Extend the period?"
+- question: "指定期間にデータが見つかりませんでした。期間を延長しますか？"
 - header: "Period"
 - options:
-  1. label: "14 days", description: "Collect data from past 2 weeks"
-  2. label: "30 days", description: "Collect data from past month"
-  3. label: "Cancel", description: "Cancel report generation"
+  1. label: "14日間", description: "過去2週間のデータを収集"
+  2. label: "30日間", description: "過去1ヶ月のデータを収集"
+  3. label: "キャンセル", description: "レポート生成を中止"
 
 If user selects extended period, call subagent again with new --days value.
-If "Cancel", print "Report generation cancelled." and stop.
+If "キャンセル", print "レポート生成をキャンセルしました。" and stop.
 
 **STATUS: OK**:
 1. Display a summary preview:
@@ -201,16 +202,16 @@ If "Cancel", print "Report generation cancelled." and stop.
    - Output path
 
 2. Use AskUserQuestion:
-   - question: "Generate report with this data?"
+   - question: "このデータでレポートを生成しますか？"
    - header: "Report"
    - options:
-     1. label: "Generate", description: "Generate report and save to file"
-     2. label: "Change period", description: "Change data collection period"
-     3. label: "Cancel", description: "Cancel report generation"
+     1. label: "生成する", description: "レポートを生成しファイルに保存"
+     2. label: "期間を変更", description: "データ収集期間を変更"
+     3. label: "キャンセル", description: "レポート生成を中止"
 
-**If "Generate"**: Proceed to Phase 3
-**If "Change period"**: Use AskUserQuestion to get new period, then re-run Phase 1
-**If "Cancel"**: Print "Report generation cancelled." and stop
+**If "生成する"**: Proceed to Phase 3
+**If "期間を変更"**: Use AskUserQuestion to get new period, then re-run Phase 1
+**If "キャンセル"**: Print "レポート生成をキャンセルしました。" and stop
 
 ---
 
