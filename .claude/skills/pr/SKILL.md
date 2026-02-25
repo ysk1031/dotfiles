@@ -2,7 +2,7 @@
 name: pr
 description: Create a GitHub Pull Request from current branch with auto-generated description. Use when the user wants to create a PR.
 allowed-tools: Task, AskUserQuestion, Bash
-argument-hint: [base-branch to specify target branch] [--draft to create as draft PR]
+argument-hint: "[base-branch to specify target branch] [--draft to create as draft PR]"
 ---
 
 # Pull Request Creation Skill

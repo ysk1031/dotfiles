@@ -2,7 +2,7 @@
 name: fix-ci
 description: Diagnose and fix failed GitHub Actions workflow runs on the current branch. Use when CI is failing and the user wants to identify and fix the cause.
 allowed-tools: Task, AskUserQuestion, Bash, Read, Glob, Grep
-argument-hint: [run-id or workflow-name to target specific run]
+argument-hint: "[run-id or workflow-name to target specific run]"
 ---
 
 # CI Failure Diagnosis & Fix Skill

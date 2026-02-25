@@ -2,7 +2,7 @@
 name: commit
 description: Generate and execute git commits for staged changes with Conventional Commits format. Use when the user wants to commit staged changes.
 allowed-tools: Task, AskUserQuestion, Bash
-argument-hint: [--force/-f to skip granularity check] [optional commit message hint]
+argument-hint: "[--force/-f to skip granularity check] [optional commit message hint]"
 ---
 
 # Git Commit Skill

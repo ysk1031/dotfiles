@@ -2,7 +2,7 @@
 name: code-simplifier
 description: Simplify and refine recently modified code for clarity and maintainability
 allowed-tools: Task, AskUserQuestion, Bash, Read, Edit, Glob, Grep
-argument-hint: [file-path or empty for recent changes]
+argument-hint: "[file-path or empty for recent changes]"
 ---
 
 # Code Simplifier Skill
