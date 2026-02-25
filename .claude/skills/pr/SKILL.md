@@ -2,7 +2,7 @@
 name: pr
 description: Create a GitHub Pull Request from current branch with auto-generated description. Use when the user wants to create a PR.
 allowed-tools: Task, AskUserQuestion, Bash
-argument-hint: [base-branch] [--draft]
+argument-hint: [base-branch to specify target branch] [--draft to create as draft PR]
 ---
 
 # Pull Request Creation Skill
@@ -79,6 +79,19 @@ Run these commands:
 - `git diff <base>...HEAD --stat` (file change summary)
 - `git diff <base>...HEAD` (detailed diff - limit reading if too large)
 
+**Step 5.5: Check Unpushed Commits**
+Check if a remote tracking branch exists and count unpushed commits:
+```bash
+REMOTE_BRANCH=$(git rev-parse --abbrev-ref --symbolic-full-name @{u} 2>/dev/null)
+if [ -n "$REMOTE_BRANCH" ]; then
+  UNPUSHED=$(git log ${REMOTE_BRANCH}..HEAD --oneline)
+  UNPUSHED_COUNT=$(echo "$UNPUSHED" | grep -c . || echo 0)
+else
+  UNPUSHED="(リモートブランチ未設定 — 全コミットがpushされます)"
+  UNPUSHED_COUNT="all"
+fi
+```
+
 **Step 6: Check PR Template**
 Check if `.github/pull_request_template.md` exists:
 - If exists, read its content for format reference
@@ -128,6 +141,9 @@ Return in this format:
 STATUS: OK
 BASE: <base-branch>
 DRAFT: <true if --draft in arguments, false otherwise>
+UNPUSHED_COUNT: <count or "all">
+UNPUSHED_COMMITS:
+<unpushed commit list or "(リモートブランチ未設定 — 全コミットがpushされます)">
 TITLE: <generated title>
 BODY:
 <generated description body>
@@ -154,7 +170,10 @@ Then call subagent again with the language specified.
 
 **STATUS: OK**:
 1. Display the proposed PR title and body
-2. Use AskUserQuestion:
+2. Display unpushed commit information:
+   - If UNPUSHED_COUNT is a number: "リモートにpushされていないコミットが {UNPUSHED_COUNT} 件あります:\n{UNPUSHED_COMMITS}"
+   - If UNPUSHED_COUNT is "all": "リモートブランチが未設定のため、全コミットがpushされます。"
+3. Use AskUserQuestion:
    - question: "このPR内容でよろしいですか？"
    - header: "PR"
    - options:
