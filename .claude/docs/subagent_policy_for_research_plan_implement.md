@@ -69,11 +69,14 @@ Main Conversation
     │
     ├── /command でSkill起動
     │   ├── context: default → main agentが直接実行
+    │   ├── context: fork → forked agentとして隔離実行（メインコンテキスト非消費）
     │   └── context: fork + agent: <name> → カスタムsubagentとして実行（パターンA）
     │
     └── Task ツールでsubagent起動
         └── subagent の skills: [...] → Skillの知識を事前注入（パターンB）
 ```
+
+`context: fork`（`agent:` なし）は、Skillをforked agentで実行するがカスタムsubagentは使わない。Skill内部のプロンプトがそのままforked agentの指示として使われ、その中からさらにTask経由でsubagentを呼べる。現在 `/research`、`/plan` がこのパターンで実行されている。
 
 ---
 
@@ -104,18 +107,22 @@ Main Conversation
 
 ## 現在の設計
 
-現在は `prompts/*.md` ファイルがsubagentの「キャラ付け」を実質的に担っている。
+`prompts/*.md` ファイルがsubagentの「キャラ付け」を実質的に担い、`/research` と `/plan` は `context: fork` でメインコンテキストから隔離実行される。
 
 ```
-/research (Skill)
-  └→ general-purpose subagent + prompts/investigate.md
+/research (Skill, context: fork)
+  └→ forked agent がオーケストレーション
+      ├→ Bash subagent（スコープ決定）
+      └→ general-purpose subagent + prompts/investigate.md（深掘り調査）
 
-/plan (Skill)
-  └→ general-purpose subagent + prompts/generate-plan.md
-  └→ general-purpose subagent + prompts/revise-plan.md
+/plan (Skill, context: fork)
+  └→ forked agent がオーケストレーション
+      ├→ Bash subagent（コンテキスト収集）
+      ├→ general-purpose subagent + prompts/generate-plan.md（計画生成）
+      └→ general-purpose subagent + prompts/revise-plan.md（注釈反映）
 
-/implement (Skill)
-  └→ main agent が直接実装
+/implement (Skill, disable-model-invocation)
+  └→ main agent が直接実装（Bash subagentで計画読み込み・ツール検出）
 ```
 
 この方式で現時点では十分に機能しており、カスタムsubagentを導入する必要性は低い。

@@ -41,10 +41,12 @@ Boris Tane氏の記事 [How I use Claude Code](https://boristane.com/blog/how-i-
 
 ### フェーズ
 
+`context: fork` で実行され、メインの会話コンテキストを消費しない。
+
 1. **スコープ決定**（Bash subagent）— 関連ファイルの特定、プロジェクト構造の把握
 2. **深掘り調査**（general-purpose subagent）— 全文読み、依存関係2階層追跡、データフロー分析
 3. **ユーザーレビュー**（AskUserQuestion）— サマリー表示、追加調査 or ファイル出力
-4. **ファイル出力**（main agent）— `research-<topic>.md` を生成、VSCodeで自動オープン
+4. **ファイル出力**（skill agent）— `research-<topic>.md` を生成、VSCodeで自動オープン
 
 ### 使い方
 
@@ -103,10 +105,12 @@ Boris Tane氏の記事 [How I use Claude Code](https://boristane.com/blog/how-i-
 
 ### フェーズ
 
+`context: fork` で実行され、メインの会話コンテキストを消費しない。
+
 1. **コンテキスト収集**（Bash subagent）— 引数パース、research ファイル検索、プロジェクト構造把握
 2. **計画生成**（general-purpose subagent）— タスク分析、コードベース調査、実装ステップ生成
-3. **注釈サイクル**（main agent ループ）— plan.md 出力 → VSCode表示 → ユーザーレビュー → 注釈反映 → 再生成（繰り返し）
-4. **確定**（main agent）— チェックリスト整合性確認、完了メッセージ
+3. **注釈サイクル**（skill agent ループ）— plan.md 出力 → VSCode表示 → ユーザーレビュー → 注釈反映 → 再生成（繰り返し）
+4. **確定**（skill agent）— チェックリスト整合性確認、完了メッセージ
 
 ### 使い方
 
@@ -175,6 +179,8 @@ MODIFY（変更）、DELETE（削除）、ADD（追加）、QUESTION（質問）
 ```
 
 ### フェーズ
+
+メインの会話コンテキストで直接実行される（`disable-model-invocation: true` により、明示的な `/implement` コマンドでのみ起動）。
 
 1. **計画読み込み & ツール検出**（Bash subagent）— plan.md のチェックリスト抽出、type check/lint/test コマンド自動検出
 2. **スコープ確認**（AskUserQuestion）— 全ステップ or 部分実装の選択
