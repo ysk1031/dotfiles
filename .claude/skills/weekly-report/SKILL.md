@@ -4,6 +4,7 @@ description: Aggregate development activity (GitHub + Claude Code) from the past
 allowed-tools: Task, AskUserQuestion, Bash
 argument-hint: "[--repos owner/repo1,repo2 to specify repositories] [--days N to set lookback period] [--output path to set output file]"
 context: fork
+disable-model-invocation: true
 ---
 
 # Weekly Development Review Report Skill
