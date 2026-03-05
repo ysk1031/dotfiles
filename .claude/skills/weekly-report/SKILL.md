@@ -3,7 +3,7 @@ name: weekly-report
 description: Aggregate development activity (GitHub + Claude Code) from the past week and generate a review report
 allowed-tools: Task, AskUserQuestion, Bash
 argument-hint: "[--repos owner/repo1,repo2 to specify repositories] [--days N to set lookback period] [--output path to set output file]"
-context: fork
+disable-model-invocation: true
 ---
 
 # Weekly Development Review Report Skill
@@ -12,10 +12,10 @@ Generate a review report aggregating development activity (GitHub + Claude Code 
 
 ## Instructions
 
-### Phase 1: Data Collection (use Task with Bash subagent)
+### Phase 1: Data Collection (use Task with subagent)
 
 Call the Task tool with:
-- subagent_type: "Bash"
+- subagent_type: "general-purpose"
 - description: "collect weekly dev activity data"
 - prompt: Include the subagent prompt below, replacing $ARGUMENTS with actual arguments
 

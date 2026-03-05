@@ -45,7 +45,6 @@
   },
   "enabledPlugins": {
     "gopls-lsp@claude-plugins-official": true,
-    "code-simplifier@claude-plugins-official": true,
     "feature-dev@claude-plugins-official": true
   },
   "language": "日本語（2ちゃんねるのなんJ民の言葉使い）"

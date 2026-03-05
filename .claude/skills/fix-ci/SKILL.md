@@ -11,10 +11,10 @@ Diagnose failed GitHub Actions workflow runs, identify the root cause, propose a
 
 ## Instructions
 
-### Phase 1: Data Collection (use Task with Bash subagent)
+### Phase 1: Data Collection (use Task with subagent)
 
 Call the Task tool with:
-- subagent_type: "Bash"
+- subagent_type: "general-purpose"
 - description: "collect CI failure logs"
 - prompt: Read the file `.claude/skills/fix-ci/prompts/collect-logs.md` and use its content as the subagent prompt. Replace `$ARGUMENTS` with actual arguments before passing to the subagent.
 
