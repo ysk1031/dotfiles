@@ -11,10 +11,10 @@ Generate a PR title and description from current branch changes, let the user re
 
 ## Instructions
 
-### Phase 1: Analyze Changes (use Task with Bash subagent)
+### Phase 1: Analyze Changes (use Task with subagent)
 
 Call the Task tool with:
-- subagent_type: "Bash"
+- subagent_type: "general-purpose"
 - description: "analyze branch changes for PR"
 - prompt: Include the subagent prompt below, replacing $ARGUMENTS with actual arguments
 

@@ -3,7 +3,6 @@ name: plan
 description: Generate a detailed implementation plan with human annotation cycles. Produces a plan document that can be iteratively refined before implementation.
 allowed-tools: Task, AskUserQuestion, Bash, Read, Glob, Grep
 argument-hint: "[task description] [--research 'research-file.md'] [--output 'filename']"
-context: fork
 ---
 
 # Implementation Plan Skill
@@ -12,93 +11,12 @@ Generate a detailed implementation plan for a task, then iterate on it through h
 
 ## Instructions
 
-### Phase 1: Context Gathering (use Task with Bash subagent)
+### Phase 1: Context Gathering (use Task with subagent)
 
 Call the Task tool with:
-- subagent_type: "Bash"
+- subagent_type: "general-purpose"
 - description: "gather planning context"
-- prompt: Include the subagent prompt below, replacing $ARGUMENTS with actual arguments
-
-#### Subagent Prompt Template
-
-You are a planning context gatherer. Collect information needed to generate an implementation plan.
-
-**Arguments**: $ARGUMENTS
-
-**Step 1: Parse Arguments**
-
-Extract:
-- `TASK`: The task description. REQUIRED — if empty, return:
-```
-STATUS: NO_TASK
-タスクの説明を指定してください。例: /plan "ユーザー認証機能の追加"
-```
-- `RESEARCH_FILE`: Path from `--research` flag (optional)
-- `OUTPUT`: Custom output filename from `--output` flag (optional)
-
-**Step 2: Validate Research File**
-
-If RESEARCH_FILE is specified:
-```bash
-if [ -f "$RESEARCH_FILE" ]; then
-  echo "RESEARCH: EXISTS"
-  wc -l "$RESEARCH_FILE"
-else
-  echo "RESEARCH: NOT_FOUND"
-fi
-```
-
-If not specified, check if any research files exist in the current directory:
-```bash
-ls research-*.md 2>/dev/null | head -5
-```
-Report them as `AVAILABLE_RESEARCH` (do NOT auto-select — just list them for user awareness).
-
-**Step 3: Project Context**
-
-```bash
-# Project type
-ls package.json go.mod Cargo.toml pyproject.toml requirements.txt Makefile build.gradle pom.xml 2>/dev/null
-
-# Directory structure (top 2 levels)
-find . -maxdepth 2 -type d \
-  -not -path '*/node_modules/*' \
-  -not -path '*/.git/*' \
-  -not -path '*/vendor/*' \
-  -not -path '*/dist/*' \
-  -not -path '*/__pycache__/*' \
-  -not -path '*/.next/*' \
-  -not -path '*/build/*' \
-  | head -60
-
-# CLAUDE.md
-if [ -f CLAUDE.md ]; then
-  echo "CLAUDE_MD: EXISTS"
-else
-  echo "CLAUDE_MD: NOT_FOUND"
-fi
-
-# Recent git activity for context
-git log --oneline -5 2>/dev/null
-```
-
-**Step 4: Return Result**
-
-```
-STATUS: OK
-TASK: <task description>
-RESEARCH_FILE: <path or NONE>
-RESEARCH: <EXISTS or NOT_FOUND or NONE>
-AVAILABLE_RESEARCH: <list or NONE>
-OUTPUT: <custom filename or NONE>
-CLAUDE_MD: <EXISTS or NOT_FOUND>
-PROJECT_TYPE: <detected>
-DIRECTORY_STRUCTURE:
-<structure>
-
-RECENT_COMMITS:
-<last 5 commits>
-```
+- prompt: Read the file `.claude/skills/plan/prompts/gather-context.md` and use its content as the subagent prompt. Replace `$ARGUMENTS` with the actual user arguments.
 
 ---
 
@@ -186,7 +104,7 @@ Use AskUserQuestion:
 - question: "計画を確認してください。エディタでインライン注釈を書き込んでから「注釈を反映」を選択すると、注釈を反映した計画を再生成します。"
 - header: "Plan Review"
 - options:
-  1. label: "承認", description: "この計画で実装に進めます"
+  1. label: "承認", description: "この計画を確定します"
   2. label: "注釈を反映", description: "ファイルに書き込んだ注釈を反映して再生成します"
   3. label: "キャンセル", description: "計画作成を終了します"
 
@@ -223,8 +141,7 @@ Use AskUserQuestion:
 <display the checklist>
 
 ### 次のステップ
-- この計画に基づいて実装を開始できます
-- 実装中に計画を参照し、各ステップ完了時にチェックリストを更新してください
+- 実装時にこの計画を参照し、各ステップ完了時にチェックリストを更新してください
 ```
 
 ---
