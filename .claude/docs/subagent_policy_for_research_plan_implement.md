@@ -107,22 +107,22 @@ Main Conversation
 
 ## 現在の設計
 
-`prompts/*.md` ファイルがsubagentの「キャラ付け」を実質的に担い、`/research` と `/plan` は `context: fork` でメインコンテキストから隔離実行される。
+`prompts/*.md` ファイルがsubagentの「キャラ付け」を実質的に担っている。
 
 ```
-/research (Skill, context: fork)
+/research (Skill)
   └→ forked agent がオーケストレーション
-      ├→ Bash subagent（スコープ決定）
+      ├→ general-purpose subagent + prompts/analyze-scope.md（スコープ決定）
       └→ general-purpose subagent + prompts/investigate.md（深掘り調査）
 
-/plan (Skill, context: fork)
+/plan (Skill)
   └→ forked agent がオーケストレーション
-      ├→ Bash subagent（コンテキスト収集）
+      ├→ general-purpose subagent + prompts/gather-context.md（コンテキスト収集）
       ├→ general-purpose subagent + prompts/generate-plan.md（計画生成）
       └→ general-purpose subagent + prompts/revise-plan.md（注釈反映）
 
 /implement (Skill, disable-model-invocation)
-  └→ main agent が直接実装（Bash subagentで計画読み込み・ツール検出）
+  └→ main agent が直接実装（general-purpose subagentで計画読み込み・ツール検出）
 ```
 
 この方式で現時点では十分に機能しており、カスタムsubagentを導入する必要性は低い。
@@ -185,7 +185,7 @@ skills:
 ## カスタムsubagentが不要なケース
 
 1. **そのsubagentを使うSkillが1つだけ** → `prompts/*.md` で十分
-2. **ビルトインsubagent（general-purpose, Bash, code-simplifier）で事足りる** → カスタム化の恩恵が薄い
+2. **ビルトインsubagent（general-purpose, Bash）で事足りる** → カスタム化の恩恵が薄い
 3. **「専門知識」が実はタスク固有の指示** → subagentではなくプロンプトに書くべき
 
 ---
@@ -211,6 +211,6 @@ skills:
 導入するとしたら `deep-research` subagent が最有力:
 - `/research` と `/plan` の両方で「コードベースを深く読む」作業がある
 - 「全文読み、2階層追跡、仮定明示」という行動原則が共通
-- 現状は `prompts/investigate.md` と `prompts/generate-plan.md` に重複して記述がある
+- 現状は `prompts/investigate.md` に具体的な行動原則（全文読み、2階層追跡、仮定明示）が記載され、`prompts/generate-plan.md` でもコードベース調査を指示しているが、行動原則レベルの重複は限定的
 
 ただしこれも「使ってみて共通化の必要性を実感してから」で遅くない。

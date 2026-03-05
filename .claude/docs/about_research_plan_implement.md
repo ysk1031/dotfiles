@@ -36,14 +36,13 @@ Boris Tane氏の記事 [How I use Claude Code](https://boristane.com/blog/how-i-
 .claude/skills/research/
 ├── SKILL.md
 └── prompts/
+    ├── analyze-scope.md  # スコープ決定用subagentプロンプト
     └── investigate.md    # 深掘り調査用subagentプロンプト
 ```
 
 ### フェーズ
 
-`context: fork` で実行され、メインの会話コンテキストを消費しない。
-
-1. **スコープ決定**（Bash subagent）— 関連ファイルの特定、プロジェクト構造の把握
+1. **スコープ決定**（general-purpose subagent）— 関連ファイルの特定、プロジェクト構造の把握
 2. **深掘り調査**（general-purpose subagent）— 全文読み、依存関係2階層追跡、データフロー分析
 3. **ユーザーレビュー**（AskUserQuestion）— サマリー表示、追加調査 or ファイル出力
 4. **ファイル出力**（skill agent）— `research-<topic>.md` を生成、VSCodeで自動オープン
@@ -99,15 +98,14 @@ Boris Tane氏の記事 [How I use Claude Code](https://boristane.com/blog/how-i-
 .claude/skills/plan/
 ├── SKILL.md
 └── prompts/
+    ├── gather-context.md # コンテキスト収集用subagentプロンプト
     ├── generate-plan.md  # 初回計画生成用subagentプロンプト
     └── revise-plan.md    # 注釈反映・計画改訂用subagentプロンプト
 ```
 
 ### フェーズ
 
-`context: fork` で実行され、メインの会話コンテキストを消費しない。
-
-1. **コンテキスト収集**（Bash subagent）— 引数パース、research ファイル検索、プロジェクト構造把握
+1. **コンテキスト収集**（general-purpose subagent）— 引数パース、research ファイル検索、プロジェクト構造把握
 2. **計画生成**（general-purpose subagent）— タスク分析、コードベース調査、実装ステップ生成
 3. **注釈サイクル**（skill agent ループ）— plan.md 出力 → VSCode表示 → ユーザーレビュー → 注釈反映 → 再生成（繰り返し）
 4. **確定**（skill agent）— チェックリスト整合性確認、完了メッセージ
@@ -175,14 +173,16 @@ MODIFY（変更）、DELETE（削除）、ADD（追加）、QUESTION（質問）
 
 ```
 .claude/skills/implement/
-└── SKILL.md    # promptsは不要（main agentが直接実装）
+├── SKILL.md
+└── prompts/
+    └── load-plan.md    # 計画読み込み・ツール検出用subagentプロンプト
 ```
 
 ### フェーズ
 
 メインの会話コンテキストで直接実行される（`disable-model-invocation: true` により、明示的な `/implement` コマンドでのみ起動）。
 
-1. **計画読み込み & ツール検出**（Bash subagent）— plan.md のチェックリスト抽出、type check/lint/test コマンド自動検出
+1. **計画読み込み & ツール検出**（general-purpose subagent）— plan.md のチェックリスト抽出、type check/lint/test コマンド自動検出
 2. **スコープ確認**（AskUserQuestion）— 全ステップ or 部分実装の選択
 3. **実装ループ**（main agent）— 各ステップ: 実装 → バリデーション → チェックリスト更新 → 次へ（確認なし）
 4. **検証 & サマリー**（main agent）— テスト実行、git diff --stat、完了メッセージ
