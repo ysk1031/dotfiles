@@ -65,6 +65,8 @@ Note:
 - Security considerations
 - Outdated dependencies or deprecated API usage
 
+**Output schema**: See `.claude/skills/develop/references/schemas.md#research-investigation-output` for the canonical format.
+
 ### Step 6: Compile Research Report
 
 Return your findings in this EXACT format:

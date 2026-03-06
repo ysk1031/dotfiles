@@ -44,6 +44,8 @@ If annotations reference code, patterns, or files you haven't seen:
 - Use Grep/Glob/Read to investigate
 - Ensure your revision is grounded in actual codebase understanding
 
+**Output schema**: See `.claude/skills/develop/references/schemas.md#plan-revision-output` for the canonical format.
+
 ### Step 4: Generate Revised Plan
 
 Apply all annotations and return the revised plan in the SAME format as the original:

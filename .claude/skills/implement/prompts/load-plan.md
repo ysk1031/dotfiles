@@ -98,6 +98,8 @@ If CLAUDE.md exists, note it:
 [ -f CLAUDE.md ] && echo "CLAUDE_MD: EXISTS" || echo "CLAUDE_MD: NOT_FOUND"
 ```
 
+**Output schema**: See `.claude/skills/develop/references/schemas.md#implement-load-output` for the canonical format.
+
 **Step 4: Return Result**
 
 ```

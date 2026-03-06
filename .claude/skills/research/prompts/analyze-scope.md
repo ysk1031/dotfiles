@@ -60,6 +60,8 @@ grep -rl "$TOPIC" --include='*.ts' --include='*.tsx' --include='*.js' --include=
 If SCOPE is "focused", limit entry points to the most directly relevant 5 files.
 If SCOPE is "broad", include up to 20 files and look for related configuration, tests, and types.
 
+**Output schema**: See `.claude/skills/develop/references/schemas.md#research-scope-output` for the canonical format.
+
 **Step 4: Return Result**
 
 ```
