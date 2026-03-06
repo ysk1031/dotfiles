@@ -1,8 +1,9 @@
 ---
 name: plan
-description: Generate a detailed implementation plan with human annotation cycles. Produces a plan document that can be iteratively refined before implementation.
+description: "Generate a detailed implementation plan with human annotation cycles for iterative refinement. 設計を考えたい、実装前に計画を練りたい時に使用。"
 allowed-tools: Task, AskUserQuestion, Bash, Read, Write, Glob, Grep
 argument-hint: "[task description] [--research 'research-file.md'] [--output 'filename']"
+disable-model-invocation: true
 ---
 
 # Implementation Plan Skill
@@ -148,13 +149,13 @@ Use AskUserQuestion:
 
 ### Rules
 
-- ALWAYS display messages in Japanese
-- NEVER implement any code — this skill generates plans only
-- NEVER skip the annotation cycle (Phase 3) — the human must approve before finalization
-- There is no limit on annotation cycle iterations — repeat as many times as the user needs
-- When regenerating with annotations, preserve parts of the plan the user did NOT annotate
-- The plan must be specific enough to implement without ambiguity — include file paths, function names, and code structure
-- If a research file is provided, the plan must reference and build upon its findings
-- If CLAUDE.md exists, ensure the plan follows project conventions
-- Keep each implementation step atomic — one logical change per step
-- Include a testability consideration for each step where applicable
+- ALWAYS display messages in Japanese — the user is a Japanese speaker and needs to review and annotate plans in Japanese
+- NEVER implement any code — this skill generates plans only — separating planning from implementation prevents code changes before human approval
+- NEVER skip the annotation cycle (Phase 3) — proceeding to implementation without human approval risks unintended changes
+- There is no limit on annotation cycle iterations — repeat as many times as the user needs — plan quality directly determines implementation quality, so iterate until the user is satisfied
+- When regenerating with annotations, preserve parts of the plan the user did NOT annotate — changing unannotated sections would lose content the user already approved
+- The plan must be specific enough to implement without ambiguity — include file paths, function names, and code structure — ambiguous plans lead to misinterpretation during AI implementation, causing rework
+- If a research file is provided, the plan must reference and build upon its findings — plans that ignore research findings are prone to inconsistencies with existing patterns
+- If CLAUDE.md exists, ensure the plan follows project conventions — plans violating project conventions will be rejected during lint/review at implementation time
+- Keep each implementation step atomic — one logical change per step — large steps make mid-step validation and rollback difficult
+- Include a testability consideration for each step where applicable — untestable changes cannot be quality-assured and increase future regression risk

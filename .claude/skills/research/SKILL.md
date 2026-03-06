@@ -1,8 +1,9 @@
 ---
 name: research
-description: Deep codebase investigation before planning or implementation. Produces a structured research document for human review.
+description: "Deep codebase investigation that produces a structured research document before planning or implementation. コードベースを調査して、仕組みを理解したい、既存コードを把握したい時に使用。"
 allowed-tools: Task, AskUserQuestion, Bash, Read, Write, Glob, Grep
 argument-hint: "[topic, feature name, or file path] [--scope 'broad'|'focused'] [--output 'filename']"
+disable-model-invocation: true
 ---
 
 # Codebase Research Skill
@@ -152,12 +153,12 @@ code <filename> 2>/dev/null || true
 
 ### Rules
 
-- ALWAYS display messages in Japanese
-- NEVER modify any source code — this skill is read-only investigation
-- NEVER skip user review (Phase 3) — the human must validate findings before output
-- When re-running Phase 2 with follow-up, include previous findings to avoid redundant investigation
-- Read files in full — do NOT use partial reads (head/tail) unless the file exceeds 1000 lines
-- Trace call chains at least 2 levels deep (caller → callee → callee's callee)
-- When assumptions are made, explicitly mark them as assumptions in the output
-- If CLAUDE.md exists, read it and incorporate project conventions into the analysis
-- The research output file should be detailed enough for someone unfamiliar with the codebase to understand the topic
+- ALWAYS display messages in Japanese — the user is a Japanese speaker and needs to review research findings in Japanese
+- NEVER modify any source code — this skill is read-only investigation — modifying code during research risks introducing unverified changes
+- NEVER skip user review (Phase 3) — without human verification of findings, planning may proceed on incorrect assumptions
+- When re-running Phase 2 with follow-up, include previous findings to avoid redundant investigation — re-reading the same files wastes tokens; leveraging prior results enables efficient deep-dives
+- Read files in full — do NOT use partial reads (head/tail) unless the file exceeds 1000 lines — partial reads lose context and lead to incorrect analysis
+- Trace call chains at least 2 levels deep (caller → callee → callee's callee) — one level only gives surface-level understanding and misses actual data flow and side effects
+- When assumptions are made, explicitly mark them as assumptions in the output — without distinguishing assumptions from facts, downstream planning may treat guesses as confirmed truths
+- If CLAUDE.md exists, read it and incorporate project conventions into the analysis — analysis that ignores project-specific conventions is not useful during implementation
+- The research output file should be detailed enough for someone unfamiliar with the codebase to understand the topic — even when the researcher and implementer differ, the findings alone should be sufficient for implementation decisions

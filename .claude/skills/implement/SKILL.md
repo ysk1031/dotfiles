@@ -1,6 +1,6 @@
 ---
 name: implement
-description: Execute an approved implementation plan step by step, updating the checklist and running validation continuously until all steps are complete.
+description: "Execute an approved plan step by step with continuous validation and checklist tracking. 計画ファイル（plan.md）に沿って実装したい時に使用。"
 allowed-tools: Task, AskUserQuestion, Bash, Read, Edit, Write, Glob, Grep
 argument-hint: "[plan file path, default: 'plan.md'] [--steps '1,3,5' to run specific steps only]"
 disable-model-invocation: true
@@ -174,15 +174,15 @@ git diff --stat
 
 ### Rules
 
-- ALWAYS display messages in Japanese
-- NEVER stop between steps unless a critical error occurs — keep going until all steps are done
-- NEVER commit or push changes — only apply file modifications
-- NEVER add comments, JSDoc, or type annotations not specified in the plan
-- NEVER add features or abstractions beyond what the plan specifies
-- ALWAYS update the checklist after each step
-- ALWAYS run type check and lint after each step (if available)
-- Run the full test suite only ONCE at the end (Phase 4), not after every step
-- If a step's target file doesn't exist for a "modify" action, flag it and ask the user
-- If the plan file changes during implementation (e.g., user edits it), re-read it before each step
-- Respect CLAUDE.md conventions if the file exists
-- Keep the implementation faithful to the plan — do not deviate or "improve" beyond what's specified
+- ALWAYS display messages in Japanese — the user is a Japanese speaker and needs to review progress and errors in Japanese
+- NEVER stop between steps unless a critical error occurs — keep going until all steps are done — stopping between steps increases user wait time and significantly slows implementation
+- NEVER commit or push changes — only apply file modifications — commits should only happen after user review; unintended commits are difficult to undo
+- NEVER add comments, JSDoc, or type annotations not specified in the plan — additions not in the plan create noise in code review and diverge from the approved plan
+- NEVER add features or abstractions beyond what the plan specifies — out-of-scope changes can introduce unexpected bugs and architectural distortions
+- ALWAYS update the checklist after each step — without an up-to-date checklist, the resume point is unknown if implementation is interrupted
+- ALWAYS run type check and lint after each step (if available) — validating after each step makes it easier to identify the cause of issues and reduces fix cost
+- Run the full test suite only ONCE at the end (Phase 4), not after every step — running tests is time-consuming; running after every step significantly increases total implementation time
+- If a step's target file doesn't exist for a "modify" action, flag it and ask the user — forcing changes to a non-existent file would create an unintended new file
+- If the plan file changes during implementation (e.g., user edits it), re-read it before each step — implementing based on an outdated plan fails to reflect the user's revisions
+- Respect CLAUDE.md conventions if the file exists — code violating project conventions will be rejected during lint/review
+- Keep the implementation faithful to the plan — do not deviate or "improve" beyond what's specified — deviating from the plan bypasses the approval process and introduces unintended changes

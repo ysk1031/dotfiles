@@ -1,8 +1,9 @@
 ---
 name: fix-ci
-description: Diagnose and fix failed GitHub Actions workflow runs on the current branch. Use when CI is failing and the user wants to identify and fix the cause.
-allowed-tools: Task, AskUserQuestion, Bash, Read, Glob, Grep
+description: "Diagnose and fix failed GitHub Actions workflow runs on the current branch. CIが落ちた、テストが通らない時に使用。GitHub Actionsの失敗を診断して修正。"
+allowed-tools: Task, AskUserQuestion, Bash, Read, Edit, Write, Glob, Grep
 argument-hint: "[run-id or workflow-name to target specific run]"
+disable-model-invocation: true
 ---
 
 # CI Failure Diagnosis & Fix Skill
@@ -185,11 +186,11 @@ Apply the approved fix plan directly (main agent uses Edit/Write tools, NOT a su
 
 ### Rules
 
-- ALWAYS display messages in Japanese
-- NEVER commit or push changes — only apply file modifications
-- NEVER skip user confirmation steps (Phase 3 and Phase 5)
-- When retrying Phase 2 with a hint, reuse Phase 1 data — do NOT re-collect logs
-- Log truncation threshold: 200 lines per job
-- If `gh` commands fail with permission errors, suggest the user check their GitHub token permissions
-- Keep subagent prompts focused — include only the data each subagent needs
-- For FLAKY/TIMEOUT failures with LOW confidence, suggest re-running the workflow before attempting code fixes
+- ALWAYS display messages in Japanese — the user is a Japanese speaker and needs to review diagnostics in Japanese
+- NEVER commit or push changes — only apply file modifications — fixes should only be committed after user review; unintended pushes trigger unnecessary CI re-runs
+- NEVER skip user confirmation steps (Phase 3 and Phase 5) — human judgment is needed to prevent fixes based on incorrect diagnoses
+- When retrying Phase 2 with a hint, reuse Phase 1 data — do NOT re-collect logs — re-collecting logs wastes API calls and only duplicates the same data
+- Log truncation threshold: 200 lines per job — passing full logs consumes the context window and reduces analysis accuracy
+- If `gh` commands fail with permission errors, suggest the user check their GitHub token permissions — permission issues cannot be resolved by the skill and require user action
+- Keep subagent prompts focused — include only the data each subagent needs — including unnecessary data increases subagent token usage and dilutes analysis focus
+- For FLAKY/TIMEOUT failures with LOW confidence, suggest re-running the workflow before attempting code fixes — flaky tests don't need code fixes and are likely resolved by re-running the workflow

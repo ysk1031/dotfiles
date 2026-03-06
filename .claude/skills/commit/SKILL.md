@@ -1,6 +1,6 @@
 ---
 name: commit
-description: Generate and execute git commits for staged changes with Conventional Commits format. Use when the user wants to commit staged changes.
+description: "Generate and execute git commits with Conventional Commits format for staged changes. 変更をコミットしたい時に使用。Conventional Commits形式で生成。"
 allowed-tools: Task, AskUserQuestion, Bash
 argument-hint: "[--force/-f to skip granularity check] [optional commit message hint]"
 ---
@@ -16,62 +16,9 @@ Generate a commit message for staged changes and let the user review/edit before
 Call the Task tool with:
 - subagent_type: "general-purpose"
 - description: "analyze staged changes"
-- prompt: Include the subagent prompt below, replacing $ARGUMENTS with actual arguments
+- prompt: Read the file `.claude/skills/commit/prompts/analyze-changes.md` and use its content as the subagent prompt. Replace `$ARGUMENTS` with the actual user arguments.
 
 The subagent will return the proposed commit message (or an error/warning).
-
-#### Subagent Prompt Template
-
-You are a git commit analyzer. Analyze staged changes and generate a commit message.
-
-**Arguments**: $ARGUMENTS
-
-**Step 1: Check Staged Changes**
-Run: `git diff --staged`
-
-If no staged changes, return:
-```
-STATUS: NO_CHANGES
-ステージされた変更がありません。git add <files> でファイルをステージしてから再度 /commit を実行してください。
-```
-Then run `git status` and stop.
-
-**Step 2: Check Force Flag**
-If arguments contain "--force" or "-f", skip Step 4.
-
-**Step 3: Detect Language Convention**
-Run: `git log --oneline -10`
-- If majority contain Japanese → use Japanese
-- Otherwise → use English
-
-**Step 4: Granularity Check (skip if --force/-f)**
-If changes span more than 3 unrelated concerns, return:
-```
-STATUS: NEEDS_SPLIT
-警告: このコミットには複数の異なる変更が含まれています。
-コミットを分割することを検討してください:
-
-1. [変更1の説明]
-2. [変更2の説明]
-
-分割する場合: git reset HEAD <files>
-このまま続行する場合: /commit --force
-```
-
-**Step 5: Determine Commit Type**
-Select prefix: feat/fix/perf/refactor/style/test/docs/build/ci/chore/release
-
-**Step 6: Generate and Return Message**
-Return in this format:
-```
-STATUS: OK
-TITLE: <type>: <description>
-BODY: <body or empty if not needed>
-```
-
-- Title: under 72 characters
-- Body: Add when changes are complex (multiple files, significant changes). Explain WHAT and WHY.
-- Consider user arguments as hints.
 
 ---
 
@@ -130,8 +77,8 @@ Then verify: `git status && git log -1`
 ---
 
 ### Rules
-- NEVER skip Co-Authored-By (always use your actual model name, never hardcode a specific version)
-- NEVER use --amend unless explicitly requested
-- NEVER use --no-verify
-- Keep first line under 72 characters
-- Body should wrap at 72 characters
+- NEVER skip Co-Authored-By (always use your actual model name, never hardcode a specific version) — ensures traceability of AI-generated commits and enables audit of change history
+- NEVER use --amend unless explicitly requested — amend rewrites the previous commit, risking unintended data loss
+- NEVER use --no-verify — pre-commit hooks enforce project quality standards; bypassing them can introduce lint errors and security issues
+- Keep first line under 72 characters — industry-standard convention to prevent truncation in git log and GitHub UI
+- Body should wrap at 72 characters — ensures readability in terminals and git log output
