@@ -39,6 +39,8 @@ If multiple jobs failed:
 - If independent, form separate hypotheses for each
 - If cascading, identify the root cause
 
+**Output schema**: See `.claude/skills/fix-ci/references/schemas.md#fix-ci-analyze-output` for the canonical format.
+
 **Step 5: Form Hypothesis**
 
 Return in this format:
