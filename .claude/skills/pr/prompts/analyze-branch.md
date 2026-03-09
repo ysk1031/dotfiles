@@ -111,7 +111,7 @@ Otherwise, use default format:
 - [ ] [How to verify this change]
 ```
 
-**Output schema**: See `.claude/skills/pr/references/schemas.md#pr-analyze-output` for the canonical format.
+**Output schema**: See `~/.claude/skills/pr/references/schemas.md#pr-analyze-output` for the canonical format.
 
 **Step 10: Return Result**
 Return in this format:

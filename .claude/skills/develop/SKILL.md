@@ -66,7 +66,7 @@ Phase R performs the same processing as the existing `/research` skill, but skip
 Call the Task tool with:
 - subagent_type: "general-purpose"
 - description: "determine research scope"
-- prompt: Read the file `.claude/skills/research/prompts/analyze-scope.md` and use its content as the subagent prompt. Replace `$ARGUMENTS` with the TASK value. Apply the following overrides:
+- prompt: Read the file `~/.claude/skills/research/prompts/analyze-scope.md` and use its content as the subagent prompt. Replace `$ARGUMENTS` with the TASK value. Apply the following overrides:
   - **SCOPE**: Always set to `"broad"` — ignore `--scope` flag parsing
   - **OUTPUT**: Always set to empty — Phase R determines this automatically
   - **NO_TOPIC error message**: Use `/develop "認証フロー"` as the example (not `/research`)
@@ -90,7 +90,7 @@ Call the Task tool with:
 Call the Task tool with:
 - subagent_type: "general-purpose"
 - description: "deep codebase investigation"
-- prompt: Read `.claude/skills/research/prompts/investigate.md` with the Read tool and use its content as the subagent prompt. Embed the Phase R-1 output as `Scope Data` and TASK as `Investigation Topic`. Set `Previous Findings` and `Follow-up Request` to empty.
+- prompt: Read `~/.claude/skills/research/prompts/investigate.md` with the Read tool and use its content as the subagent prompt. Embed the Phase R-1 output as `Scope Data` and TASK as `Investigation Topic`. Set `Previous Findings` and `Follow-up Request` to empty.
 
 #### Phase R-3: Automatic Output (no review gate)
 
@@ -176,7 +176,7 @@ RESEARCH_FILE resolution:
 Call the Task tool with:
 - subagent_type: "general-purpose"
 - description: "gather planning context"
-- prompt: Read the file `.claude/skills/plan/prompts/gather-context.md` and use its content as the subagent prompt. Replace `$ARGUMENTS` with the TASK value. Apply the following overrides:
+- prompt: Read the file `~/.claude/skills/plan/prompts/gather-context.md` and use its content as the subagent prompt. Replace `$ARGUMENTS` with the TASK value. Apply the following overrides:
   - **TASK**: Already validated as non-empty — skip the NO_TASK validation in Step 1
   - **RESEARCH_FILE**: Use the resolved RESEARCH_FILE value from above
   - **OUTPUT**: Use the `$OUTPUT` value (default: `plan.md`)
@@ -202,7 +202,7 @@ Call the Task tool with:
 Call the Task tool with:
 - subagent_type: "general-purpose"
 - description: "generate implementation plan"
-- prompt: Read `.claude/skills/plan/prompts/generate-plan.md` with the Read tool and use its content as the subagent prompt. Embed the Phase P-1 output as `Context Data` and TASK as `Task Description`. If RESEARCH_FILE exists, instruct the subagent to read it with the Read tool.
+- prompt: Read `~/.claude/skills/plan/prompts/generate-plan.md` with the Read tool and use its content as the subagent prompt. Embed the Phase P-1 output as `Context Data` and TASK as `Task Description`. If RESEARCH_FILE exists, instruct the subagent to read it with the Read tool.
 
 #### Phase P-3: Annotation Cycle (repeat until approved — the ONLY confirmation gate)
 
@@ -289,7 +289,7 @@ Use AskUserQuestion:
 2. Regenerate the plan with the Task tool:
    - subagent_type: "general-purpose"
    - description: "revise plan with annotations"
-   - prompt: Read `.claude/skills/plan/prompts/revise-plan.md` with the Read tool and use its content as the subagent prompt. Embed the annotated plan file content as `Annotated Plan` and the Phase P-1 context as `Context Data`.
+   - prompt: Read `~/.claude/skills/plan/prompts/revise-plan.md` with the Read tool and use its content as the subagent prompt. Embed the annotated plan file content as `Annotated Plan` and the Phase P-1 context as `Context Data`.
 3. Overwrite the plan file with the Write tool
 4. Loop back to Step 2 (open in editor + ask for review again)
 
@@ -332,7 +332,7 @@ Plan file path resolution:
 Call the Task tool with:
 - subagent_type: "general-purpose"
 - description: "load plan and detect tooling"
-- prompt: Read the file `.claude/skills/implement/prompts/load-plan.md` and use its content as the subagent prompt. Replace `$ARGUMENTS` with the resolved plan file path. Apply the following overrides:
+- prompt: Read the file `~/.claude/skills/implement/prompts/load-plan.md` and use its content as the subagent prompt. Replace `$ARGUMENTS` with the resolved plan file path. Apply the following overrides:
   - **Step 1 (Parse Arguments)**: Skip entirely — `PLAN_FILE` is the resolved plan file path from above, `STEPS` is always ALL
   - **SELECTED_STEPS**: Omit from the return result — `/develop` always executes all steps
   - **NO_PLAN error message**: Use shorter version: `計画ファイルが見つかりません。`

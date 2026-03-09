@@ -15,7 +15,7 @@
 | context | なし（メインコンテキストで実行） |
 | disable-model-invocation | `true`（明示的な `/develop` でのみ起動） |
 | allowed-tools | `Task, AskUserQuestion, Bash, Read, Edit, Write, Glob, Grep` |
-| ファイル構成 | `.claude/skills/develop/SKILL.md` のみ（1ファイル） |
+| ファイル構成 | `~/.claude/skills/develop/SKILL.md` のみ（1ファイル） |
 
 ---
 
@@ -89,7 +89,7 @@ Phase I (Implement)
 
 1. **スコープ決定**: Task(Bash) で引数パース、プロジェクト構造把握、エントリーポイント特定
    - エラー（NO_TOPIC, ENTRY_POINT_COUNT: 0）時は AskUserQuestion で対応（既存と同じ）
-2. **深掘り調査**: Task(general-purpose) で `.claude/skills/research/prompts/investigate.md` を使用
+2. **深掘り調査**: Task(general-purpose) で `~/.claude/skills/research/prompts/investigate.md` を使用
 3. **ファイル出力**: `research-<sanitized-topic>.md` を自動で Write
 4. **サマリー表示**: 調査結果の要約を表示し、そのまま Phase P へ遷移
 
@@ -107,11 +107,11 @@ Phase I (Implement)
 
 1. **コンテキスト収集**: Task(Bash) で引数パース、プロジェクト構造把握
    - Phase R の出力ファイルを自動的に RESEARCH_FILE として設定
-2. **計画生成**: Task(general-purpose) で `.claude/skills/plan/prompts/generate-plan.md` を使用
+2. **計画生成**: Task(general-purpose) で `~/.claude/skills/plan/prompts/generate-plan.md` を使用
 3. **注釈サイクル**（★唯一の確認ゲート）:
    - plan ファイルを Write → エディタで開く
    - AskUserQuestion: 「承認」「注釈を反映」「キャンセル」
-   - 「注釈を反映」: `.claude/skills/plan/prompts/revise-plan.md` で再生成 → ループ
+   - 「注釈を反映」: `~/.claude/skills/plan/prompts/revise-plan.md` で再生成 → ループ
    - 「承認」: Phase I へ遷移
    - 「キャンセル」: パイプライン全体を終了
 4. **確定**: チェックリスト整合性確認後、Phase I へ自動遷移

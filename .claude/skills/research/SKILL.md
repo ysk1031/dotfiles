@@ -17,7 +17,7 @@ Deeply investigate a codebase topic, feature, or module and produce a structured
 Call the Task tool with:
 - subagent_type: "general-purpose"
 - description: "determine research scope"
-- prompt: Read the file `.claude/skills/research/prompts/analyze-scope.md` and use its content as the subagent prompt. Replace `$ARGUMENTS` with the actual user arguments.
+- prompt: Read the file `~/.claude/skills/research/prompts/analyze-scope.md` and use its content as the subagent prompt. Replace `$ARGUMENTS` with the actual user arguments.
 
 ---
 
@@ -38,7 +38,7 @@ If "キャンセル": Print "調査を終了しました。" and stop.
 Otherwise, call the Task tool with:
 - subagent_type: "general-purpose"
 - description: "deep codebase investigation"
-- prompt: Read the file `.claude/skills/research/prompts/investigate.md` and use its content as the subagent prompt. Embed the entire Phase 1 output as `Scope Data` and the TOPIC as `Investigation Topic`.
+- prompt: Read the file `~/.claude/skills/research/prompts/investigate.md` and use its content as the subagent prompt. Embed the entire Phase 1 output as `Scope Data` and the TOPIC as `Investigation Topic`.
 
 ---
 

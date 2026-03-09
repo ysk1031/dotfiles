@@ -59,7 +59,7 @@ fi
 git log --oneline -5 2>/dev/null
 ```
 
-**Output schema**: See `.claude/skills/develop/references/schemas.md#plan-context-output` for the canonical format.
+**Output schema**: See `~/.claude/skills/develop/references/schemas.md#plan-context-output` for the canonical format.
 
 **Step 4: Return Result**
 

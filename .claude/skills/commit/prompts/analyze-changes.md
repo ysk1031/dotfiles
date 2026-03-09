@@ -37,7 +37,7 @@ STATUS: NEEDS_SPLIT
 **Step 5: Determine Commit Type**
 Select prefix: feat/fix/perf/refactor/style/test/docs/build/ci/chore/release
 
-**Output schema**: See `.claude/skills/commit/references/schemas.md#commit-analyze-output` for the canonical format.
+**Output schema**: See `~/.claude/skills/commit/references/schemas.md#commit-analyze-output` for the canonical format.
 
 **Step 6: Generate and Return Message**
 Return in this format:

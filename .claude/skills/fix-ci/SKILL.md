@@ -17,7 +17,7 @@ Diagnose failed GitHub Actions workflow runs, identify the root cause, propose a
 Call the Task tool with:
 - subagent_type: "general-purpose"
 - description: "collect CI failure logs"
-- prompt: Read the file `.claude/skills/fix-ci/prompts/collect-logs.md` and use its content as the subagent prompt. Replace `$ARGUMENTS` with actual arguments before passing to the subagent.
+- prompt: Read the file `~/.claude/skills/fix-ci/prompts/collect-logs.md` and use its content as the subagent prompt. Replace `$ARGUMENTS` with actual arguments before passing to the subagent.
 
 The subagent will return collected failure data (or an error/status).
 
@@ -30,7 +30,7 @@ If Phase 1 returned an error status (`GH_AUTH_REQUIRED`, `NO_REPO`, `NO_REMOTE`,
 Call the Task tool with:
 - subagent_type: "general-purpose"
 - description: "analyze CI failure cause"
-- prompt: Read the file `.claude/skills/fix-ci/prompts/analyze-failure.md` and use its content as the subagent prompt. Embed the entire Phase 1 output as `CI Failure Data` and the user hint (if any) as `Additional context from user`.
+- prompt: Read the file `~/.claude/skills/fix-ci/prompts/analyze-failure.md` and use its content as the subagent prompt. Embed the entire Phase 1 output as `CI Failure Data` and the user hint (if any) as `Additional context from user`.
 
 ---
 
@@ -107,7 +107,7 @@ Use AskUserQuestion:
 Call the Task tool with:
 - subagent_type: "general-purpose"
 - description: "create CI fix plan"
-- prompt: Read the file `.claude/skills/fix-ci/prompts/create-fix-plan.md` and use its content as the subagent prompt. Embed the approved hypothesis data and Phase 1 output into the appropriate placeholders.
+- prompt: Read the file `~/.claude/skills/fix-ci/prompts/create-fix-plan.md` and use its content as the subagent prompt. Embed the approved hypothesis data and Phase 1 output into the appropriate placeholders.
 
 ---
 

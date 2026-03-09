@@ -101,7 +101,7 @@ Aggregate the data:
 - Total changed files
 - Claude Code session count by project
 
-**Output schema**: See `.claude/skills/weekly-report/references/schemas.md#weekly-report-collect-output` for the canonical format.
+**Output schema**: See `~/.claude/skills/weekly-report/references/schemas.md#weekly-report-collect-output` for the canonical format.
 
 **Step 8: Return Collected Data**
 

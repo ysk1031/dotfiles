@@ -39,7 +39,7 @@ Based on your investigation:
 4. Consider edge cases and error handling
 5. Plan how to test the changes
 
-**Output schema**: See `.claude/skills/develop/references/schemas.md#plan-generation-output` for the canonical format.
+**Output schema**: See `~/.claude/skills/develop/references/schemas.md#plan-generation-output` for the canonical format.
 
 ### Step 4: Generate the Plan
 

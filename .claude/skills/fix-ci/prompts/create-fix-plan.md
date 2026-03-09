@@ -32,7 +32,7 @@ Look for:
 
 Determine how the user can verify the fix locally before pushing.
 
-**Output schema**: See `.claude/skills/fix-ci/references/schemas.md#fix-ci-plan-output` for the canonical format.
+**Output schema**: See `~/.claude/skills/fix-ci/references/schemas.md#fix-ci-plan-output` for the canonical format.
 
 **Step 5: Return Fix Plan**
 

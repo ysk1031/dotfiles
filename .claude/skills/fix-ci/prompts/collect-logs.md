@@ -110,7 +110,7 @@ Get the run URL:
 gh run view <run-id> --json url -q .url
 ```
 
-**Output schema**: See `.claude/skills/fix-ci/references/schemas.md#fix-ci-collect-output` for the canonical format.
+**Output schema**: See `~/.claude/skills/fix-ci/references/schemas.md#fix-ci-collect-output` for the canonical format.
 
 **Step 4: Return Collected Data**
 

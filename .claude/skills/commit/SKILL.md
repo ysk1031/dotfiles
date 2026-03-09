@@ -16,7 +16,7 @@ Generate a commit message for staged changes and let the user review/edit before
 Call the Task tool with:
 - subagent_type: "general-purpose"
 - description: "analyze staged changes"
-- prompt: Read the file `.claude/skills/commit/prompts/analyze-changes.md` and use its content as the subagent prompt. Replace `$ARGUMENTS` with the actual user arguments.
+- prompt: Read the file `~/.claude/skills/commit/prompts/analyze-changes.md` and use its content as the subagent prompt. Replace `$ARGUMENTS` with the actual user arguments.
 
 The subagent will return the proposed commit message (or an error/warning).
 

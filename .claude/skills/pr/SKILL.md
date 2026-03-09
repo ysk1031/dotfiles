@@ -16,7 +16,7 @@ Generate a PR title and description from current branch changes, let the user re
 Call the Task tool with:
 - subagent_type: "general-purpose"
 - description: "analyze branch changes for PR"
-- prompt: Read the file `.claude/skills/pr/prompts/analyze-branch.md` and use its content as the subagent prompt. Replace `$ARGUMENTS` with the actual user arguments.
+- prompt: Read the file `~/.claude/skills/pr/prompts/analyze-branch.md` and use its content as the subagent prompt. Replace `$ARGUMENTS` with the actual user arguments.
 
 The subagent will return the proposed PR content (or an error/status).
 

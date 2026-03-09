@@ -17,7 +17,7 @@ Execute an approved implementation plan from start to finish. Read the plan, imp
 Call the Task tool with:
 - subagent_type: "general-purpose"
 - description: "load plan and detect tooling"
-- prompt: Read the file `.claude/skills/implement/prompts/load-plan.md` and use its content as the subagent prompt. Replace `$ARGUMENTS` with the actual user arguments.
+- prompt: Read the file `~/.claude/skills/implement/prompts/load-plan.md` and use its content as the subagent prompt. Replace `$ARGUMENTS` with the actual user arguments.
 
 ---
 
