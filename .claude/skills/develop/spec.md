@@ -15,7 +15,7 @@
 | context | なし（メインコンテキストで実行） |
 | disable-model-invocation | `true`（明示的な `/develop` でのみ起動） |
 | allowed-tools | `Task, AskUserQuestion, Bash, Read, Edit, Write, Glob, Grep` |
-| ファイル構成 | `~/.claude/skills/develop/SKILL.md` のみ（1ファイル） |
+| ファイル構成 | SKILL.md（オーケストレーター）, spec.md（仕様書）, references/schemas.md（I/Oスキーマ定義） |
 
 ---
 
@@ -54,18 +54,19 @@
 
 ```
 Phase R (Research)
-  ├─ Task(Bash): スコープ決定
+  ├─ Task(general-purpose) + research/prompts/analyze-scope.md: スコープ決定
   ├─ Task(general-purpose) + research/prompts/investigate.md: 深掘り調査
   └─ research-<topic>.md 自動出力 ← レビューゲートなし
       │
 Phase P (Plan)
+  ├─ Task(general-purpose) + plan/prompts/gather-context.md: コンテキスト収集
   ├─ Task(general-purpose) + plan/prompts/generate-plan.md: 計画生成
   ├─ 注釈サイクル ← ★唯一の確認ゲート（承認まで繰り返し）
   ├─ Task(general-purpose) + plan/prompts/revise-plan.md: 注釈反映
   └─ plan.md 確定
       │
 Phase I (Implement)
-  ├─ Task(Bash): 計画読み込み & ツール検出
+  ├─ Task(general-purpose) + implement/prompts/load-plan.md: 計画読み込み & ツール検出
   └─ 実装ループ（Edit/Write → type check + lint → チェックリスト更新）
       └─ テスト実行 → 完了サマリー
 ```
@@ -87,7 +88,7 @@ Phase I (Implement)
 
 **処理フロー:**
 
-1. **スコープ決定**: Task(Bash) で引数パース、プロジェクト構造把握、エントリーポイント特定
+1. **スコープ決定**: Task(general-purpose) + analyze-scope.md で引数パース、プロジェクト構造把握、エントリーポイント特定
    - エラー（NO_TOPIC, ENTRY_POINT_COUNT: 0）時は AskUserQuestion で対応（既存と同じ）
 2. **深掘り調査**: Task(general-purpose) で `~/.claude/skills/research/prompts/investigate.md` を使用
 3. **ファイル出力**: `research-<sanitized-topic>.md` を自動で Write
@@ -105,15 +106,17 @@ Phase I (Implement)
 
 **処理フロー:**
 
-1. **コンテキスト収集**: Task(Bash) で引数パース、プロジェクト構造把握
+1. **コンテキスト収集**: Task(general-purpose) + gather-context.md で引数パース、プロジェクト構造把握
    - Phase R の出力ファイルを自動的に RESEARCH_FILE として設定
 2. **計画生成**: Task(general-purpose) で `~/.claude/skills/plan/prompts/generate-plan.md` を使用
 3. **注釈サイクル**（★唯一の確認ゲート）:
    - plan ファイルを Write → エディタで開く
+   - 計画の概要を表示（全ステップ数、各ステップの簡潔なサマリー）
    - AskUserQuestion: 「承認」「注釈を反映」「キャンセル」
    - 「注釈を反映」: `~/.claude/skills/plan/prompts/revise-plan.md` で再生成 → ループ
    - 「承認」: Phase I へ遷移
    - 「キャンセル」: パイプライン全体を終了
+   - 「Other（カスタム入力）」: ユーザーの入力テキストを verbal annotation として扱い、「注釈を反映」と同じフローで計画を再生成
 4. **確定**: チェックリスト整合性確認後、Phase I へ自動遷移
 
 ### Phase I: Implement
@@ -127,7 +130,7 @@ Phase I (Implement)
 
 **処理フロー:**
 
-1. **計画読み込み & ツール検出**: Task(Bash) で plan ファイルのチェックリスト抽出、バリデーションツール自動検出
+1. **計画読み込み & ツール検出**: Task(general-purpose) + load-plan.md で plan ファイルのチェックリスト抽出、バリデーションツール自動検出
 2. **実装ループ**: 各ステップを順番に実行
    - ステップ詳細を plan から読み取り
    - Edit/Write でコード変更
@@ -169,16 +172,23 @@ Phase R・P をスキップし、Phase I から開始。
 ├── research/          # そのまま維持（個別に /research で使える）
 │   ├── SKILL.md
 │   └── prompts/
+│       ├── analyze-scope.md  ← /develop が再利用
 │       └── investigate.md    ← /develop が再利用
 ├── plan/              # そのまま維持（個別に /plan で使える）
 │   ├── SKILL.md
 │   └── prompts/
+│       ├── gather-context.md ← /develop が再利用
 │       ├── generate-plan.md  ← /develop が再利用
 │       └── revise-plan.md    ← /develop が再利用
 ├── implement/         # そのまま維持（個別に /implement で使える）
-│   └── SKILL.md
+│   ├── SKILL.md
+│   └── prompts/
+│       └── load-plan.md      ← /develop が再利用
 └── develop/           # 新規作成
-    └── SKILL.md       # パイプラインオーケストレーター
+    ├── SKILL.md       # パイプラインオーケストレーター
+    ├── spec.md        # 仕様書
+    └── references/
+        └── schemas.md # I/Oスキーマ定義
 ```
 
 - `/develop` は既存スキルを**呼び出さない**（Skill chaining は使わない）
