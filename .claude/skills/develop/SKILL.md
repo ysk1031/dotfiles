@@ -64,9 +64,10 @@ Phase R performs the same processing as the existing `/research` skill, but skip
 #### Phase R-1: Scope Determination (Task + subagent)
 
 Call the Task tool with:
-- subagent_type: "general-purpose"
+- subagent_type: "custom"
+- agent: "analyze-research-scope"
 - description: "determine research scope"
-- prompt: Read the file `~/.claude/skills/research/prompts/analyze-scope.md` and use its content as the subagent prompt. Replace `$ARGUMENTS` with the TASK value. Apply the following overrides:
+- prompt: Replace `$ARGUMENTS` in the agent's loaded prompt with the TASK value and execute. Apply the following overrides:
   - **SCOPE**: Always set to `"broad"` — ignore `--scope` flag parsing
   - **OUTPUT**: Always set to empty — Phase R determines this automatically
   - **NO_TOPIC error message**: Use `/develop "認証フロー"` as the example (not `/research`)
@@ -330,9 +331,10 @@ Plan file path resolution:
 - If `--from implement`: use `OUTPUT` value (default: `plan.md`)
 
 Call the Task tool with:
-- subagent_type: "general-purpose"
+- subagent_type: "custom"
+- agent: "load-impl-plan"
 - description: "load plan and detect tooling"
-- prompt: Read the file `~/.claude/skills/implement/prompts/load-plan.md` and use its content as the subagent prompt. Replace `$ARGUMENTS` with the resolved plan file path. Apply the following overrides:
+- prompt: Replace `$ARGUMENTS` in the agent's loaded prompt with the resolved plan file path and execute. Apply the following overrides:
   - **Step 1 (Parse Arguments)**: Skip entirely — `PLAN_FILE` is the resolved plan file path from above, `STEPS` is always ALL
   - **SELECTED_STEPS**: Omit from the return result — `/develop` always executes all steps
   - **NO_PLAN error message**: Use shorter version: `計画ファイルが見つかりません。`

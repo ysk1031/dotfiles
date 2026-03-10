@@ -15,9 +15,10 @@ Deeply investigate a codebase topic, feature, or module and produce a structured
 ### Phase 1: Scope Determination (use Task with subagent)
 
 Call the Task tool with:
-- subagent_type: "general-purpose"
+- subagent_type: "custom"
+- agent: "analyze-research-scope"
 - description: "determine research scope"
-- prompt: Read the file `~/.claude/skills/research/prompts/analyze-scope.md` and use its content as the subagent prompt. Replace `$ARGUMENTS` with the actual user arguments.
+- prompt: Replace `$ARGUMENTS` in the agent's loaded prompt with the actual user arguments and execute.
 
 ---
 
