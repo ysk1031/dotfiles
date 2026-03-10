@@ -1,6 +1,6 @@
 ---
 name: develop
-description: "新機能を作りたい、大きな変更を実装したい時に使用。調査から実装まで一気通貫で実行。Run the full research, plan, implement pipeline end-to-end."
+description: "Run the full research, plan, implement pipeline end-to-end. 新機能を作りたい、大きな変更を実装したい時に使用。調査から実装まで一気通貫で実行。"
 allowed-tools: Task, AskUserQuestion, Bash, Read, Edit, Write, Glob, Grep
 argument-hint: "[task description] [--from 'research'|'plan'|'implement'] [--research 'file.md'] [--output 'plan-filename']"
 disable-model-invocation: true
