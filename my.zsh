@@ -5,6 +5,12 @@
 # Options
 setopt hist_ignore_all_dups
 
+# Case-insensitive completion
+zstyle ':completion:*' matcher-list 'm:{a-z}={A-Z} m:{A-Z}={a-z}'
+
+# Aliases - Safety
+alias rm='rm -i'
+
 # Aliases - Git
 alias g='git'
 alias gst='git status'
