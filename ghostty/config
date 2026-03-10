@@ -46,7 +46,7 @@
 theme = Everforest Dark Hard
 
 font-thicken = true
-font-family = "Menlo"
+font-family = "JetBrainsMono Nerd Font"
 font-family = "Hiragino Kaku Gothic ProN"
 font-size = 14
 font-feature = "-calt"
