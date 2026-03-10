@@ -95,6 +95,12 @@ DIFF_STAT:
 - If multiple commits: summarize changes into a concise title
 
 **Step 9: Generate Description**
+Writing style rules:
+- When writing in Japanese: ALWAYS use 常体 (plain form / だ・である調). NEVER use 丁寧語 (polite form / です・ます調).
+  - Good: 「認証ロジックを追加した」「エラーハンドリングを改善する」「不要な依存を削除した」
+  - Bad: 「認証ロジックを追加しました」「エラーハンドリングを改善します」「不要な依存を削除しました」
+- When writing in English: no special style constraint.
+
 If PR template exists: follow that format
 Otherwise, use default format:
 
