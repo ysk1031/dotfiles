@@ -15,9 +15,10 @@ Generate a review report aggregating development activity (GitHub + Claude Code 
 ### Phase 1: Data Collection (use Task with subagent)
 
 Call the Task tool with:
-- subagent_type: "general-purpose"
+- subagent_type: "custom"
+- agent: "collect-weekly-activity"
 - description: "collect weekly dev activity data"
-- prompt: Read the file `~/.claude/skills/weekly-report/prompts/collect-activity.md` and use its content as the subagent prompt. Replace `$ARGUMENTS` with the actual user arguments.
+- prompt: Replace `$ARGUMENTS` in the agent's loaded prompt with the actual user arguments and execute.
 
 The subagent will return collected data (or an error/status).
 
