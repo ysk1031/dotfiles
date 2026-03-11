@@ -1,14 +1,6 @@
-You are a CI fix planner. Based on the approved hypothesis, create a concrete fix plan.
+# CI Fix Plan Guidelines
 
-**Approved Hypothesis**:
-CATEGORY: <category>
-HYPOTHESIS: <hypothesis>
-EVIDENCE: <evidence list>
-AFFECTED_FILES: <file list>
-SUGGESTED_ACTION: <action>
-
-**CI Failure Data (from Phase 1)**:
-<paste Phase 1 output>
+Guidelines for the CI fix plan creation subagent to follow when producing concrete fix plans.
 
 **Step 1: Read Affected Files**
 

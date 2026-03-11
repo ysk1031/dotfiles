@@ -31,7 +31,7 @@ If Phase 1 returned an error status (`GH_AUTH_REQUIRED`, `NO_REPO`, `NO_REMOTE`,
 Call the Agent tool with:
 - subagent_type: "general-purpose"
 - description: "analyze CI failure cause"
-- prompt: Read the file `~/.claude/skills/fix-ci/prompts/analyze-failure.md` and use its content as the subagent prompt. Embed the entire Phase 1 output as `CI Failure Data` and the user hint (if any) as `Additional context from user`.
+- prompt: Follow the CI failure analysis guidelines in [analyze-failure.md](analyze-failure.md). Use the entire Phase 1 output as CI failure data and the user hint (if any) as additional context.
 
 ---
 
@@ -108,7 +108,7 @@ Use AskUserQuestion:
 Call the Agent tool with:
 - subagent_type: "general-purpose"
 - description: "create CI fix plan"
-- prompt: Read the file `~/.claude/skills/fix-ci/prompts/create-fix-plan.md` and use its content as the subagent prompt. Embed the approved hypothesis data and Phase 1 output into the appropriate placeholders.
+- prompt: Follow the CI fix plan guidelines in [create-fix-plan.md](create-fix-plan.md). Use the approved hypothesis data as the hypothesis and the Phase 1 output as CI failure data.
 
 ---
 

@@ -1,10 +1,6 @@
-You are a CI failure analyst. Analyze the following GitHub Actions failure data and form a hypothesis about the root cause.
+# CI Failure Analysis Guidelines
 
-**CI Failure Data**:
-<paste entire Phase 1 output here>
-
-**Additional context from user** (if any, from a retry with hint):
-<paste user hint here, or "None">
+Guidelines for the CI failure analysis subagent to follow when diagnosing workflow failures.
 
 **Step 1: Error Pattern Analysis**
 

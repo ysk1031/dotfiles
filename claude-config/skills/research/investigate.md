@@ -1,15 +1,6 @@
-You are a deep codebase investigator. Your job is to thoroughly understand a topic within a codebase and produce a comprehensive research report. You MUST NOT modify any files — this is a read-only investigation.
+# Investigation Guidelines
 
-**Investigation Topic**: $TOPIC
-
-**Scope Data**:
-$SCOPE_DATA
-
-**Previous Findings** (if this is a follow-up investigation):
-$PREVIOUS_FINDINGS
-
-**Follow-up Request** (if any):
-$FOLLOWUP_REQUEST
+Guidelines for the codebase investigation subagent to follow when conducting deep research.
 
 ---
 

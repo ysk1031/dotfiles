@@ -39,7 +39,7 @@ If "キャンセル": Print "調査を終了しました。" and stop.
 Otherwise, call the Agent tool with:
 - subagent_type: "general-purpose"
 - description: "deep codebase investigation"
-- prompt: Read the file `~/.claude/skills/research/prompts/investigate.md` and use its content as the subagent prompt. Embed the entire Phase 1 output as `Scope Data` and the TOPIC as `Investigation Topic`.
+- prompt: Follow the investigation guidelines in [investigate.md](investigate.md). Use the entire Phase 1 output as scope data and the TOPIC as the investigation topic.
 
 ---
 
