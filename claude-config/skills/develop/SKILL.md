@@ -144,12 +144,12 @@ Each phase's specific error handling is defined in the referenced skill's SKILL.
 
 ### Rules
 
-- ALWAYS display messages in Japanese — ユーザーが日本語話者であり、パイプライン全体の進捗を日本語で確認する必要があるため
-- NEVER modify existing skills — `/develop` is an independent skill — 既存スキルを変更すると、個別スキル（`/research` 等）の単独利用に影響が出る
-- NEVER skip the plan annotation cycle (Phase P-3) — 計画の承認がパイプライン唯一の確認ゲートであり、これを飛ばすと意図しない変更が実装される
-- Skip the review gate in Research phase — パイプライン内では調査は中間成果物であり、計画レビューで最終確認できるため
-- Skip scope confirmation in Implement phase — 計画承認済みのため、実装開始の再確認は冗長
-- Reference existing skill SKILL.md files directly and specify only overrides — ロジック重複を最小化し、単独スキルの変更が自動的に反映されるようにする
-- When starting mid-pipeline with `--from`, validate preconditions for skipped phases — 前提条件が満たされない状態で後続フェーズを実行するとエラーや不完全な結果になる
-- NEVER commit or push changes — コミットはユーザーが変更を確認した後に行うべき
-- Correctly pass data between phases (RESEARCH_FILE, OUTPUT, etc.) and maintain variable consistency — フェーズ間のデータ不整合はサイレントに誤った結果を生む
+- ALWAYS display messages in Japanese — the user is a Japanese speaker and needs to review pipeline progress in Japanese
+- NEVER modify existing skills — `/develop` is an independent skill — modifying existing skills would affect their standalone usage (e.g., `/research` used independently)
+- NEVER skip the plan annotation cycle (Phase P-3) — the plan annotation cycle is the only confirmation gate in the pipeline; skipping it risks implementing unintended changes
+- Skip the review gate in Research phase — within the pipeline, research is an intermediate artifact that will be reviewed during plan annotation
+- Skip scope confirmation in Implement phase — the plan is already approved, so re-confirming implementation start is redundant
+- Reference existing skill SKILL.md files directly and specify only overrides — minimizes logic duplication and ensures standalone skill changes propagate automatically
+- When starting mid-pipeline with `--from`, validate preconditions for skipped phases — executing later phases without meeting preconditions leads to errors or incomplete results
+- NEVER commit or push changes — commits should only happen after user review; unintended pushes trigger unnecessary CI runs
+- Correctly pass data between phases (RESEARCH_FILE, OUTPUT, etc.) and maintain variable consistency — data inconsistency between phases silently produces incorrect results
