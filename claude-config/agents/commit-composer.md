@@ -1,8 +1,8 @@
 ---
-name: analyze-commit-changes
+name: commit-composer
 model: sonnet
 maxTurns: 20
-description: "Analyze staged git changes and generate a Conventional Commits message. ステージ変更を分析しコミットメッセージ生成。"
+description: "Commit message composer. Analyzes staged changes and drafts Conventional Commits messages. コミットメッセージ作成係。"
 tools: Bash, Read
 ---
 

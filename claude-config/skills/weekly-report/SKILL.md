@@ -16,7 +16,7 @@ Generate a review report aggregating development activity (GitHub + Claude Code 
 
 Call the Agent tool with:
 - subagent_type: "custom"
-- agent: "collect-weekly-activity"
+- agent: "activity-reporter"
 - description: "collect weekly dev activity data"
 - prompt: Replace `$ARGUMENTS` in the agent's loaded prompt with the actual user arguments and execute.
 

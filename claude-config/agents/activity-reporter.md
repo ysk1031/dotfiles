@@ -1,8 +1,8 @@
 ---
-name: collect-weekly-activity
+name: activity-reporter
 model: haiku
 maxTurns: 10
-description: "Collect GitHub and Claude Code activity data for weekly reports. 週次活動データの収集。"
+description: "Development activity reporter. Collects GitHub and Claude Code activity data for weekly reports. 開発活動レポーター。"
 tools: Bash, Read
 ---
 

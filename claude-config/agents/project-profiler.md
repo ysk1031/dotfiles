@@ -1,8 +1,8 @@
 ---
-name: gather-plan-context
+name: project-profiler
 model: haiku
 maxTurns: 10
-description: "Gather project context for implementation planning. 実装計画のためのプロジェクトコンテキスト収集。"
+description: "Project profiler for implementation planning. Builds a project profile by examining structure, conventions, and recent activity. 実装計画用プロジェクト調査係。"
 tools: Bash, Read
 ---
 

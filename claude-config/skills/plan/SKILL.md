@@ -16,7 +16,7 @@ Generate a detailed implementation plan for a task, then iterate on it through h
 
 Call the Agent tool with:
 - subagent_type: "custom"
-- agent: "gather-plan-context"
+- agent: "project-profiler"
 - description: "gather planning context"
 - prompt: Replace `$ARGUMENTS` in the agent's loaded prompt with the actual user arguments and execute.
 

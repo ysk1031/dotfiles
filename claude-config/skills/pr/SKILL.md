@@ -15,7 +15,7 @@ Generate a PR title and description from current branch changes, let the user re
 
 Call the Agent tool with:
 - subagent_type: "custom"
-- agent: "analyze-pr-branch"
+- agent: "pr-composer"
 - description: "analyze branch changes for PR"
 - prompt: Replace `$ARGUMENTS` in the agent's loaded prompt with the actual user arguments and execute.
 

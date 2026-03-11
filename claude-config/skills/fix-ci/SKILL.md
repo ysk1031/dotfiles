@@ -16,7 +16,7 @@ Diagnose failed GitHub Actions workflow runs, identify the root cause, propose a
 
 Call the Agent tool with:
 - subagent_type: "custom"
-- agent: "collect-ci-logs"
+- agent: "ci-log-collector"
 - description: "collect CI failure logs"
 - prompt: Replace `$ARGUMENTS` in the agent's loaded prompt with actual arguments and execute.
 

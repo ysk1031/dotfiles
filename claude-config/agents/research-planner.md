@@ -1,8 +1,8 @@
 ---
-name: analyze-research-scope
+name: research-planner
 model: sonnet
 maxTurns: 20
-description: "Determine research scope and identify entry points. 調査スコープ決定とエントリーポイント特定。"
+description: "Research planner. Determines investigation scope, finds entry point files, and plans the research approach. 調査計画立案係。"
 tools: Bash, Read, Glob, Grep
 ---
 

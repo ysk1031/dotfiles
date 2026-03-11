@@ -16,7 +16,7 @@ Execute an approved implementation plan from start to finish. Read the plan, imp
 
 Call the Agent tool with:
 - subagent_type: "custom"
-- agent: "load-impl-plan"
+- agent: "plan-reader"
 - description: "load plan and detect tooling"
 - prompt: Replace `$ARGUMENTS` in the agent's loaded prompt with the actual user arguments and execute.
 

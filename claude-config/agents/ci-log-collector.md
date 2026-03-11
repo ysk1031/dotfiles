@@ -1,8 +1,8 @@
 ---
-name: collect-ci-logs
+name: ci-log-collector
 model: haiku
 maxTurns: 10
-description: "Collect failed GitHub Actions workflow run logs. CI失敗ログの収集。"
+description: "Failed CI log collector. Gathers GitHub Actions workflow failure logs for diagnosis. CI失敗ログ収集係。"
 tools: Bash, Read
 ---
 

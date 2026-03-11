@@ -1,8 +1,8 @@
 ---
-name: analyze-pr-branch
+name: pr-composer
 model: sonnet
 maxTurns: 20
-description: "Analyze branch changes and generate PR title and description. ブランチ変更を分析しPRタイトル・説明文生成。"
+description: "Pull request composer. Analyzes branch changes and drafts PR title and description. PR作成係。"
 tools: Bash, Read
 ---
 

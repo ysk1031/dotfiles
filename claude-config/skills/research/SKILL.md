@@ -16,7 +16,7 @@ Deeply investigate a codebase topic, feature, or module and produce a structured
 
 Call the Agent tool with:
 - subagent_type: "custom"
-- agent: "analyze-research-scope"
+- agent: "research-planner"
 - description: "determine research scope"
 - prompt: Replace `$ARGUMENTS` in the agent's loaded prompt with the actual user arguments and execute.
 
