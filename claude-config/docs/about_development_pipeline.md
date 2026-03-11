@@ -251,7 +251,6 @@ claude-config/agents/
 ```
 claude-config/skills/develop/
 ├── SKILL.md        # オーケストレーター定義
-├── spec.md         # 仕様書
 └── references/
     └── schemas.md  # I/Oスキーマ定義
 ```
