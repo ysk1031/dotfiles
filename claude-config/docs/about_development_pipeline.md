@@ -5,18 +5,23 @@ Boris Tane氏の記事 [How I use Claude Code](https://boristane.com/blog/how-i-
 
 ---
 
-## 3つのSkillの概要
+## 4つのSkillの概要
 
 | Skill | 役割 | 出力 |
 |-------|------|------|
 | `/research` | コードベースの深掘り調査 | `research-<topic>.md` |
 | `/plan` | 注釈サイクル付き計画策定 | `plan.md` |
 | `/implement` | 計画に基づく一気通貫実装 | コードの変更 + チェックリスト更新 |
+| `/develop` | research→plan→implement の一気通貫実行 | `research-<topic>.md` + `plan.md` + コード変更 |
 
 ### パイプラインの流れ
 
 ```
+# 個別実行
 /research → 人間がレビュー → /plan → 注釈サイクル → /implement → /commit
+
+# 一気通貫実行
+/develop → [自動調査] → 注釈サイクル → [自動実装] → /commit
 ```
 
 各Skillは独立して使えるが、前のSkillの出力を次のSkillに引き渡すことで最大の効果を発揮する。
@@ -33,16 +38,18 @@ Boris Tane氏の記事 [How I use Claude Code](https://boristane.com/blog/how-i-
 ### ファイル構成
 
 ```
-.claude/skills/research/
+claude-config/skills/research/
 ├── SKILL.md
 └── prompts/
-    ├── analyze-scope.md  # スコープ決定用subagentプロンプト
     └── investigate.md    # 深掘り調査用subagentプロンプト
+
+claude-config/agents/
+└── analyze-research-scope.md  # スコープ決定用custom subagent
 ```
 
 ### フェーズ
 
-1. **スコープ決定**（general-purpose subagent）— 関連ファイルの特定、プロジェクト構造の把握
+1. **スコープ決定**（custom subagent: `analyze-research-scope`, model: sonnet）— 関連ファイルの特定、プロジェクト構造の把握
 2. **深掘り調査**（general-purpose subagent）— 全文読み、依存関係2階層追跡、データフロー分析
 3. **ユーザーレビュー**（AskUserQuestion）— サマリー表示、追加調査 or ファイル出力
 4. **ファイル出力**（skill agent）— `research-<topic>.md` を生成、VSCodeで自動オープン
@@ -95,17 +102,19 @@ Boris Tane氏の記事 [How I use Claude Code](https://boristane.com/blog/how-i-
 ### ファイル構成
 
 ```
-.claude/skills/plan/
+claude-config/skills/plan/
 ├── SKILL.md
 └── prompts/
-    ├── gather-context.md # コンテキスト収集用subagentプロンプト
     ├── generate-plan.md  # 初回計画生成用subagentプロンプト
     └── revise-plan.md    # 注釈反映・計画改訂用subagentプロンプト
+
+claude-config/agents/
+└── gather-plan-context.md  # コンテキスト収集用custom subagent
 ```
 
 ### フェーズ
 
-1. **コンテキスト収集**（general-purpose subagent）— 引数パース、research ファイル検索、プロジェクト構造把握
+1. **コンテキスト収集**（custom subagent: `gather-plan-context`, model: haiku）— 引数パース、research ファイル検索、プロジェクト構造把握
 2. **計画生成**（general-purpose subagent）— タスク分析、コードベース調査、実装ステップ生成
 3. **注釈サイクル**（skill agent ループ）— plan.md 出力 → VSCode表示 → ユーザーレビュー → 注釈反映 → 再生成（繰り返し）
 4. **確定**（skill agent）— チェックリスト整合性確認、完了メッセージ
@@ -172,17 +181,18 @@ MODIFY（変更）、DELETE（削除）、ADD（追加）、QUESTION（質問）
 ### ファイル構成
 
 ```
-.claude/skills/implement/
-├── SKILL.md
-└── prompts/
-    └── load-plan.md    # 計画読み込み・ツール検出用subagentプロンプト
+claude-config/skills/implement/
+└── SKILL.md
+
+claude-config/agents/
+└── load-impl-plan.md  # 計画読み込み・ツール検出用custom subagent
 ```
 
 ### フェーズ
 
 メインの会話コンテキストで直接実行される（`disable-model-invocation: true` により、明示的な `/implement` コマンドでのみ起動）。
 
-1. **計画読み込み & ツール検出**（general-purpose subagent）— plan.md のチェックリスト抽出、type check/lint/test コマンド自動検出
+1. **計画読み込み & ツール検出**（custom subagent: `load-impl-plan`, model: sonnet）— plan.md のチェックリスト抽出、type check/lint/test コマンド自動検出
 2. **スコープ確認**（AskUserQuestion）— 全ステップ or 部分実装の選択
 3. **実装ループ**（main agent）— 各ステップ: 実装 → バリデーション → チェックリスト更新 → 次へ（確認なし）
 4. **検証 & サマリー**（main agent）— テスト実行、git diff --stat、完了メッセージ
@@ -229,6 +239,65 @@ MODIFY（変更）、DELETE（削除）、ADD（追加）、QUESTION（質問）
 
 ---
 
+## `/develop` — 一気通貫パイプライン
+
+### 概要
+
+`/research` → `/plan` → `/implement` を一気通貫で実行するオーケストレータースキル。
+調査（Phase R）のレビューゲートをスキップし、計画の注釈サイクル（Phase P）のみを確認ゲートとして保持する。
+
+### ファイル構成
+
+```
+claude-config/skills/develop/
+├── SKILL.md        # オーケストレーター定義
+├── spec.md         # 仕様書
+└── references/
+    └── schemas.md  # I/Oスキーマ定義
+```
+
+### 引数
+
+| 引数 | 説明 | デフォルト |
+|------|------|-----------|
+| `TASK` | タスクの説明 | — |
+| `--from` | 開始フェーズ（`research`, `plan`, `implement`） | `research` |
+| `--research` | 既存の調査ファイルパス | — |
+| `--output` | 計画ファイル名 | `plan.md` |
+
+### フェーズ
+
+1. **Phase R: 調査**（`/research` と同等、ただしレビューゲートをスキップして自動出力）
+2. **Phase P: 計画**（`/plan` と同等、注釈サイクルを維持 — パイプライン唯一の確認ゲート）
+3. **Phase I: 実装**（`/implement` と同等、ただしスコープ確認をスキップして全ステップ自動実行）
+
+### 個別スキルとの違い
+
+| 観点 | 個別スキル | `/develop` |
+|------|-----------|-----------|
+| 調査のレビューゲート | あり（ユーザー確認） | なし（自動出力） |
+| 計画の注釈サイクル | あり | あり（唯一の確認ゲート） |
+| 実装のスコープ確認 | あり（全/部分選択） | なし（常に全ステップ実行） |
+| `--from` による途中開始 | なし | あり |
+
+### 使い方
+
+```bash
+# 基本: 調査から実装まで一気通貫
+/develop "ユーザー認証機能の追加"
+
+# 計画フェーズから開始（調査済み）
+/develop "OAuth2.0対応" --from plan --research research-認証フロー.md
+
+# 実装フェーズから開始（計画済み）
+/develop --from implement
+
+# 出力ファイル名を指定
+/develop "API v2 マイグレーション" --output migration-plan.md
+```
+
+---
+
 ## 利用例: 完全なパイプライン
 
 ### 例1: 新機能追加
@@ -252,6 +321,18 @@ MODIFY（変更）、DELETE（削除）、ADD（追加）、QUESTION（質問）
 # → 最後にテスト実行
 
 # 4. コミット
+/commit
+```
+
+### 例1b: 新機能追加（/develop で一気通貫）
+
+```bash
+# 上記の例1と同等の結果を1コマンドで実行
+/develop "プロフィール画像アップロード機能の追加"
+# → 自動で調査 → 計画生成 → 注釈サイクル（ここでレビュー）→ 一気に実装
+# → 最後にテスト実行
+
+# コミット
 /commit
 ```
 
@@ -279,3 +360,15 @@ MODIFY（変更）、DELETE（削除）、ADD（追加）、QUESTION（質問）
 # → チェックリストの完了済みステップは自動スキップ
 # → 未完了のステップから再開
 ```
+
+---
+
+## Custom Subagent 一覧
+
+パイプラインの各スキルで使用される custom subagent の一覧。すべて `claude-config/agents/` に配置されている。
+
+| Agent 名 | 使用スキル | モデル | maxTurns | 役割 |
+|----------|-----------|--------|----------|------|
+| `analyze-research-scope` | `/research`, `/develop` | sonnet | 20 | 調査スコープ決定・エントリーポイント特定 |
+| `gather-plan-context` | `/plan`, `/develop` | haiku | 10 | 計画用プロジェクトコンテキスト収集 |
+| `load-impl-plan` | `/implement`, `/develop` | sonnet | 20 | 計画ファイル読み込み・バリデーションツール検出 |
