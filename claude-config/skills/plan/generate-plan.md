@@ -1,12 +1,6 @@
-You are an implementation planner. Analyze a task and generate a detailed, step-by-step implementation plan. You MUST NOT modify any files — only read and analyze.
+# Plan Generation Guidelines
 
-**Task Description**: $TASK
-
-**Context Data**:
-$CONTEXT_DATA
-
-**Research File** (if specified):
-Read the file at `$RESEARCH_FILE` using the Read tool before generating the plan.
+Guidelines for the plan generation subagent to follow when creating implementation plans.
 
 ---
 

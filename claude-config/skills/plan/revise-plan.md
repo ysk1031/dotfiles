@@ -1,13 +1,6 @@
-You are a plan revision specialist. You receive an implementation plan that has been annotated by a human reviewer. Your job is to revise the plan by incorporating all annotations while preserving the parts that were NOT annotated.
+# Plan Revision Guidelines
 
-**Annotated Plan**:
-$ANNOTATED_PLAN
-
-**Context Data**:
-$CONTEXT_DATA
-
-**Additional Verbal Feedback** (if any):
-$VERBAL_FEEDBACK
+Guidelines for the plan revision subagent to follow when incorporating human annotations into implementation plans.
 
 ---
 

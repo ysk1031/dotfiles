@@ -38,7 +38,7 @@ Use AskUserQuestion:
 Call the Agent tool with:
 - subagent_type: "general-purpose"
 - description: "generate implementation plan"
-- prompt: Read the file `~/.claude/skills/plan/prompts/generate-plan.md` and use its content as the subagent prompt. Embed the Phase 1 output as `Context Data`, the TASK as `Agent Description`, and if a research file exists, instruct the subagent to read it.
+- prompt: Follow the plan generation guidelines in [generate-plan.md](generate-plan.md). Use the Phase 1 output as context data, the TASK as the agent description, and if a research file exists, read and incorporate its findings.
 
 ---
 
@@ -117,7 +117,7 @@ Use AskUserQuestion:
 2. Call the Agent tool to regenerate the plan:
    - subagent_type: "general-purpose"
    - description: "revise plan with annotations"
-   - prompt: Read the file `~/.claude/skills/plan/prompts/revise-plan.md` and use its content as the subagent prompt. Embed the annotated plan file content as `Annotated Plan` and the original context from Phase 1 as `Context Data`.
+   - prompt: Follow the plan revision guidelines in [revise-plan.md](revise-plan.md). Use the annotated plan file content as the annotated plan and the original context from Phase 1 as context data.
 3. Write the revised plan to the same file (overwrite)
 4. Loop back to Step 2 (open in editor + ask for review again)
 
