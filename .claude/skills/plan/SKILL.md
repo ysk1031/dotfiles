@@ -15,9 +15,10 @@ Generate a detailed implementation plan for a task, then iterate on it through h
 ### Phase 1: Context Gathering (use Task with subagent)
 
 Call the Task tool with:
-- subagent_type: "general-purpose"
+- subagent_type: "custom"
+- agent: "gather-plan-context"
 - description: "gather planning context"
-- prompt: Read the file `~/.claude/skills/plan/prompts/gather-context.md` and use its content as the subagent prompt. Replace `$ARGUMENTS` with the actual user arguments.
+- prompt: Replace `$ARGUMENTS` in the agent's loaded prompt with the actual user arguments and execute.
 
 ---
 

@@ -175,9 +175,10 @@ RESEARCH_FILE resolution:
 - If `--from plan` without `--research`: search for `research-*.md` in the current directory and display candidates (do NOT auto-select)
 
 Call the Task tool with:
-- subagent_type: "general-purpose"
+- subagent_type: "custom"
+- agent: "gather-plan-context"
 - description: "gather planning context"
-- prompt: Read the file `~/.claude/skills/plan/prompts/gather-context.md` and use its content as the subagent prompt. Replace `$ARGUMENTS` with the TASK value. Apply the following overrides:
+- prompt: Replace `$ARGUMENTS` in the agent's loaded prompt with the TASK value and execute. Apply the following overrides:
   - **TASK**: Already validated as non-empty — skip the NO_TASK validation in Step 1
   - **RESEARCH_FILE**: Use the resolved RESEARCH_FILE value from above
   - **OUTPUT**: Use the `$OUTPUT` value (default: `plan.md`)
