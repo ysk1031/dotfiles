@@ -4,3 +4,5 @@
 # Claude Code backup files
 .claude/**/*.md~
 .claude/**/*~
+claude-config/**/*.md~
+claude-config/**/*~
