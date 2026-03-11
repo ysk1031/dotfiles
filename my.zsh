@@ -9,7 +9,7 @@ setopt hist_ignore_all_dups
 zstyle ':completion:*' matcher-list 'm:{a-z}={A-Z} m:{A-Z}={a-z}'
 
 # Aliases - Safety
-alias rm='rm -i'
+alias rm='trash'
 
 # Aliases - Git
 alias g='git'
