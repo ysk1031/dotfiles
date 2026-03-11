@@ -1,7 +1,7 @@
 ---
 name: fix-ci
 description: "Diagnose and fix failed GitHub Actions workflow runs on the current branch. CIが落ちた、テストが通らない時に使用。GitHub Actionsの失敗を診断して修正。"
-allowed-tools: Task, AskUserQuestion, Bash, Read, Edit, Write, Glob, Grep
+allowed-tools: Agent, AskUserQuestion, Bash, Read, Edit, Write, Glob, Grep
 argument-hint: "[run-id or workflow-name to target specific run]"
 disable-model-invocation: true
 ---
@@ -12,9 +12,9 @@ Diagnose failed GitHub Actions workflow runs, identify the root cause, propose a
 
 ## Instructions
 
-### Phase 1: Data Collection (use Task with subagent)
+### Phase 1: Data Collection (use Agent with subagent)
 
-Call the Task tool with:
+Call the Agent tool with:
 - subagent_type: "custom"
 - agent: "collect-ci-logs"
 - description: "collect CI failure logs"
@@ -24,11 +24,11 @@ The subagent will return collected failure data (or an error/status).
 
 ---
 
-### Phase 2: Hypothesis Formation (use Task with general-purpose subagent)
+### Phase 2: Hypothesis Formation (use Agent with general-purpose subagent)
 
 If Phase 1 returned an error status (`GH_AUTH_REQUIRED`, `NO_REPO`, `NO_REMOTE`, `NO_FAILED_RUNS`, `RUN_NOT_FOUND`), display the message to the user and stop. Do NOT proceed to Phase 2.
 
-Call the Task tool with:
+Call the Agent tool with:
 - subagent_type: "general-purpose"
 - description: "analyze CI failure cause"
 - prompt: Read the file `~/.claude/skills/fix-ci/prompts/analyze-failure.md` and use its content as the subagent prompt. Embed the entire Phase 1 output as `CI Failure Data` and the user hint (if any) as `Additional context from user`.
@@ -103,9 +103,9 @@ Use AskUserQuestion:
 
 ---
 
-### Phase 4: Fix Plan Creation (use Task with general-purpose subagent)
+### Phase 4: Fix Plan Creation (use Agent with general-purpose subagent)
 
-Call the Task tool with:
+Call the Agent tool with:
 - subagent_type: "general-purpose"
 - description: "create CI fix plan"
 - prompt: Read the file `~/.claude/skills/fix-ci/prompts/create-fix-plan.md` and use its content as the subagent prompt. Embed the approved hypothesis data and Phase 1 output into the appropriate placeholders.

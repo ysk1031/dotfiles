@@ -1,7 +1,7 @@
 ---
 name: commit
 description: "Generate and execute git commits with Conventional Commits format for staged changes. 変更をコミットしたい時に使用。Conventional Commits形式で生成。"
-allowed-tools: Task, AskUserQuestion, Bash
+allowed-tools: Agent, AskUserQuestion, Bash
 argument-hint: "[--force/-f to skip granularity check] [optional commit message hint]"
 ---
 
@@ -11,9 +11,9 @@ Generate a commit message for staged changes and let the user review/edit before
 
 ## Instructions
 
-### Phase 1: Analyze Changes (use Task with subagent)
+### Phase 1: Analyze Changes (use Agent with subagent)
 
-Call the Task tool with:
+Call the Agent tool with:
 - subagent_type: "custom"
 - agent: "analyze-commit-changes"
 - description: "analyze staged changes"

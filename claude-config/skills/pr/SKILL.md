@@ -1,7 +1,7 @@
 ---
 name: pr
 description: "Create a GitHub Pull Request with auto-generated title and description from branch changes. PRを作りたい時に使用。タイトルと説明文を自動生成。"
-allowed-tools: Task, AskUserQuestion, Bash
+allowed-tools: Agent, AskUserQuestion, Bash
 argument-hint: "[base-branch to specify target branch] [--draft to create as draft PR]"
 ---
 
@@ -11,9 +11,9 @@ Generate a PR title and description from current branch changes, let the user re
 
 ## Instructions
 
-### Phase 1: Analyze Changes (use Task with subagent)
+### Phase 1: Analyze Changes (use Agent with subagent)
 
-Call the Task tool with:
+Call the Agent tool with:
 - subagent_type: "custom"
 - agent: "analyze-pr-branch"
 - description: "analyze branch changes for PR"

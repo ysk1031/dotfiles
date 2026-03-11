@@ -1,7 +1,7 @@
 ---
 name: implement
 description: "Execute an approved plan step by step with continuous validation and checklist tracking. 計画ファイル（plan.md）に沿って実装したい時に使用。"
-allowed-tools: Task, AskUserQuestion, Bash, Read, Edit, Write, Glob, Grep
+allowed-tools: Agent, AskUserQuestion, Bash, Read, Edit, Write, Glob, Grep
 argument-hint: "[plan file path, default: 'plan.md'] [--steps '1,3,5' to run specific steps only]"
 disable-model-invocation: true
 ---
@@ -12,9 +12,9 @@ Execute an approved implementation plan from start to finish. Read the plan, imp
 
 ## Instructions
 
-### Phase 1: Plan Loading & Tooling Detection (use Task with subagent)
+### Phase 1: Plan Loading & Tooling Detection (use Agent with subagent)
 
-Call the Task tool with:
+Call the Agent tool with:
 - subagent_type: "custom"
 - agent: "load-impl-plan"
 - description: "load plan and detect tooling"

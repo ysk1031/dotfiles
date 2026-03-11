@@ -1,7 +1,7 @@
 ---
 name: research
 description: "Deep codebase investigation that produces a structured research document before planning or implementation. コードベースを調査して、仕組みを理解したい、既存コードを把握したい時に使用。"
-allowed-tools: Task, AskUserQuestion, Bash, Read, Write, Glob, Grep
+allowed-tools: Agent, AskUserQuestion, Bash, Read, Write, Glob, Grep
 argument-hint: "[topic, feature name, or file path] [--scope 'broad'|'focused'] [--output 'filename']"
 disable-model-invocation: true
 ---
@@ -12,9 +12,9 @@ Deeply investigate a codebase topic, feature, or module and produce a structured
 
 ## Instructions
 
-### Phase 1: Scope Determination (use Task with subagent)
+### Phase 1: Scope Determination (use Agent with subagent)
 
-Call the Task tool with:
+Call the Agent tool with:
 - subagent_type: "custom"
 - agent: "analyze-research-scope"
 - description: "determine research scope"
@@ -22,7 +22,7 @@ Call the Task tool with:
 
 ---
 
-### Phase 2: Deep Investigation (use Task with general-purpose subagent)
+### Phase 2: Deep Investigation (use Agent with general-purpose subagent)
 
 If Phase 1 returned an error status (`NO_TOPIC`), display the message to the user and stop.
 
@@ -36,7 +36,7 @@ If Phase 1 returned `ENTRY_POINT_COUNT: 0`, use AskUserQuestion to ask the user 
 If "キーワードを変更": Re-run Phase 1 with the new keyword.
 If "キャンセル": Print "調査を終了しました。" and stop.
 
-Otherwise, call the Task tool with:
+Otherwise, call the Agent tool with:
 - subagent_type: "general-purpose"
 - description: "deep codebase investigation"
 - prompt: Read the file `~/.claude/skills/research/prompts/investigate.md` and use its content as the subagent prompt. Embed the entire Phase 1 output as `Scope Data` and the TOPIC as `Investigation Topic`.

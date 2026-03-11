@@ -1,7 +1,7 @@
 ---
 name: plan
 description: "Generate a detailed implementation plan with human annotation cycles for iterative refinement. 設計を考えたい、実装前に計画を練りたい時に使用。"
-allowed-tools: Task, AskUserQuestion, Bash, Read, Write, Glob, Grep
+allowed-tools: Agent, AskUserQuestion, Bash, Read, Write, Glob, Grep
 argument-hint: "[task description] [--research 'research-file.md'] [--output 'filename']"
 disable-model-invocation: true
 ---
@@ -12,9 +12,9 @@ Generate a detailed implementation plan for a task, then iterate on it through h
 
 ## Instructions
 
-### Phase 1: Context Gathering (use Task with subagent)
+### Phase 1: Context Gathering (use Agent with subagent)
 
-Call the Task tool with:
+Call the Agent tool with:
 - subagent_type: "custom"
 - agent: "gather-plan-context"
 - description: "gather planning context"
@@ -22,7 +22,7 @@ Call the Task tool with:
 
 ---
 
-### Phase 2: Plan Generation (use Task with general-purpose subagent)
+### Phase 2: Plan Generation (use Agent with general-purpose subagent)
 
 If Phase 1 returned `NO_TASK`, display the message and stop.
 
@@ -35,10 +35,10 @@ Use AskUserQuestion:
   2. label: "パスを変更", description: "別のファイルを指定します（Otherで入力）"
   3. label: "キャンセル", description: "計画作成を終了します"
 
-Call the Task tool with:
+Call the Agent tool with:
 - subagent_type: "general-purpose"
 - description: "generate implementation plan"
-- prompt: Read the file `~/.claude/skills/plan/prompts/generate-plan.md` and use its content as the subagent prompt. Embed the Phase 1 output as `Context Data`, the TASK as `Task Description`, and if a research file exists, instruct the subagent to read it.
+- prompt: Read the file `~/.claude/skills/plan/prompts/generate-plan.md` and use its content as the subagent prompt. Embed the Phase 1 output as `Context Data`, the TASK as `Agent Description`, and if a research file exists, instruct the subagent to read it.
 
 ---
 
@@ -114,7 +114,7 @@ Use AskUserQuestion:
 
 **If "注釈を反映"**:
 1. Read the plan file with the Read tool
-2. Call the Task tool to regenerate the plan:
+2. Call the Agent tool to regenerate the plan:
    - subagent_type: "general-purpose"
    - description: "revise plan with annotations"
    - prompt: Read the file `~/.claude/skills/plan/prompts/revise-plan.md` and use its content as the subagent prompt. Embed the annotated plan file content as `Annotated Plan` and the original context from Phase 1 as `Context Data`.

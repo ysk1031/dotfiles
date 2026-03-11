@@ -1,7 +1,7 @@
 ---
 name: weekly-report
 description: "Aggregate GitHub + Claude Code activity into a structured weekly review report. 今週何をやったか振り返りたい時に使用。GitHub活動とClaude Codeセッションを集計。"
-allowed-tools: Task, AskUserQuestion, Bash
+allowed-tools: Agent, AskUserQuestion, Bash
 argument-hint: "[--repos owner/repo1,repo2 to specify repositories] [--days N to set lookback period] [--output path to set output file]"
 disable-model-invocation: true
 ---
@@ -12,9 +12,9 @@ Generate a review report aggregating development activity (GitHub + Claude Code 
 
 ## Instructions
 
-### Phase 1: Data Collection (use Task with subagent)
+### Phase 1: Data Collection (use Agent with subagent)
 
-Call the Task tool with:
+Call the Agent tool with:
 - subagent_type: "custom"
 - agent: "collect-weekly-activity"
 - description: "collect weekly dev activity data"
