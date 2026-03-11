@@ -1,6 +1,7 @@
 ---
 name: load-impl-plan
 model: sonnet
+maxTurns: 20
 description: "Load implementation plan file and detect available validation tools. 計画ファイル読み込みとバリデーションツール検出。"
 tools: Bash, Read, Glob
 ---

@@ -1,6 +1,7 @@
 ---
 name: collect-weekly-activity
 model: haiku
+maxTurns: 10
 description: "Collect GitHub and Claude Code activity data for weekly reports. 週次活動データの収集。"
 tools: Bash, Read
 ---

@@ -1,6 +1,7 @@
 ---
 name: analyze-commit-changes
 model: sonnet
+maxTurns: 20
 description: "Analyze staged git changes and generate a Conventional Commits message. ステージ変更を分析しコミットメッセージ生成。"
 tools: Bash, Read
 ---

@@ -1,6 +1,7 @@
 ---
 name: analyze-research-scope
 model: sonnet
+maxTurns: 20
 description: "Determine research scope and identify entry points. 調査スコープ決定とエントリーポイント特定。"
 tools: Bash, Read, Glob, Grep
 ---

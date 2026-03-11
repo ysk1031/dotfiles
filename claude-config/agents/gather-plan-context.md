@@ -1,6 +1,7 @@
 ---
 name: gather-plan-context
 model: haiku
+maxTurns: 10
 description: "Gather project context for implementation planning. 実装計画のためのプロジェクトコンテキスト収集。"
 tools: Bash, Read
 ---

@@ -1,6 +1,7 @@
 ---
 name: analyze-pr-branch
 model: sonnet
+maxTurns: 20
 description: "Analyze branch changes and generate PR title and description. ブランチ変更を分析しPRタイトル・説明文生成。"
 tools: Bash, Read
 ---
