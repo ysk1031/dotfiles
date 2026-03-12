@@ -1,8 +1,8 @@
 ---
 name: implement
-description: "Execute an approved plan step by step with continuous validation and checklist tracking. 計画ファイル（plan.md）に沿って実装したい時に使用。"
+description: "Execute an approved design/plan step by step with continuous validation and checklist tracking. 設計ファイル（design-*.md）に沿って実装したい時に使用。"
 allowed-tools: Agent, AskUserQuestion, Bash, Read, Edit, Write, Glob, Grep
-argument-hint: "[plan file path, default: 'plan.md'] [--steps '1,3,5' to run specific steps only]"
+argument-hint: "<design file path> [--steps '1,3,5' to run specific steps only]"
 disable-model-invocation: true
 ---
 

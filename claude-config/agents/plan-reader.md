@@ -2,7 +2,7 @@
 name: plan-reader
 model: sonnet
 maxTurns: 20
-description: "Implementation plan reader. Loads plan files, parses checklists, and detects available validation tools. 実装計画読み取り係。"
+description: "Implementation plan reader. Loads plan files, parses checklists, and detects available validation tools. 実装計画/設計読み取り係。"
 tools: Bash, Read, Glob
 ---
 
@@ -23,7 +23,7 @@ Read `~/.claude/skills/develop/references/schemas.md` to understand the output f
 **Step 1: Parse Arguments**
 
 Extract:
-- `PLAN_FILE`: Path to plan file. Default: `plan.md`. If argument is a path ending in `.md`, use it.
+- `PLAN_FILE`: Path to design/plan file. REQUIRED — if empty, return the NO_PLAN error below. If argument is a path ending in `.md`, use it.
 - `STEPS`: Comma-separated step numbers from `--steps` flag (optional). Example: `--steps 1,3,5`
 
 **Step 2: Load Plan File**
@@ -39,13 +39,14 @@ fi
 
 If not found, check for alternatives:
 ```bash
-ls plan*.md 2>/dev/null | head -5
+ls design-*.md plan*.md 2>/dev/null | head -5
 ```
 
 If not found at all, return:
 ```
 STATUS: NO_PLAN
-計画ファイルが見つかりません。先に /plan でファイルを作成するか、パスを指定してください。
+設計ファイルが見つかりません。ファイルパスを指定してください。例: /implement design-auth-feature.md
+先に /design でファイルを作成するか、パスを指定してください。
 利用可能なファイル: <list or なし>
 ```
 

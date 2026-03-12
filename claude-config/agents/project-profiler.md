@@ -27,7 +27,7 @@ Extract:
 - `TASK`: The task description. REQUIRED — if empty, return:
 ```
 STATUS: NO_TASK
-タスクの説明を指定してください。例: /plan "ユーザー認証機能の追加"
+タスクの説明を指定してください。例: /design "ユーザー認証機能の追加"
 ```
 - `RESEARCH_FILE`: Path from `--research` flag (optional)
 - `OUTPUT`: Custom output filename from `--output` flag (optional)
