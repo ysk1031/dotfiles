@@ -24,10 +24,10 @@ Call the Agent tool with:
 
 ### Phase 2: Deep Investigation (use Agent with general-purpose subagent)
 
-If Phase 1 returned an error status (`NO_TOPIC`), display the message to the user and stop.
+If Phase 1 returned an error status (`"status": "NO_TOPIC"`), display the `message` field to the user and stop.
 
-If Phase 1 returned `ENTRY_POINT_COUNT: 0`, use AskUserQuestion to ask the user for clarification:
-- question: "`<topic>` に関連するファイルが見つかりませんでした。キーワードやパスを変えて再試行しますか？"
+If Phase 1 returned `"entry_point_count": 0`, use AskUserQuestion to ask the user for clarification:
+- question: "`<topic from Phase 1 output>` に関連するファイルが見つかりませんでした。キーワードやパスを変えて再試行しますか？"
 - header: "Research"
 - options:
   1. label: "キーワードを変更", description: "別のキーワードで検索します（Otherで入力）"
@@ -45,16 +45,16 @@ Otherwise, call the Agent tool with:
 
 ### Phase 3: User Review (main agent)
 
-**STATUS: OK from Phase 2**:
+**`"status": "OK"` from Phase 2**:
 
-Display the research summary to the user:
+Display the research summary to the user, using JSON fields:
 
 ```
 ## 調査結果サマリー
 
 **トピック**: <topic>
-**調査範囲**: <scope>
-**調査ファイル数**: <count>
+**調査範囲**: <scope from Phase 1>
+**調査ファイル数**: <files_investigated>
 
 ### 主要な発見
 <key findings summary — 3-5 bullet points>
@@ -82,7 +82,7 @@ Use AskUserQuestion:
 Write the research document:
 
 1. Determine filename:
-   - If `OUTPUT` was specified in Phase 1: use that filename
+   - If Phase 1's `output` field is non-empty: use that filename
    - Otherwise: `research-<sanitized-topic>.md` (sanitize: lowercase, replace spaces/special chars with hyphens)
 
 2. Write the file using the Write tool. The file MUST include these sections:

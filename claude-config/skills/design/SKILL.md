@@ -24,9 +24,9 @@ Call the Agent tool with:
 
 ### Phase 2: Plan Generation (use Agent with general-purpose subagent)
 
-If Phase 1 returned `NO_TASK`, display the message and stop.
+If Phase 1 returned `"status": "NO_TASK"`, display the `message` field and stop.
 
-If Phase 1 returned `RESEARCH: NOT_FOUND` (file specified but missing):
+If Phase 1 returned `"research": "NOT_FOUND"` (file specified but missing):
 Use AskUserQuestion:
 - question: "指定された調査ファイル `<path>` が見つかりません。調査ファイルなしで計画を作成しますか？"
 - header: "Plan"
@@ -49,10 +49,18 @@ This is the core loop. It repeats until the user approves the plan.
 **Step 1: Write Plan File**
 
 Determine filename:
-- If `OUTPUT` was specified: use that
+- If Phase 1's `output` field is not `"NONE"`: use that
 - Otherwise: `design-<sanitized-task>.md` (sanitize the TASK: lowercase, replace spaces and special characters with hyphens, remove consecutive hyphens)
 
-Write the plan from Phase 2 output using the Write tool. The plan MUST follow this structure:
+Convert the Phase 2 JSON output to Markdown and write using the Write tool. Map JSON fields to Markdown sections as follows:
+- `background` → `## 背景`
+- `goal` → `## ゴール`
+- `steps` array → `## 実装ステップ` (each step item → `### N. <step.title>` with `step.target`, `step.action`, `step.changes`, `step.reason`, `step.detail`)
+- `testing` → `## テスト計画`
+- `risks` array → `## リスクと考慮事項` (each → `- <risk.risk>: <risk.mitigation>`)
+- `checklist` array → `## チェックリスト` (each → `- [ ] <item>`)
+
+The plan MUST follow this structure:
 
 ```markdown
 # Plan: <task description>

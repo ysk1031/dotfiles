@@ -24,7 +24,7 @@ Call the Agent tool with:
 
 ### Phase 2: Scope Confirmation (main agent)
 
-If Phase 1 returned `NO_PLAN`, display the message and stop.
+If Phase 1 returned `"status": "NO_PLAN"`, display the `message` field and stop.
 
 1. Read the full plan file with the Read tool.
 2. Extract the implementation steps and checklist.
@@ -36,13 +36,13 @@ Display the implementation scope:
 
 **ファイル**: <plan file>
 **ステップ数**: 残り <remaining> / 全 <total>
-**検出ツール**: type check: <yes/no>, lint: <yes/no>, test: <yes/no>
+**検出ツール**: type check: <tooling.typecheck != "NONE" ? yes : no>, lint: <tooling.lint != "NONE" ? yes : no>, test: <tooling.test != "NONE" ? yes : no>
 
 ### チェックリスト
 <display checklist with current status>
 ```
 
-If `SELECTED_STEPS` is not ALL, show only the selected steps.
+If `selected_steps` is not `"ALL"`, show only the selected steps.
 
 Use AskUserQuestion:
 - question: "実装を開始しますか？"

@@ -66,7 +66,7 @@ Instructions section with the following overrides:
 1. **Phase 1 (Scope Determination)**: Apply these adjustments to the subagent prompt:
    - `SCOPE`: Always set to `"broad"` — ignore `--scope` flag parsing
    - `OUTPUT`: Always set to empty — Phase R determines filename automatically
-   - `NO_TOPIC` error message example: Use `/develop "認証フロー"` (not `/research`)
+   - `"status": "NO_TOPIC"` error `message` example: Use `/develop "認証フロー"` (not `/research`)
 2. **Phase 3 (User Review)**: Skip entirely — do NOT ask for user review
 3. **Phase 4 (Output Generation)**: Execute automatically after Phase 2 completes
 
@@ -88,7 +88,7 @@ Instructions section with the following overrides:
 
 **Overrides**:
 1. **Phase 1 (Context Gathering)**: Apply these adjustments to the subagent prompt:
-   - `TASK`: Already validated as non-empty — skip the NO_TASK validation
+   - `TASK`: Already validated as non-empty — skip the `"status": "NO_TASK"` validation
    - `RESEARCH_FILE`: Use the resolved value from above
    - `OUTPUT`: Use the `$OUTPUT` value (default: `design-<sanitized-task>.md`)
 2. **Phase 1 Error Handling** (`--from design` with missing research file):
@@ -113,8 +113,8 @@ Instructions section with the following overrides:
 **Overrides**:
 1. **Phase 1 (Plan Loading)**: Apply these adjustments to the subagent prompt:
    - `PLAN_FILE`: Use `OUTPUT` value (default: `design-<sanitized-task>.md`) — skip argument parsing
-   - `SELECTED_STEPS`: Always ALL — omit from return result
-   - `NO_PLAN` error message: Use shorter version: `計画ファイルが見つかりません。`
+   - `selected_steps`: Always `"ALL"` — omit from return result
+   - `"status": "NO_PLAN"` error `message`: Use shorter version: `計画ファイルが見つかりません。`
 2. **Phase 2 (Scope Confirmation)**: Skip entirely — do NOT ask for user
    confirmation. Auto-execute all steps.
 3. **Phase 3 → renumbered as the implementation loop**: Execute all remaining
@@ -132,8 +132,8 @@ Each phase's specific error handling is defined in the referenced skill's SKILL.
 | Situation | Phase | Response |
 |-----------|-------|----------|
 | Task description empty | Argument parsing | Display error message and stop |
-| Topic not specified in Phase R | Phase R (via `/research`) | Display error message and stop (fallback) |
-| 0 entry points in Phase R | Phase R (via `/research`) | AskUserQuestion: change keyword or cancel |
+| `"status": "NO_TOPIC"` in Phase R | Phase R (via `/research`) | Display `message` field and stop (fallback) |
+| `"entry_point_count": 0` in Phase R | Phase R (via `/research`) | AskUserQuestion: change keyword or cancel |
 | Research file not found with `--from design` | Phase D (override) | AskUserQuestion: continue without / change path / cancel |
 | Cancel during annotation cycle | Phase D (override) | Display "開発を終了しました。" and stop entire pipeline |
 | Plan file not found with `--from implement` | Argument parsing | Display error message + candidates and stop |

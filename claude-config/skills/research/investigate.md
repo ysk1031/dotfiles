@@ -60,70 +60,58 @@ Note:
 
 ### Step 6: Compile Research Report
 
-Return your findings in this EXACT format:
+Return your output as a JSON code block.
 
-```
-STATUS: OK
-TOPIC: <topic>
-FILES_INVESTIGATED: <count>
-
-=== OVERVIEW ===
-<2-3 sentence overview of the topic and key takeaway>
-
-=== ARCHITECTURE ===
-<Description of the architecture relevant to this topic>
-<Component relationships, layers, boundaries>
-<Key design decisions and their rationale>
-
-=== COMPONENTS ===
-
---- COMPONENT: <name> ---
-FILE: <path>
-ROLE: <what it does>
-DEPENDS_ON:
-- <dependency 1> (<path>): <why>
-- <dependency 2> (<path>): <why>
-DEPENDED_BY:
-- <dependent 1> (<path>): <how it uses this component>
-KEY_FUNCTIONS:
-- <function1>: <what it does>
-- <function2>: <what it does>
-NOTES: <any important observations>
-
-(repeat for each significant component)
-
-=== DATA_FLOW ===
-<Step-by-step description of how data flows through the system>
-1. <entry point> → <what happens>
-2. <next step> → <what happens>
-...
-
-=== PATTERNS ===
-- <pattern 1>: <where and how it's used>
-- <pattern 2>: <where and how it's used>
-
-=== RISKS ===
-- <risk 1>: <description and affected files>
-- <risk 2>: <description and affected files>
-
-=== FILE_LIST ===
-GROUP: <role description>
-- <file path 1>
-- <file path 2>
-
-GROUP: <role description>
-- <file path 3>
+Success:
+```json
+{
+  "status": "OK",
+  "topic": "認証フロー",
+  "files_investigated": 12,
+  "overview": "認証はJWTベースで実装されており、middlewareでトークン検証を行う。セッション管理はRedisに委譲されている。",
+  "architecture": "3層アーキテクチャ: Controller → Service → Repository。認証はmiddlewareとしてController層の前段に配置。",
+  "components": [
+    {
+      "name": "AuthMiddleware",
+      "file": "src/auth/middleware.ts",
+      "role": "リクエストのJWTトークンを検証し、ユーザー情報をコンテキストに注入する",
+      "depends_on": [
+        { "name": "TokenService", "path": "src/auth/token.ts", "why": "JWT検証ロジック" }
+      ],
+      "depended_by": [
+        { "name": "Router", "path": "src/api/routes.ts", "how": "全認証必須エンドポイントで使用" }
+      ],
+      "key_functions": [
+        { "name": "authenticate", "description": "JWTトークンを検証してユーザーを返す" }
+      ],
+      "notes": "エラー時は401を返す"
+    }
+  ],
+  "data_flow": [
+    "1. クライアントがAuthorizationヘッダーにJWTを付与してリクエスト",
+    "2. AuthMiddlewareがトークンを検証",
+    "3. 検証成功時、req.userにユーザー情報を格納",
+    "4. Controllerがreq.userを参照して処理を実行"
+  ],
+  "patterns": ["Repository パターン: データアクセスはRepository層に集約", "Middleware チェーン: Express middlewareで横断的関心事を処理"],
+  "risks": ["JWT秘密鍵がハードコードされている (src/config.ts:15)", "トークン失効チェックが未実装"],
+  "file_list": [
+    { "group": "認証コア", "files": ["src/auth/middleware.ts", "src/auth/token.ts"] },
+    { "group": "テスト", "files": ["tests/auth.test.ts"] }
+  ]
+}
 ```
 
 If the investigation is inconclusive or the topic is too broad:
-```
-STATUS: PARTIAL
-TOPIC: <topic>
-FINDINGS: <what was determined>
-UNCLEAR: <what remains unclear>
-SUGGESTED_NARROWING:
-- <suggestion 1>
-- <suggestion 2>
+```json
+{
+  "status": "PARTIAL",
+  "topic": "認証フロー",
+  "files_investigated": 5,
+  "findings": "認証ミドルウェアの基本構造は把握できたが、OAuth連携部分は別モジュールに分離されている",
+  "unclear": "OAuth2.0のトークンリフレッシュフローの詳細",
+  "suggested_narrowing": "OAuth連携に絞って /research src/auth/oauth/ で再調査を推奨"
+}
 ```
 
 ---

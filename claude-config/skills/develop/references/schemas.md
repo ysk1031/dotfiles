@@ -1,229 +1,378 @@
 # Pipeline Schemas
 
-Subagent I/O format definitions for the pipeline skills (research, design, implement).
+JSON Schema definitions for the pipeline skill agent outputs (research, design, implement).
+
+See each agent file and guideline for inline JSON examples.
 
 ---
 
 ## research-scope-output
 
-Output format for the research-planner agent (Phase 1 of /research).
+JSON Schema for research-planner agent output (Phase 1 of /research).
 
+```json
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "required": ["status"],
+  "properties": {
+    "status": {
+      "type": "string",
+      "enum": ["OK", "NO_TOPIC"],
+      "description": "OK: topic identified, NO_TOPIC: topic unclear"
+    },
+    "topic": { "type": "string", "description": "Topic string for analysis" },
+    "scope": {
+      "type": "string",
+      "enum": ["broad", "focused"],
+      "description": "Investigation scope"
+    },
+    "output": { "type": "string", "description": "Output filename (empty if not specified)" },
+    "claude_md": {
+      "type": "string",
+      "enum": ["EXISTS", "NOT_FOUND"],
+      "description": "Whether CLAUDE.md exists"
+    },
+    "project_type": { "type": "string", "description": "Detected project type" },
+    "directory_structure": { "type": "string", "description": "Project directory structure (top 2 levels)" },
+    "entry_points": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "List of file paths as investigation starting points"
+    },
+    "entry_point_count": { "type": "integer", "description": "Number of entry points" },
+    "message": { "type": "string", "description": "User-facing message (for NO_TOPIC status)" }
+  }
+}
 ```
-STATUS: OK | NO_TOPIC
-TOPIC: <string>
-SCOPE: broad | focused
-OUTPUT: <filename or empty>
-CLAUDE_MD: EXISTS | NOT_FOUND
-PROJECT_TYPE: <string>
-DIRECTORY_STRUCTURE:
-<structure output>
 
-ENTRY_POINTS:
-<file1>
-<file2>
-...
-
-ENTRY_POINT_COUNT: <number>
-```
-
-**Fields:**
-- `STATUS` — Scope analysis result. `OK`: topic identified, `NO_TOPIC`: topic unclear
-- `TOPIC` — Topic string for analysis
-- `SCOPE` — Investigation scope. `broad`: wide-ranging investigation, `focused`: investigation narrowed to a specific area
-- `OUTPUT` — Output filename (empty if not specified)
-- `CLAUDE_MD` — Whether CLAUDE.md exists
-- `PROJECT_TYPE` — Detected project type
-- `DIRECTORY_STRUCTURE` — Project directory structure (top 2 levels)
-- `ENTRY_POINTS` — List of file paths as investigation starting points
-- `ENTRY_POINT_COUNT` — Number of entry points
+### Status variants
+- `OK`: includes `topic`, `scope`, `output`, `claude_md`, `project_type`, `directory_structure`, `entry_points`, `entry_point_count`
+- `NO_TOPIC`: includes `message`
 
 ---
 
 ## research-investigation-output
 
-Output format for the research investigation agent (Phase 2 of /research).
+JSON Schema for research investigation guideline output (Phase 2 of /research).
 
+```json
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "required": ["status"],
+  "properties": {
+    "status": {
+      "type": "string",
+      "enum": ["OK", "PARTIAL"],
+      "description": "OK: investigation complete, PARTIAL: partial results"
+    },
+    "topic": { "type": "string", "description": "Investigation topic" },
+    "files_investigated": { "type": "integer", "description": "Number of files investigated" },
+    "overview": { "type": "string", "description": "Overview (2-3 sentences)" },
+    "architecture": { "type": "string", "description": "Architecture description" },
+    "components": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": { "type": "string" },
+          "file": { "type": "string" },
+          "role": { "type": "string" },
+          "depends_on": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "name": { "type": "string" },
+                "path": { "type": "string" },
+                "why": { "type": "string" }
+              }
+            }
+          },
+          "depended_by": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "name": { "type": "string" },
+                "path": { "type": "string" },
+                "how": { "type": "string" }
+              }
+            }
+          },
+          "key_functions": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "name": { "type": "string" },
+                "description": { "type": "string" }
+              }
+            }
+          },
+          "notes": { "type": "string" }
+        }
+      },
+      "description": "Details of major components"
+    },
+    "data_flow": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Data flow steps"
+    },
+    "patterns": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Discovered patterns and conventions"
+    },
+    "risks": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Risks and technical debt"
+    },
+    "file_list": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "group": { "type": "string" },
+          "files": {
+            "type": "array",
+            "items": { "type": "string" }
+          }
+        }
+      },
+      "description": "File list by role"
+    },
+    "findings": { "type": "string", "description": "What was found (when PARTIAL)" },
+    "unclear": { "type": "string", "description": "Unclear points (when PARTIAL)" },
+    "suggested_narrowing": { "type": "string", "description": "Suggestions for narrowing scope (when PARTIAL)" }
+  }
+}
 ```
-STATUS: OK | PARTIAL
-TOPIC: <string>
-FILES_INVESTIGATED: <number>
 
-=== OVERVIEW ===
-<2-3 sentence overview>
-
-=== ARCHITECTURE ===
-<architecture description>
-
-=== COMPONENTS ===
-
---- COMPONENT: <name> ---
-FILE: <path>
-ROLE: <description>
-DEPENDS_ON:
-- <dependency> (<path>): <why>
-DEPENDED_BY:
-- <dependent> (<path>): <how>
-KEY_FUNCTIONS:
-- <function>: <description>
-NOTES: <observations>
-
-=== DATA_FLOW ===
-1. <entry> → <what happens>
-2. <next> → <what happens>
-
-=== PATTERNS ===
-- <pattern>: <where and how>
-
-=== RISKS ===
-- <risk>: <description and affected files>
-
-=== FILE_LIST ===
-GROUP: <role>
-- <file path>
-```
-
-**Fields:**
-- `STATUS` — `OK`: investigation complete, `PARTIAL`: partial results (e.g., topic too broad)
-- `TOPIC` — Investigation topic
-- `FILES_INVESTIGATED` — Number of files investigated
-- `OVERVIEW` — Overview (2-3 sentences)
-- `ARCHITECTURE` — Architecture description
-- `COMPONENTS` — Details of major components (multiple)
-- `DATA_FLOW` — Data flow description
-- `PATTERNS` — Discovered patterns and conventions
-- `RISKS` — Risks and technical debt
-- `FILE_LIST` — File list by role
-
-Additional fields when PARTIAL:
-- `FINDINGS` — What was found
-- `UNCLEAR` — Unclear points
-- `SUGGESTED_NARROWING` — Suggestions for narrowing scope
+### Status variants
+- `OK`: includes all data fields (`topic`, `files_investigated`, `overview`, `architecture`, `components`, `data_flow`, `patterns`, `risks`, `file_list`)
+- `PARTIAL`: includes `topic`, `files_investigated`, `findings`, `unclear`, `suggested_narrowing`
 
 ---
 
 ## design-context-output
 
-Output format for the project-profiler agent (Phase 1 of /design).
+JSON Schema for project-profiler agent output (Phase 1 of /design).
 
+```json
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "required": ["status"],
+  "properties": {
+    "status": {
+      "type": "string",
+      "enum": ["OK", "NO_TASK"],
+      "description": "OK: context collection successful, NO_TASK: task not specified"
+    },
+    "task": { "type": "string", "description": "Task description" },
+    "research_file": { "type": "string", "description": "Path to the specified research file ('NONE' if not specified)" },
+    "research": {
+      "type": "string",
+      "enum": ["EXISTS", "NOT_FOUND", "NONE"],
+      "description": "Research file status"
+    },
+    "available_research": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "List of research-*.md files in the current directory"
+    },
+    "output": { "type": "string", "description": "Output filename ('NONE' if not specified)" },
+    "claude_md": {
+      "type": "string",
+      "enum": ["EXISTS", "NOT_FOUND"],
+      "description": "Whether CLAUDE.md exists"
+    },
+    "project_type": { "type": "string", "description": "Detected project type" },
+    "directory_structure": { "type": "string", "description": "Directory structure" },
+    "recent_commits": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Last 5 commits"
+    },
+    "message": { "type": "string", "description": "User-facing message (for NO_TASK status)" }
+  }
+}
 ```
-STATUS: OK | NO_TASK
-TASK: <string>
-RESEARCH_FILE: <path or NONE>
-RESEARCH: EXISTS | NOT_FOUND | NONE
-AVAILABLE_RESEARCH: <list or NONE>
-OUTPUT: <filename or NONE>
-CLAUDE_MD: EXISTS | NOT_FOUND
-PROJECT_TYPE: <string>
-DIRECTORY_STRUCTURE:
-<structure>
 
-RECENT_COMMITS:
-<last 5 commits>
-```
-
-**Fields:**
-- `STATUS` — `OK`: context collection successful, `NO_TASK`: task not specified
-- `TASK` — Task description
-- `RESEARCH_FILE` — Path to the specified research file (NONE if not specified)
-- `RESEARCH` — Research file status
-- `AVAILABLE_RESEARCH` — List of research-*.md files in the current directory
-- `OUTPUT` — Output filename (NONE if not specified)
-- `CLAUDE_MD` — Whether CLAUDE.md exists
-- `PROJECT_TYPE` — Detected project type
-- `DIRECTORY_STRUCTURE` — Directory structure
-- `RECENT_COMMITS` — Last 5 commits
+### Status variants
+- `OK`: includes all data fields (`task`, `research_file`, `research`, `available_research`, `output`, `claude_md`, `project_type`, `directory_structure`, `recent_commits`)
+- `NO_TASK`: includes `message`
 
 ---
 
 ## design-generation-output
 
-Output format for the plan generation agent (Phase 2 of /design). Guidelines: design/generate-plan.md.
+JSON Schema for plan generation guideline output (Phase 2 of /design). Guidelines: design/generate-plan.md.
 
+```json
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "required": ["status"],
+  "properties": {
+    "status": {
+      "type": "string",
+      "const": "OK",
+      "description": "Always OK"
+    },
+    "background": { "type": "string", "description": "Background description of the task" },
+    "goal": { "type": "string", "description": "Definition of success (specific, measurable outcomes)" },
+    "steps": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["number", "title", "target", "action", "changes", "reason", "detail"],
+        "properties": {
+          "number": { "type": "integer", "description": "Step number" },
+          "title": { "type": "string", "description": "Step title" },
+          "target": { "type": "string", "description": "Target file path" },
+          "action": {
+            "type": "string",
+            "enum": ["create", "modify", "delete"],
+            "description": "Operation type"
+          },
+          "changes": { "type": "string", "description": "Specific changes to make" },
+          "reason": { "type": "string", "description": "Why this change is needed" },
+          "detail": { "type": "string", "description": "Detailed description" }
+        }
+      },
+      "description": "Implementation steps"
+    },
+    "testing": { "type": "string", "description": "Test plan" },
+    "risks": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "risk": { "type": "string", "description": "Risk description" },
+          "mitigation": { "type": "string", "description": "Mitigation strategy" }
+        }
+      },
+      "description": "Risks and mitigations"
+    },
+    "checklist": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Checklist items (e.g., 'Step 1: brief description')"
+    }
+  }
+}
 ```
-STATUS: OK
-
-=== BACKGROUND ===
-<background description>
-
-=== GOAL ===
-<goal description>
-
-=== STEPS ===
-
---- STEP 1: <title> ---
-TARGET: <file path> (create | modify)
-CHANGES: <specific changes>
-REASON: <why>
-DETAIL:
-<detailed description>
-
-=== TESTING ===
-<verification plan>
-
-=== RISKS ===
-- <risk>: <description and mitigation>
-
-=== CHECKLIST ===
-- [ ] Step 1: <brief>
-- [ ] Step 2: <brief>
-```
-
-**Fields:**
-- `STATUS` — Always `OK`
-- `BACKGROUND` — Background description of the task
-- `GOAL` — Definition of success (specific, measurable outcomes)
-- `STEPS` — Implementation steps (each step includes TARGET, CHANGES, REASON, DETAIL)
-- `TESTING` — Test plan
-- `RISKS` — Risks and mitigations
-- `CHECKLIST` — Checklist
 
 ---
 
 ## design-revision-output
 
-Output format for the plan revision agent (annotation cycle of /design). Guidelines: design/revise-plan.md.
+JSON Schema for plan revision guideline output (annotation cycle of /design). Guidelines: design/revise-plan.md.
 
-Same format as design-generation-output, with the following section prepended:
+Same structure as design-generation-output, with an additional field:
 
+```json
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "required": ["status", "revision_summary"],
+  "properties": {
+    "status": { "type": "string", "const": "OK" },
+    "revision_summary": {
+      "type": "string",
+      "description": "Summary of how each annotation was addressed"
+    },
+    "background": { "type": "string" },
+    "goal": { "type": "string" },
+    "steps": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["number", "title", "target", "action", "changes", "reason", "detail"],
+        "properties": {
+          "number": { "type": "integer" },
+          "title": { "type": "string" },
+          "target": { "type": "string" },
+          "action": { "type": "string", "enum": ["create", "modify", "delete"] },
+          "changes": { "type": "string" },
+          "reason": { "type": "string" },
+          "detail": { "type": "string" }
+        }
+      }
+    },
+    "testing": { "type": "string" },
+    "risks": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "risk": { "type": "string" },
+          "mitigation": { "type": "string" }
+        }
+      }
+    },
+    "checklist": {
+      "type": "array",
+      "items": { "type": "string" }
+    }
+  }
+}
 ```
-=== REVISION_SUMMARY ===
-<changes made, listing each annotation and how it was addressed>
-```
-
-**Additional Fields:**
-- `REVISION_SUMMARY` — Summary of how each annotation was addressed
 
 ---
 
 ## implement-load-output
 
-Output format for the plan-reader agent (Phase 1 of /implement).
+JSON Schema for plan-reader agent output (Phase 1 of /implement).
 
+```json
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "required": ["status"],
+  "properties": {
+    "status": {
+      "type": "string",
+      "enum": ["OK", "NO_PLAN"],
+      "description": "OK: plan loaded successfully, NO_PLAN: plan file not found"
+    },
+    "plan_file": { "type": "string", "description": "Path to the plan file" },
+    "selected_steps": {
+      "type": "string",
+      "description": "Steps to execute (comma-separated or 'ALL')"
+    },
+    "total_steps": { "type": "integer", "description": "Total number of steps" },
+    "completed_steps": { "type": "integer", "description": "Number of completed steps" },
+    "remaining_steps": { "type": "integer", "description": "Number of remaining steps" },
+    "claude_md": {
+      "type": "string",
+      "enum": ["EXISTS", "NOT_FOUND"],
+      "description": "Whether CLAUDE.md exists"
+    },
+    "tooling": {
+      "type": "object",
+      "properties": {
+        "typecheck": { "type": "string", "description": "Type check command (or 'NONE')" },
+        "lint": { "type": "string", "description": "Lint command (or 'NONE')" },
+        "test": { "type": "string", "description": "Test command (or 'NONE')" }
+      },
+      "description": "Detected validation commands"
+    },
+    "checklist": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Checklist lines with line numbers"
+    },
+    "message": { "type": "string", "description": "User-facing message (for NO_PLAN status)" }
+  }
+}
 ```
-STATUS: OK | NO_PLAN
-PLAN_FILE: <path>
-SELECTED_STEPS: <comma-separated numbers or ALL>
-TOTAL_STEPS: <number>
-COMPLETED_STEPS: <number>
-REMAINING_STEPS: <number>
-CLAUDE_MD: EXISTS | NOT_FOUND
 
-TOOLING:
-TYPECHECK: <command or NONE>
-LINT: <command or NONE>
-TEST: <command or NONE>
-
-CHECKLIST:
-<raw checklist lines with line numbers>
-```
-
-**Fields:**
-- `STATUS` — `OK`: plan loaded successfully, `NO_PLAN`: plan file not found
-- `PLAN_FILE` — Path to the plan file
-- `SELECTED_STEPS` — Steps to execute (comma-separated or ALL)
-- `TOTAL_STEPS` — Total number of steps
-- `COMPLETED_STEPS` — Number of completed steps
-- `REMAINING_STEPS` — Number of remaining steps
-- `CLAUDE_MD` — Whether CLAUDE.md exists
-- `TOOLING` — Detected validation commands
-- `CHECKLIST` — Checklist with line numbers
+### Status variants
+- `OK`: includes all data fields (`plan_file`, `selected_steps`, `total_steps`, `completed_steps`, `remaining_steps`, `claude_md`, `tooling`, `checklist`)
+- `NO_PLAN`: includes `message`

@@ -33,51 +33,46 @@ Based on your investigation:
 4. Consider edge cases and error handling
 5. Plan how to test the changes
 
-**Output schema**: See `~/.claude/skills/develop/references/schemas.md#plan-generation-output` for the canonical format.
+**Output schema**: See `~/.claude/skills/develop/references/schemas.md#design-generation-output` for the canonical format.
 
 ### Step 4: Generate the Plan
 
-Return your plan in this EXACT format:
+Return your output as a JSON code block.
 
-```
-STATUS: OK
-
-=== BACKGROUND ===
-<Why this task is needed. Reference research findings if available.>
-
-=== GOAL ===
-<Specific, measurable outcomes that define success>
-
-=== STEPS ===
-
---- STEP 1: <title> ---
-TARGET: <file path> (<create|modify>)
-CHANGES: <specific changes>
-REASON: <why this step is needed>
-DETAIL:
-<detailed description with code structure, function signatures, types, etc.>
-<include code snippets where they clarify the intent>
-
---- STEP 2: <title> ---
-TARGET: <file path> (<create|modify>)
-CHANGES: <specific changes>
-REASON: <why>
-DETAIL:
-<detailed description>
-
-(continue for all steps)
-
-=== TESTING ===
-<How to verify each step and the overall implementation>
-
-=== RISKS ===
-- <risk 1>: <description and mitigation>
-- <risk 2>: <description and mitigation>
-
-=== CHECKLIST ===
-- [ ] Step 1: <brief description>
-- [ ] Step 2: <brief description>
-...
+```json
+{
+  "status": "OK",
+  "background": "現在の認証はセッションベースで実装されているが、マイクロサービス化に伴いJWTベースに移行する必要がある。",
+  "goal": "JWT認証ミドルウェアを実装し、既存の全APIエンドポイントで動作することを確認する。",
+  "steps": [
+    {
+      "number": 1,
+      "title": "JWT型定義の追加",
+      "target": "src/types/auth.ts",
+      "action": "create",
+      "changes": "JWTペイロードとトークンレスポンスの型定義を追加",
+      "reason": "型安全性を確保するため、実装前に型を定義する",
+      "detail": "JwtPayload interface (sub, iat, exp) と TokenResponse interface (access_token, refresh_token, expires_in) を定義する。"
+    },
+    {
+      "number": 2,
+      "title": "認証ミドルウェアの実装",
+      "target": "src/auth/middleware.ts",
+      "action": "create",
+      "changes": "JWTトークン検証ミドルウェアを実装",
+      "reason": "全APIエンドポイントで共通の認証処理が必要",
+      "detail": "Express middleware として実装。Authorization ヘッダーから Bearer トークンを抽出し、jsonwebtoken で検証する。"
+    }
+  ],
+  "testing": "1. npm run test で全テストが通ることを確認\n2. curl でJWT付きリクエストが認証されることを確認",
+  "risks": [
+    { "risk": "既存セッション認証との併存期間が必要", "mitigation": "Feature flagで切り替え可能にする" }
+  ],
+  "checklist": [
+    "Step 1: JWT型定義の追加",
+    "Step 2: 認証ミドルウェアの実装"
+  ]
+}
 ```
 
 ---

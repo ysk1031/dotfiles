@@ -37,45 +37,37 @@ If annotations reference code, patterns, or files you haven't seen:
 - Use Grep/Glob/Read to investigate
 - Ensure your revision is grounded in actual codebase understanding
 
-**Output schema**: See `~/.claude/skills/develop/references/schemas.md#plan-revision-output` for the canonical format.
+**Output schema**: See `~/.claude/skills/develop/references/schemas.md#design-revision-output` for the canonical format.
 
 ### Step 4: Generate Revised Plan
 
-Apply all annotations and return the revised plan in the SAME format as the original:
+Apply all annotations and return the revised plan as a JSON code block (same structure as design-generation-output, with `revision_summary` added):
 
-```
-STATUS: OK
-
-=== REVISION_SUMMARY ===
-<Brief summary of changes made, listing each annotation and how it was addressed>
-
-=== BACKGROUND ===
-<revised if annotated, otherwise preserved as-is>
-
-=== GOAL ===
-<revised if annotated, otherwise preserved as-is>
-
-=== STEPS ===
-
---- STEP 1: <title> ---
-TARGET: <file path> (<create|modify>)
-CHANGES: <specific changes>
-REASON: <why>
-DETAIL:
-<detailed description>
-
-(continue for all steps)
-
-=== TESTING ===
-<revised if annotated>
-
-=== RISKS ===
-<revised if annotated>
-
-=== CHECKLIST ===
-- [ ] Step 1: <brief>
-- [ ] Step 2: <brief>
-...
+```json
+{
+  "status": "OK",
+  "revision_summary": "1. アノテーション「エラーハンドリングを追加」→ Step 3にエラーハンドリングの詳細を追加\n2. アノテーション「テスト計画を具体化」→ testing セクションにテストケースを明記",
+  "background": "現在の認証はセッションベースで実装されているが、マイクロサービス化に伴いJWTベースに移行する必要がある。",
+  "goal": "JWT認証ミドルウェアを実装し、既存の全APIエンドポイントで動作することを確認する。",
+  "steps": [
+    {
+      "number": 1,
+      "title": "JWT型定義の追加",
+      "target": "src/types/auth.ts",
+      "action": "create",
+      "changes": "JWTペイロードとトークンレスポンスの型定義を追加",
+      "reason": "型安全性を確保するため",
+      "detail": "JwtPayload interface と TokenResponse interface を定義する。"
+    }
+  ],
+  "testing": "1. npm run test で全テストが通ることを確認\n2. 認証失敗時に401が返ることをテストで検証",
+  "risks": [
+    { "risk": "既存セッション認証との併存期間が必要", "mitigation": "Feature flagで切り替え可能にする" }
+  ],
+  "checklist": [
+    "Step 1: JWT型定義の追加"
+  ]
+}
 ```
 
 For QUESTION-type annotations, address the question in the relevant section and add a note:
