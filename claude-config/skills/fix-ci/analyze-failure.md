@@ -39,29 +39,30 @@ If multiple jobs failed:
 
 **Step 5: Form Hypothesis**
 
-Return in this format:
-```
-STATUS: OK
-CATEGORY: <failure category from Step 1>
-HYPOTHESIS: <1-3 sentence explanation of the root cause in Japanese>
-EVIDENCE:
-- <evidence 1>
-- <evidence 2>
-- <evidence 3>
-AFFECTED_FILES:
-- <file path 1>
-- <file path 2>
-CONFIDENCE: <HIGH/MEDIUM/LOW>
-SUGGESTED_ACTION: <brief description of what needs to change>
+Return your output as a JSON code block.
+
+Success:
+```json
+{
+  "status": "OK",
+  "category": "TEST_FAILURE",
+  "hypothesis": "認証ミドルウェアの変更により、既存のテストが期待するレスポンスコードと異なる値を返すようになった",
+  "evidence": [
+    "src/auth/middleware.ts:42 でステータスコードが 401 から 403 に変更されている",
+    "tests/auth.test.ts:15 で 401 を期待しているが 403 が返却されている"
+  ],
+  "affected_files": ["src/auth/middleware.ts", "tests/auth.test.ts"],
+  "confidence": "HIGH",
+  "suggested_action": "テストの期待値を 403 に更新するか、ミドルウェアのステータスコードを 401 に戻す"
+}
 ```
 
 If the cause cannot be determined:
-```
-STATUS: UNCLEAR
-PARTIAL_ANALYSIS: <what you could determine in Japanese>
-EVIDENCE:
-- <evidence 1>
-POSSIBLE_CAUSES:
-- <possible cause 1>
-- <possible cause 2>
+```json
+{
+  "status": "UNCLEAR",
+  "partial_analysis": "テストがタイムアウトしているが、原因が外部サービスの応答遅延か内部のデッドロックか判別できない",
+  "evidence": ["tests/integration/api.test.ts で 30 秒のタイムアウトが発生"],
+  "possible_causes": ["外部APIのレスポンス遅延", "データベース接続のデッドロック"]
+}
 ```

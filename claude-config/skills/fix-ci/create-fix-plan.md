@@ -28,24 +28,34 @@ Determine how the user can verify the fix locally before pushing.
 
 **Step 5: Return Fix Plan**
 
-Return in this format:
-```
-STATUS: OK
-CHANGES:
-1. FILE: <path>
-   ACTION: <modify/create/delete>
-   DESCRIPTION: <what to change and why, in Japanese>
-   DETAIL: <specific code change description or diff-like snippet>
-2. FILE: <path>
-   ACTION: <modify/create/delete>
-   DESCRIPTION: <what to change and why, in Japanese>
-   DETAIL: <specific code change description or diff-like snippet>
+Return your output as a JSON code block.
 
-VERIFICATION: <how to verify the fix locally, in Japanese>
+Success:
+```json
+{
+  "status": "OK",
+  "changes": [
+    {
+      "file": "src/auth/middleware.ts",
+      "action": "modify",
+      "description": "認証失敗時のステータスコードを401に統一する",
+      "detail": "42行目の res.status(403) を res.status(401) に変更"
+    },
+    {
+      "file": "tests/auth.test.ts",
+      "action": "modify",
+      "description": "テストの期待値を修正する",
+      "detail": "15行目の expect(res.status).toBe(401) は変更不要（middleware側を修正するため）"
+    }
+  ],
+  "verification": "npm run test -- --testPathPattern auth を実行してテストが通ることを確認する"
+}
 ```
 
 If the fix is not straightforward or requires more information:
-```
-STATUS: NEEDS_INFO
-QUESTION: <what additional information is needed, in Japanese>
+```json
+{
+  "status": "NEEDS_INFO",
+  "question": "認証失敗時のステータスコードは 401 と 403 のどちらが正しい仕様ですか？"
+}
 ```

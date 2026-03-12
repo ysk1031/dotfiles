@@ -26,7 +26,7 @@ The subagent will return collected failure data (or an error/status).
 
 ### Phase 2: Hypothesis Formation (use Agent with general-purpose subagent)
 
-If Phase 1 returned an error status (`GH_AUTH_REQUIRED`, `NO_REPO`, `NO_REMOTE`, `NO_FAILED_RUNS`, `RUN_NOT_FOUND`), display the message to the user and stop. Do NOT proceed to Phase 2.
+If Phase 1 returned an error status (`"status": "GH_AUTH_REQUIRED"`, `"NO_REPO"`, `"NO_REMOTE"`, `"NO_FAILED_RUNS"`, `"RUN_NOT_FOUND"`), display the `message` field to the user and stop. Do NOT proceed to Phase 2.
 
 Call the Agent tool with:
 - subagent_type: "general-purpose"
@@ -37,14 +37,14 @@ Call the Agent tool with:
 
 ### Phase 3: User Confirmation of Hypothesis (main agent)
 
-**STATUS: OK from Phase 2**:
+**`"status": "OK"` from Phase 2**:
 
-Display the hypothesis to the user in a clear format:
+Display the hypothesis to the user in a clear format, using JSON fields:
 
 ```
 ## CI失敗の診断結果
 
-**ワークフロー**: <workflow name>
+**ワークフロー**: <workflow from Phase 1 output>
 **カテゴリ**: <category>
 **確信度**: <confidence>
 
@@ -52,13 +52,13 @@ Display the hypothesis to the user in a clear format:
 <hypothesis>
 
 ### 根拠
-<evidence list>
+<evidence array items>
 
 ### 影響ファイル
-<affected files list>
+<affected_files array items>
 ```
 
-If CONFIDENCE is LOW and CATEGORY is FLAKY or TIMEOUT, add a note:
+If `confidence` is `"LOW"` and `category` is `"FLAKY"` or `"TIMEOUT"`, add a note:
 "この失敗はフレーキーテスト（非決定的な失敗）の可能性があります。再実行で解決する場合があります。"
 
 Use AskUserQuestion:
@@ -73,9 +73,9 @@ Use AskUserQuestion:
 **If "ヒントを追加して再分析"**: User provides additional context via "Other". Re-run Phase 2 with the original Phase 1 data PLUS user's hint. Do NOT re-run Phase 1.
 **If "キャンセル"**: Print "CI診断を終了しました。" and stop.
 
-**STATUS: UNCLEAR from Phase 2**:
+**`"status": "UNCLEAR"` from Phase 2**:
 
-Display the partial analysis:
+Display the partial analysis using JSON fields:
 
 ```
 ## CI失敗の部分分析
@@ -83,10 +83,10 @@ Display the partial analysis:
 原因を特定できませんでした。
 
 ### 判明していること
-<partial analysis>
+<partial_analysis>
 
 ### 可能性のある原因
-<possible causes>
+<possible_causes array items>
 ```
 
 Use AskUserQuestion:
@@ -114,21 +114,21 @@ Call the Agent tool with:
 
 ### Phase 5: User Confirmation of Fix Plan (main agent)
 
-**STATUS: NEEDS_INFO from Phase 4**: Display the question and use AskUserQuestion to get the answer, then re-run Phase 4 with the additional information.
+**`"status": "NEEDS_INFO"` from Phase 4**: Display the `question` field and use AskUserQuestion to get the answer, then re-run Phase 4 with the additional information.
 
-**STATUS: OK from Phase 4**:
+**`"status": "OK"` from Phase 4**:
 
-Display the fix plan in a clear format:
+Display the fix plan in a clear format, using JSON fields:
 
 ```
 ## 修正プラン
 
-<for each change>
-### <N>. `<file path>` (<action>)
-<description>
+<for each item in changes array>
+### <N>. `<item.file>` (<item.action>)
+<item.description>
 
 ```
-<detail>
+<item.detail>
 ```
 
 </for each>
