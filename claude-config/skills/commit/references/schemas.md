@@ -1,40 +1,49 @@
 # Commit Schemas
 
-Subagent I/O format definitions for the commit skill.
+JSON Schema definitions for the commit skill agent outputs.
+
+See each agent file for inline JSON examples.
 
 ---
 
 ## commit-analyze-output
 
-Output format for commit/prompts/analyze-changes.md.
+JSON Schema for commit-composer agent output.
 
-Success:
-```
-STATUS: OK
-TITLE: <type>: <description>
-BODY: <body or empty>
+```json
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "required": ["status"],
+  "properties": {
+    "status": {
+      "type": "string",
+      "enum": ["OK", "NO_CHANGES", "NEEDS_SPLIT"],
+      "description": "OK: message generated, NO_CHANGES: no staged changes, NEEDS_SPLIT: commit split recommended"
+    },
+    "title": {
+      "type": "string",
+      "maxLength": 72,
+      "description": "Commit message title (Conventional Commits format)"
+    },
+    "body": {
+      "type": "string",
+      "description": "Commit message body (explains WHAT and WHY)"
+    },
+    "message": {
+      "type": "string",
+      "description": "User-facing message (for NO_CHANGES and NEEDS_SPLIT statuses)"
+    },
+    "suggestions": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Suggested split descriptions (for NEEDS_SPLIT)"
+    }
+  }
+}
 ```
 
-No changes:
-```
-STATUS: NO_CHANGES
-ステージされた変更がありません。git add <files> でファイルをステージしてから再度 /commit を実行してください。
-```
-
-Split recommended:
-```
-STATUS: NEEDS_SPLIT
-警告: このコミットには複数の異なる変更が含まれています。
-コミットを分割することを検討してください:
-
-1. [変更1の説明]
-2. [変更2の説明]
-
-分割する場合: git reset HEAD <files>
-このまま続行する場合: /commit --force
-```
-
-**Fields:**
-- `STATUS` — `OK`: message generated, `NO_CHANGES`: no staged changes, `NEEDS_SPLIT`: commit split recommended
-- `TITLE` — Commit message title line (Conventional Commits format, max 72 chars)
-- `BODY` — Commit message body (only for complex changes; explains WHAT and WHY)
+### Status variants
+- `OK`: includes `title` (required), `body` (optional)
+- `NO_CHANGES`: includes `message` with guidance to stage files
+- `NEEDS_SPLIT`: includes `message`, `suggestions` array of split descriptions

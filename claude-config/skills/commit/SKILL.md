@@ -25,13 +25,13 @@ The subagent will return the proposed commit message (or an error/warning).
 
 ### Phase 2: User Confirmation (main agent)
 
-If subagent returns STATUS: NO_CHANGES or STATUS: NEEDS_SPLIT, display the message and stop.
+If subagent returns `"status": "NO_CHANGES"` or `"status": "NEEDS_SPLIT"`, display the `message` field and stop.
 
-If subagent returns STATUS: OK:
+If subagent returns `"status": "OK"`:
 1. Use AskUserQuestion:
-   - question: Include the proposed commit message in the question text
-     Example (no body): "提案コミットメッセージ:\n\n`<type>: <description>`\n\nこのコミットメッセージでよろしいですか？"
-     Example (with body): "提案コミットメッセージ:\n\n`<type>: <description>`\n\n<body>\n\nこのコミットメッセージでよろしいですか？"
+   - question: Include the proposed commit message (from `title` and `body` fields) in the question text
+     Example (no body): "提案コミットメッセージ:\n\n`<title>`\n\nこのコミットメッセージでよろしいですか？"
+     Example (with body): "提案コミットメッセージ:\n\n`<title>`\n\n<body>\n\nこのコミットメッセージでよろしいですか？"
    - header: "Commit"
    - options:
      1. label: "Accept", description: "このままコミットを実行"
