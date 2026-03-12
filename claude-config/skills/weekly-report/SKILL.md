@@ -26,12 +26,12 @@ The subagent will return collected data (or an error/status).
 
 ### Phase 2: User Confirmation (main agent)
 
-Handle based on subagent STATUS:
+Handle based on subagent `status`:
 
-**STATUS: GH_AUTH_REQUIRED / JQ_REQUIRED / NO_REPOS**:
-Display the message and stop.
+**`"status": "GH_AUTH_REQUIRED"` / `"JQ_REQUIRED"` / `"NO_REPOS"`**:
+Display the `message` field and stop.
 
-**STATUS: NO_DATA**:
+**`"status": "NO_DATA"`**:
 Use AskUserQuestion:
 - question: "指定期間にデータが見つかりませんでした。期間を延長しますか？"
 - header: "Period"
@@ -43,13 +43,13 @@ Use AskUserQuestion:
 If user selects extended period, call subagent again with new --days value.
 If "キャンセル", print "レポート生成をキャンセルしました。" and stop.
 
-**STATUS: OK**:
-1. Display a summary preview:
-   - Period
-   - PR count (created/merged) and other key stats
-   - Claude Code session count
-   - Target repositories
-   - Output path
+**`"status": "OK"`**:
+1. Display a summary preview using JSON fields:
+   - `period`
+   - PR count (`github_stats.prs_created` / `github_stats.prs_merged`) and other key stats
+   - Claude Code session count (`claude_stats.total_sessions`)
+   - Target repositories (`repos`)
+   - Output path (`output_path`)
 
 2. Use AskUserQuestion:
    - question: "このデータでレポートを生成しますか？"
@@ -74,7 +74,7 @@ Generate the Markdown report file with collected data.
 cat > {OUTPUT_PATH} << 'REPORT_EOF'
 # 週次開発振り返りレポート
 
-**期間**: {START_DATE} ~ {END_DATE}
+**期間**: {period}
 **生成日時**: {CURRENT_DATETIME}
 
 ---
@@ -83,33 +83,32 @@ cat > {OUTPUT_PATH} << 'REPORT_EOF'
 
 | 項目 | 数値 |
 |------|------|
-| PR作成 | {PRS_CREATED} |
-| PRマージ | {PRS_MERGED} |
-| 変更ファイル数 | {CHANGED_FILES} |
-| 追加行数 | +{ADDITIONS} |
-| 削除行数 | -{DELETIONS} |
-| Claude Code セッション | {CLAUDE_SESSIONS} |
+| PR作成 | {github_stats.prs_created} |
+| PRマージ | {github_stats.prs_merged} |
+| 変更ファイル数 | {github_stats.changed_files} |
+| 追加行数 | +{github_stats.additions} |
+| 削除行数 | -{github_stats.deletions} |
+| Claude Code セッション | {claude_stats.total_sessions} |
 
 ---
 
 ## GitHub活動
 
-{FOR EACH REPO}
-### {owner/repo}
+{FOR EACH pr IN github_prs}
+### {pr.repo}
 
 #### Pull Requests
 
 | # | タイトル | 状態 | 変更 |
 |---|---------|------|------|
-| #{number} | {title} | {state} | +{additions}/-{deletions} |
+| #{pr.number} | {pr.title} | {pr.state} | +{pr.additions}/-{pr.deletions} |
 
-**#{number} {title}**
-> {body の最初の200文字。なければ「説明なし」}
+**#{pr.number} {pr.title}**
+> {pr.body_preview。なければ「説明なし」}
 
 コミット:
-- `{sha1}` {message1}
-- `{sha2}` {message2}
-- `{sha3}` {message3}
+- `{pr.commits[0].sha}` {pr.commits[0].message}
+- `{pr.commits[1].sha}` {pr.commits[1].message}
 ...
 
 {END FOR EACH}
@@ -120,15 +119,15 @@ cat > {OUTPUT_PATH} << 'REPORT_EOF'
 
 ### プロジェクト別詳細
 
-#### {project_name} ({count}セッション)
+{FOR EACH session IN claude_sessions}
+#### {session.project_path} ({session.session_count}セッション)
 
 **主な相談内容:**
-- {具体的な相談内容1}
-- {具体的な相談内容2}
-- {具体的な相談内容3}
-...
+{FOR EACH prompt IN session.prompts}
+- {prompt}
+{END FOR EACH}
 
-(プロジェクトごとに繰り返し)
+{END FOR EACH}
 
 ---
 
