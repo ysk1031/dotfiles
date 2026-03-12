@@ -134,12 +134,7 @@ Write the research document:
 <Complete list of files investigated, grouped by role>
 ```
 
-3. Open the file in the editor:
-```bash
-code <filename> 2>/dev/null || true
-```
-
-4. Display completion message:
+3. Display completion message:
 
 ```
 ## 調査完了

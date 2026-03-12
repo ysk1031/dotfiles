@@ -103,13 +103,7 @@ The plan MUST follow this structure:
 ...
 ```
 
-**Step 2: Open in Editor**
-
-```bash
-code <filename> 2>/dev/null || true
-```
-
-**Step 3: User Review**
+**Step 2: User Review**
 
 Use AskUserQuestion:
 - question: "計画を確認してください。エディタでインライン注釈を書き込んでから「注釈を反映」を選択すると、注釈を反映した計画を再生成します。"
@@ -129,7 +123,7 @@ Use AskUserQuestion:
    - description: "revise plan with annotations"
    - prompt: Use the annotated plan file content as the annotated plan and the original context from Phase 1 as context data.
 3. Write the revised plan to the same file (overwrite)
-4. Loop back to Step 2 (open in editor + ask for review again)
+4. Loop back to Step 2 (ask for review again)
 
 **If custom input (Other)**: Treat as a verbal annotation. Re-run plan generation with the user's input as additional feedback, same as the "注釈を反映" flow but with the user's text as extra context.
 
