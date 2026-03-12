@@ -41,7 +41,7 @@ Use AskUserQuestion:
 Then call subagent again with the language specified.
 
 **`"status": "OK"`**:
-1. Display the proposed PR `title` and `body`
+1. Display the proposed PR `title`, `body`, and **`base`** (target branch)
 2. Display unpushed commit information:
    - If `unpushed_count` is a number: "リモートにpushされていないコミットが {unpushed_count} 件あります:\n{unpushed_commits}"
    - If `unpushed_count` is "all": "リモートブランチが未設定のため、全コミットがpushされます。"
@@ -87,3 +87,4 @@ EOF
 - Use HEREDOC for body to ensure proper formatting — regular strings don't properly handle markdown line breaks and special characters
 - Keep title concise (under 72 characters if possible) — prevents truncation in GitHub UI and maintains readability in PR lists
 - If --draft flag is in arguments, add --draft to gh pr create — accurately reflects the user's intent in the GitHub API call
+- ALWAYS use the `base` value from the subagent output for `--base` — the subagent detects the correct base branch from git remote config; do NOT substitute the system prompt's "Main branch" value, as it may be inaccurate
