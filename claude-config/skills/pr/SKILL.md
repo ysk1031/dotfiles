@@ -25,12 +25,12 @@ The subagent will return the proposed PR content (or an error/status).
 
 ### Phase 2: User Confirmation (main agent)
 
-Handle based on subagent STATUS:
+Handle based on subagent `status`:
 
-**STATUS: NOT_ON_BRANCH / NO_BASE / NO_COMMITS / NO_CHANGES**:
-Display the message and stop.
+**`"status": "NOT_ON_BRANCH"` / `"NO_BASE"` / `"NO_COMMITS"` / `"NO_CHANGES"`**:
+Display the `message` field and stop.
 
-**STATUS: ASK_LANGUAGE**:
+**`"status": "ASK_LANGUAGE"`**:
 Use AskUserQuestion:
 - question: "PR説明文をどちらの言語で作成しますか？"
 - header: "Language"
@@ -40,11 +40,11 @@ Use AskUserQuestion:
 
 Then call subagent again with the language specified.
 
-**STATUS: OK**:
-1. Display the proposed PR title and body
+**`"status": "OK"`**:
+1. Display the proposed PR `title` and `body`
 2. Display unpushed commit information:
-   - If UNPUSHED_COUNT is a number: "リモートにpushされていないコミットが {UNPUSHED_COUNT} 件あります:\n{UNPUSHED_COMMITS}"
-   - If UNPUSHED_COUNT is "all": "リモートブランチが未設定のため、全コミットがpushされます。"
+   - If `unpushed_count` is a number: "リモートにpushされていないコミットが {unpushed_count} 件あります:\n{unpushed_commits}"
+   - If `unpushed_count` is "all": "リモートブランチが未設定のため、全コミットがpushされます。"
 3. Use AskUserQuestion:
    - question: "このPR内容でよろしいですか？"
    - header: "PR"
@@ -68,7 +68,7 @@ git push -u origin HEAD
 
 2. Create PR:
 ```bash
-gh pr create --base <base> --title "<title>" --body "$(cat <<'EOF'
+gh pr create --base <base from subagent output> --title "<title from subagent output>" --body "$(cat <<'EOF'
 <body>
 
 ---
