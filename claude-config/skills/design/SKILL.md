@@ -22,7 +22,7 @@ Call the Agent tool with:
 
 ---
 
-### Phase 2: Plan Generation (use Agent with general-purpose subagent)
+### Phase 2: Plan Generation (use Agent with subagent)
 
 If Phase 1 returned `"status": "NO_TASK"`, display the `message` field and stop.
 
@@ -36,9 +36,10 @@ Use AskUserQuestion:
   3. label: "キャンセル", description: "計画作成を終了します"
 
 Call the Agent tool with:
-- subagent_type: "general-purpose"
+- subagent_type: "custom"
+- agent: "plan-generator"
 - description: "generate implementation plan"
-- prompt: Follow the plan generation guidelines in [generate-plan.md](generate-plan.md). Use the Phase 1 output as context data, the TASK as the agent description, and if a research file exists, read and incorporate its findings.
+- prompt: Use the Phase 1 output as context data, the TASK as the agent description, and if a research file exists, read and incorporate its findings.
 
 ---
 
@@ -123,9 +124,10 @@ Use AskUserQuestion:
 **If "注釈を反映"**:
 1. Read the plan file with the Read tool
 2. Call the Agent tool to regenerate the plan:
-   - subagent_type: "general-purpose"
+   - subagent_type: "custom"
+   - agent: "plan-reviser"
    - description: "revise plan with annotations"
-   - prompt: Follow the plan revision guidelines in [revise-plan.md](revise-plan.md). Use the annotated plan file content as the annotated plan and the original context from Phase 1 as context data.
+   - prompt: Use the annotated plan file content as the annotated plan and the original context from Phase 1 as context data.
 3. Write the revised plan to the same file (overwrite)
 4. Loop back to Step 2 (open in editor + ask for review again)
 
