@@ -55,7 +55,7 @@ function lg() {
     cd "$(cat $LAZYGIT_NEW_DIR_FILE)"
     rm -f $LAZYGIT_NEW_DIR_FILE > /dev/null
   fi
-  zle clear-screen
+  zle reset-prompt
 }
 zle -N lg
 bindkey '^g' lg
