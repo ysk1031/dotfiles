@@ -1,12 +1,12 @@
 # Pipeline Schemas
 
-Subagent I/O format definitions for the pipeline skills (research, plan, implement).
+Subagent I/O format definitions for the pipeline skills (research, design, implement).
 
 ---
 
 ## research-scope-output
 
-Output format for research/prompts/analyze-scope.md.
+Output format for the research-planner agent (Phase 1 of /research).
 
 ```
 STATUS: OK | NO_TOPIC
@@ -41,7 +41,7 @@ ENTRY_POINT_COUNT: <number>
 
 ## research-investigation-output
 
-Output format for research/prompts/investigate.md.
+Output format for the research investigation agent (Phase 2 of /research).
 
 ```
 STATUS: OK | PARTIAL
@@ -101,9 +101,9 @@ Additional fields when PARTIAL:
 
 ---
 
-## plan-context-output
+## design-context-output
 
-Output format for plan/prompts/gather-context.md.
+Output format for the project-profiler agent (Phase 1 of /design).
 
 ```
 STATUS: OK | NO_TASK
@@ -135,9 +135,9 @@ RECENT_COMMITS:
 
 ---
 
-## plan-generation-output
+## design-generation-output
 
-Output format for plan/prompts/generate-plan.md.
+Output format for the plan generation agent (Phase 2 of /design). Guidelines: design/generate-plan.md.
 
 ```
 STATUS: OK
@@ -179,11 +179,11 @@ DETAIL:
 
 ---
 
-## plan-revision-output
+## design-revision-output
 
-Output format for plan/prompts/revise-plan.md.
+Output format for the plan revision agent (annotation cycle of /design). Guidelines: design/revise-plan.md.
 
-Same format as plan-generation-output, with the following section prepended:
+Same format as design-generation-output, with the following section prepended:
 
 ```
 === REVISION_SUMMARY ===
@@ -197,7 +197,7 @@ Same format as plan-generation-output, with the following section prepended:
 
 ## implement-load-output
 
-Output format for implement/prompts/load-plan.md.
+Output format for the plan-reader agent (Phase 1 of /implement).
 
 ```
 STATUS: OK | NO_PLAN
