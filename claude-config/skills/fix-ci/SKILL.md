@@ -24,14 +24,15 @@ The subagent will return collected failure data (or an error/status).
 
 ---
 
-### Phase 2: Hypothesis Formation (use Agent with general-purpose subagent)
+### Phase 2: Hypothesis Formation (use Agent with subagent)
 
 If Phase 1 returned an error status (`"status": "GH_AUTH_REQUIRED"`, `"NO_REPO"`, `"NO_REMOTE"`, `"NO_FAILED_RUNS"`, `"RUN_NOT_FOUND"`), display the `message` field to the user and stop. Do NOT proceed to Phase 2.
 
 Call the Agent tool with:
-- subagent_type: "general-purpose"
+- subagent_type: "custom"
+- agent: "ci-failure-analyzer"
 - description: "analyze CI failure cause"
-- prompt: Follow the CI failure analysis guidelines in [analyze-failure.md](analyze-failure.md). Use the entire Phase 1 output as CI failure data and the user hint (if any) as additional context.
+- prompt: Use the entire Phase 1 output as CI failure data and the user hint (if any) as additional context.
 
 ---
 
@@ -103,12 +104,13 @@ Use AskUserQuestion:
 
 ---
 
-### Phase 4: Fix Plan Creation (use Agent with general-purpose subagent)
+### Phase 4: Fix Plan Creation (use Agent with subagent)
 
 Call the Agent tool with:
-- subagent_type: "general-purpose"
+- subagent_type: "custom"
+- agent: "ci-fix-planner"
 - description: "create CI fix plan"
-- prompt: Follow the CI fix plan guidelines in [create-fix-plan.md](create-fix-plan.md). Use the approved hypothesis data as the hypothesis and the Phase 1 output as CI failure data.
+- prompt: Use the approved hypothesis data as the hypothesis and the Phase 1 output as CI failure data.
 
 ---
 
