@@ -22,7 +22,7 @@ Call the Agent tool with:
 
 ---
 
-### Phase 2: Deep Investigation (use Agent with general-purpose subagent)
+### Phase 2: Deep Investigation (use Agent with subagent)
 
 If Phase 1 returned an error status (`"status": "NO_TOPIC"`), display the `message` field to the user and stop.
 
@@ -37,9 +37,10 @@ If "キーワードを変更": Re-run Phase 1 with the new keyword.
 If "キャンセル": Print "調査を終了しました。" and stop.
 
 Otherwise, call the Agent tool with:
-- subagent_type: "general-purpose"
+- subagent_type: "custom"
+- agent: "codebase-investigator"
 - description: "deep codebase investigation"
-- prompt: Follow the investigation guidelines in [investigate.md](investigate.md). Use the entire Phase 1 output as scope data and the TOPIC as the investigation topic.
+- prompt: Use the entire Phase 1 output as scope data and the TOPIC as the investigation topic.
 
 ---
 
