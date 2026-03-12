@@ -49,12 +49,13 @@ bindkey '^]' fzf-src
 function lg() {
   export LAZYGIT_NEW_DIR_FILE=~/.lazygit/newdir
 
-  lazygit "$@"
+  lazygit
 
   if [ -f $LAZYGIT_NEW_DIR_FILE ]; then
     cd "$(cat $LAZYGIT_NEW_DIR_FILE)"
     rm -f $LAZYGIT_NEW_DIR_FILE > /dev/null
   fi
+  zle clear-screen
 }
 zle -N lg
 bindkey '^g' lg
