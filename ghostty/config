@@ -58,8 +58,6 @@ adjust-cell-height = 10%
 window-padding-x = 4
 window-padding-y = 4
 window-padding-balance = true
-window-height = 40
-window-width = 140
 
 background-opacity = 0.90
 background-blur-radius = 20

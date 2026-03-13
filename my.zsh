@@ -23,6 +23,7 @@ alias ls='eza'
 alias ll='eza -l --group-directories-first'
 alias grep='rg'
 alias lzd='lazydocker'
+alias nv='nvim'
 
 # Function: History search with fzf (Ctrl+r)
 function fzf_select_history() {
