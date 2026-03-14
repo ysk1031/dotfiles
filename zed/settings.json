@@ -1,0 +1,55 @@
+// Zed settings
+//
+// For information on how to configure Zed, see the Zed
+// documentation: https://zed.dev/docs/configuring-zed
+//
+// To see all of Zed's default settings without changing your
+// custom settings, run `zed: open default settings` from the
+// command palette (cmd-shift-p / ctrl-shift-p)
+{
+  "buffer_font_family": "JetBrainsMonoNL Nerd Font",
+  "agent": {
+    "favorite_models": [],
+    "model_parameters": [],
+    "enable_feedback": false,
+  },
+  "edit_predictions": {
+    "provider": "copilot",
+  },
+  "disable_ai": false,
+  "tabs": {
+    "file_icons": true,
+  },
+  "title_bar": {
+    "show_branch_icon": true,
+  },
+  "git": {
+    "inline_blame": {
+      "enabled": false,
+    },
+  },
+  "telemetry": {
+    "diagnostics": false,
+    "metrics": false,
+  },
+  "terminal": {
+    "button": false,
+    "font_size": 13.0,
+    "font_family": "Menlo",
+  },
+  "base_keymap": "VSCode",
+  "minimap": {
+    "show": "never",
+  },
+  "cursor_shape": "block",
+  "show_whitespaces": "all",
+  "ensure_final_newline_on_save": true,
+  "soft_wrap": "editor_width",
+  "ui_font_size": 16.0,
+  "buffer_font_size": 14.0,
+  "theme": {
+    "mode": "system",
+    "light": "Gruvbox Light",
+    "dark": "Gruvbox Dark",
+  },
+}

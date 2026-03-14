@@ -69,6 +69,20 @@ ln -s /path/to/dotfiles/ghostty/config \
 
 After creating the symlink, restart Ghostty to apply the configuration.
 
+### Zed Editor
+
+Zed's settings are managed in `zed/`. To set up the symlink:
+
+```bash
+# Create config directory if it doesn't exist
+mkdir -p ~/.config/zed
+
+# Create symlink
+ln -sf /path/to/dotfiles/zed/settings.json ~/.config/zed/settings.json
+```
+
+After creating the symlink, restart Zed to apply the configuration.
+
 ### Claude Code
 
 Claude Code's global configuration files are managed in `claude/`. The following files/directories are included:
