@@ -71,7 +71,7 @@ After creating the symlink, restart Ghostty to apply the configuration.
 
 ### Claude Code
 
-Claude Code's global configuration files are managed in `claude-config/`. The following files/directories are included:
+Claude Code's global configuration files are managed in `claude/`. The following files/directories are included:
 
 - `settings.json` - Main settings (language, permissions, hooks, plugins)
 - `statusline-command.sh` - Custom status line script
@@ -83,12 +83,12 @@ To set up the symlinks:
 
 ```bash
 # Create symlinks for files
-ln -sf /path/to/dotfiles/claude-config/settings.json ~/.claude/settings.json
-ln -sf /path/to/dotfiles/claude-config/statusline-command.sh ~/.claude/statusline-command.sh
+ln -sf /path/to/dotfiles/claude/settings.json ~/.claude/settings.json
+ln -sf /path/to/dotfiles/claude/statusline-command.sh ~/.claude/statusline-command.sh
 
 # Create symlinks for directories (use -n to replace existing dirs)
-ln -sfn /path/to/dotfiles/claude-config/skills ~/.claude/skills
-ln -sfn /path/to/dotfiles/claude-config/agents ~/.claude/agents
+ln -sfn /path/to/dotfiles/claude/skills ~/.claude/skills
+ln -sfn /path/to/dotfiles/claude/agents ~/.claude/agents
 ```
 
 After creating the symlinks, restart Claude Code to apply the configuration.

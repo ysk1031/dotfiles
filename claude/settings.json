@@ -21,7 +21,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "code \"$(ls -t ~/.claude/plans/*.md | head -1)\"",
+            "command": "nv \"$(ls -t ~/.claude/plans/*.md | head -1)\"",
             "timeout": 5
           }
         ]
@@ -44,7 +44,11 @@
     "command": "~/.claude/statusline-command.sh"
   },
   "enabledPlugins": {
-    "gopls-lsp@claude-plugins-official": true
+    "gopls-lsp@claude-plugins-official": true,
+    "ralph-loop@claude-plugins-official": true,
+    "claude-md-management@claude-plugins-official": true,
+    "ruby-lsp@claude-plugins-official": true,
+    "code-review@claude-plugins-official": true
   },
   "language": "日本語（2ちゃんねるのなんJ民の言葉使い）",
   "voiceEnabled": true
