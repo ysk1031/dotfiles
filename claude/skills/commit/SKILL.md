@@ -1,8 +1,11 @@
 ---
 name: commit
-description: "Generate and execute git commits with Conventional Commits format for staged changes. 変更をコミットしたい時に使用。Conventional Commits形式で生成。"
+description: "Generate and execute git commits with Conventional Commits format. Use when user says 'commit', 'コミットして', 'save changes', 'この変更をコミット', or has staged changes to commit. Do NOT use for amending existing commits, interactive rebase, or unstaging files."
 allowed-tools: Agent, AskUserQuestion, Bash
 argument-hint: "[--force/-f to skip granularity check] [optional commit message hint]"
+metadata:
+  author: ysk1031
+  version: 1.0.0
 ---
 
 # Git Commit Skill
@@ -82,3 +85,34 @@ Then verify: `git status && git log -1`
 - NEVER use --no-verify — pre-commit hooks enforce project quality standards; bypassing them can introduce lint errors and security issues
 - Keep first line under 72 characters — industry-standard convention to prevent truncation in git log and GitHub UI
 - Body should wrap at 72 characters — ensures readability in terminals and git log output
+
+---
+
+### Examples
+
+#### Example 1: 通常のコミット
+User says: "コミットして"
+Actions:
+1. commit-composer がステージ済み変更を分析
+2. Conventional Commits形式のメッセージを提案
+3. ユーザー確認後コミット実行
+Result: `feat: add user authentication flow` のようなコミットが作成される
+
+#### Example 2: --force付きコミット
+User says: "-f でコミット"
+Actions:
+1. 粒度チェックをスキップ
+2. 即座にコミットメッセージを提案
+Result: 粒度に関わらず単一コミットとして作成される
+
+---
+
+### Troubleshooting
+
+#### "No staged changes"
+Cause: ステージされた変更がない
+Solution: `git add <files>` でファイルをステージングしてから再実行
+
+#### "NEEDS_SPLIT"
+Cause: ステージされた変更が大きすぎて単一コミットに不適切
+Solution: `git add -p` で変更を分割してステージングし、複数コミットに分ける
