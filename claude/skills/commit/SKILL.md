@@ -14,8 +14,7 @@ Generate a commit message for staged changes and let the user review/edit before
 ### Phase 1: Analyze Changes (use Agent with subagent)
 
 Call the Agent tool with:
-- subagent_type: "custom"
-- agent: "commit-composer"
+- subagent_type: "commit-composer"
 - description: "analyze staged changes"
 - prompt: Replace `$ARGUMENTS` in the agent's loaded prompt with the actual user arguments and execute.
 
