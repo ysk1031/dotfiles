@@ -1,9 +1,12 @@
 ---
 name: weekly-report
-description: "Aggregate GitHub + Claude Code activity into a structured weekly review report. 今週何をやったか振り返りたい時に使用。GitHub活動とClaude Codeセッションを集計。"
+description: "Aggregate GitHub + Claude Code activity into a structured weekly review report. Use when user says '週報を作って', 'weekly report', '今週の振り返り', '活動レポート', or wants to review development activity for a period. Do NOT use for daily standups, sprint planning, or non-development activity tracking."
 allowed-tools: Agent, AskUserQuestion, Bash
 argument-hint: "[--repos owner/repo1,repo2 to restrict (default: auto-detect all)] [--days N to set lookback period] [--output path to set output file]"
 disable-model-invocation: true
+metadata:
+  author: ysk1031
+  version: 1.0.0
 ---
 
 # Weekly Development Review Report Skill
@@ -97,3 +100,38 @@ Report generated: {OUTPUT_PATH}
 - Remove file path prefixes (@path/to/file) from prompts, keep only the question/request part — file paths are noise; retain only the essence of what was consulted
 - Use Japanese for all report content (the output report should be in Japanese) — the user is a Japanese speaker and needs to conduct reviews in Japanese
 - If a repository has no activity, still list it with "活動なし" — explicitly shows no activity occurred, distinguishing from missing data
+
+---
+
+### Examples
+
+#### Example 1: 通常の週報生成
+User says: "週報を作って"
+Actions:
+1. activity-reporter がGitHub活動とClaude Codeセッションを収集
+2. データプレビューを表示
+3. ユーザー確認後、テンプレートに沿ってレポートを生成
+Result: `~/weekly-report-YYYY-MM-DD.md` にレポートが保存される
+
+#### Example 2: 期間指定
+User says: "--days 14 で過去2週間のレポート"
+Actions:
+1. 過去14日間のデータを収集
+2. 通常と同じフロー
+Result: 2週間分のデータを含むレポートが生成される
+
+---
+
+### Troubleshooting
+
+#### "GH_AUTH_REQUIRED"
+Cause: GitHub CLIが未認証
+Solution: `gh auth login` を実行してGitHub認証を完了
+
+#### "JQ_REQUIRED"
+Cause: jqコマンドがインストールされていない
+Solution: `brew install jq` でインストール
+
+#### "NO_DATA"
+Cause: 指定期間内にデータが見つからない
+Solution: `--days` で期間を延長して再実行
