@@ -23,11 +23,11 @@ JSON Schema for activity-reporter agent output.
     },
     "period": { "type": "string", "description": "Data collection period (START_DATE ~ END_DATE)" },
     "days": { "type": "integer", "description": "Number of days" },
-    "output_path": { "type": "string", "description": "Report output path" },
+    "output_path": { "type": "string", "description": "Suggested report output path (for caller use only — agent must NOT write to this path)" },
     "repos": {
       "type": "array",
       "items": { "type": "string" },
-      "description": "List of target repositories"
+      "description": "Target repositories for GitHub PR collection (auto-detected or user-specified). Empty array means no GitHub PR activity found in the period. Claude Code projects are tracked separately in claude_sessions"
     },
     "github_stats": {
       "type": "object",
@@ -86,7 +86,7 @@ JSON Schema for activity-reporter agent output.
           }
         }
       },
-      "description": "Session details and prompt content by project"
+      "description": "Cross-project Claude Code session details. Collected from history.jsonl, independent of GitHub repos"
     },
     "warnings": {
       "type": "array",
@@ -100,4 +100,5 @@ JSON Schema for activity-reporter agent output.
 
 ### Status variants
 - `OK`: includes all data fields (`period`, `days`, `output_path`, `repos`, `github_stats`, `github_prs`, `claude_stats`, `claude_sessions`, `warnings`)
-- Error statuses (`GH_AUTH_REQUIRED`, `JQ_REQUIRED`, `NO_REPOS`, `NO_DATA`): includes `message` only
+- Error statuses (`GH_AUTH_REQUIRED`, `JQ_REQUIRED`, `NO_DATA`): includes `message` only
+- `NO_REPOS`: Only returned when `--repos` is explicitly specified but none are accessible. When repos are auto-detected, empty results continue with Claude Code data only (status remains `OK` with empty `repos` array)

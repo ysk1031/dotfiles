@@ -1,9 +1,12 @@
 ---
 name: implement
-description: "Execute an approved design/plan step by step with continuous validation and checklist tracking. 設計ファイル（design-*.md）に沿って実装したい時に使用。"
+description: "Execute an approved design plan step by step with validation and checklist tracking. Use when user says '実装して', 'implement this plan', 'design-*.mdを実装', or has an approved plan file ready for implementation. Do NOT use for planning, research, or implementing without a plan file."
 allowed-tools: Agent, AskUserQuestion, Bash, Read, Edit, Write, Glob, Grep
 argument-hint: "<design file path> [--steps '1,3,5' to run specific steps only]"
 disable-model-invocation: true
+metadata:
+  author: ysk1031
+  version: 1.0.0
 ---
 
 # Implementation Skill
@@ -15,8 +18,7 @@ Execute an approved implementation plan from start to finish. Read the plan, imp
 ### Phase 1: Plan Loading & Tooling Detection (use Agent with subagent)
 
 Call the Agent tool with:
-- subagent_type: "custom"
-- agent: "plan-reader"
+- subagent_type: "plan-reader"
 - description: "load plan and detect tooling"
 - prompt: Replace `$ARGUMENTS` in the agent's loaded prompt with the actual user arguments and execute.
 
@@ -103,11 +105,7 @@ After each step, run available validation commands:
 1. **Type check** (if available): Run the detected type check command via Bash
 2. **Lint** (if available): Run the detected lint command via Bash
 
-If validation fails:
-- Read the error output
-- Fix the issue immediately
-- Re-run validation to confirm the fix
-- Do NOT move to the next step until validation passes
+If validation fails, follow the detailed failure handling flow in `references/validation-flow.md` (relative to this skill's directory). Read it with the Read tool and follow the instructions.
 
 If validation passes, continue to the next step without pausing.
 
@@ -159,12 +157,17 @@ git diff --stat
 <git diff --stat output>
 
 ### チェックリスト
-<display updated checklist — all implemented steps should be checked>
+<display updated checklist — completed steps show [x], skipped steps show [ ] with [SKIPPED] annotation, not-attempted steps show [ ]>
 
 ### 検証結果
 - Type check: <PASS / FAIL / N/A>
 - Lint: <PASS / FAIL / N/A>
 - Test: <PASS / FAIL / SKIPPED / N/A>
+
+<if any steps were skipped>
+### スキップされたステップ
+<list skipped steps with their validation error summary>
+</if>
 
 ### 次のステップ
 - 動作確認を行ってください
@@ -181,9 +184,37 @@ git diff --stat
 - NEVER add comments, JSDoc, or type annotations not specified in the plan — additions not in the plan create noise in code review and diverge from the approved plan
 - NEVER add features or abstractions beyond what the plan specifies — out-of-scope changes can introduce unexpected bugs and architectural distortions
 - ALWAYS update the checklist after each step — without an up-to-date checklist, the resume point is unknown if implementation is interrupted
+- When a step is skipped due to validation failure, NEVER mark it as completed — leave it unchecked with a [SKIPPED] annotation — marking a skipped step as complete misleads the user about implementation status
+- When implementation is aborted, ALWAYS show a partial completion summary before stopping — the user needs to know which steps succeeded and which remain to plan their next action
 - ALWAYS run type check and lint after each step (if available) — validating after each step makes it easier to identify the cause of issues and reduces fix cost
 - Run the full test suite only ONCE at the end (Phase 4), not after every step — running tests is time-consuming; running after every step significantly increases total implementation time
 - If a step's target file doesn't exist for a "modify" action, flag it and ask the user — forcing changes to a non-existent file would create an unintended new file
 - If the plan file changes during implementation (e.g., user edits it), re-read it before each step — implementing based on an outdated plan fails to reflect the user's revisions
 - Respect CLAUDE.md conventions if the file exists — code violating project conventions will be rejected during lint/review
 - Keep the implementation faithful to the plan — do not deviate or "improve" beyond what's specified — deviating from the plan bypasses the approval process and introduces unintended changes
+
+---
+
+### Examples
+
+#### Example 1: 計画全体の実装
+User says: "design-auth.md を実装して"
+Actions:
+1. plan-reader が計画ファイルを読み込み、ツーリングを検出
+2. チェックリストと実装スコープを表示
+3. ユーザー確認後、全ステップを順番に実装
+4. 各ステップ後にtype check/lintを実行
+5. 全ステップ完了後にテストを実行し、サマリーを表示
+Result: 計画に沿った実装が完了し、チェックリストが更新される
+
+---
+
+### Troubleshooting
+
+#### "NO_PLAN"
+Cause: 指定された計画ファイルが見つからない
+Solution: ファイルパスを確認し、`design-*.md` 形式のファイルを指定
+
+#### バリデーションが繰り返し失敗
+Cause: 自動修正では解決できない問題がある
+Solution: 「手動で修正して続行」を選択して自分で修正するか、「スキップして次へ」で一旦進む

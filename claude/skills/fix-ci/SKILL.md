@@ -1,9 +1,12 @@
 ---
 name: fix-ci
-description: "Diagnose and fix failed GitHub Actions workflow runs on the current branch. CIが落ちた、テストが通らない時に使用。GitHub Actionsの失敗を診断して修正。"
+description: "Diagnose and fix failed GitHub Actions workflow runs. Use when user says 'CIが落ちた', 'fix CI', 'テストが通らない', 'ワークフローが失敗', or has a failing GitHub Actions run to debug. Do NOT use for local test failures unrelated to CI, setting up new workflows, or CI configuration questions."
 allowed-tools: Agent, AskUserQuestion, Bash, Read, Edit, Write, Glob, Grep
 argument-hint: "[run-id or workflow-name to target specific run]"
 disable-model-invocation: true
+metadata:
+  author: ysk1031
+  version: 1.0.0
 ---
 
 # CI Failure Diagnosis & Fix Skill
@@ -15,8 +18,7 @@ Diagnose failed GitHub Actions workflow runs, identify the root cause, propose a
 ### Phase 1: Data Collection (use Agent with subagent)
 
 Call the Agent tool with:
-- subagent_type: "custom"
-- agent: "ci-log-collector"
+- subagent_type: "ci-log-collector"
 - description: "collect CI failure logs"
 - prompt: Replace `$ARGUMENTS` in the agent's loaded prompt with actual arguments and execute.
 
@@ -29,8 +31,7 @@ The subagent will return collected failure data (or an error/status).
 If Phase 1 returned an error status (`"status": "GH_AUTH_REQUIRED"`, `"NO_REPO"`, `"NO_REMOTE"`, `"NO_FAILED_RUNS"`, `"RUN_NOT_FOUND"`), display the `message` field to the user and stop. Do NOT proceed to Phase 2.
 
 Call the Agent tool with:
-- subagent_type: "custom"
-- agent: "ci-failure-analyzer"
+- subagent_type: "ci-failure-analyzer"
 - description: "analyze CI failure cause"
 - prompt: Use the entire Phase 1 output as CI failure data and the user hint (if any) as additional context.
 
@@ -38,77 +39,20 @@ Call the Agent tool with:
 
 ### Phase 3: User Confirmation of Hypothesis (main agent)
 
-**`"status": "OK"` from Phase 2**:
+Display the diagnosis results and get user confirmation.
 
-Display the hypothesis to the user in a clear format, using JSON fields:
+Read `references/diagnosis-display.md` (relative to this skill's directory) with the Read tool and follow its display logic and branching instructions, using the Phase 2 output data.
 
-```
-## CI失敗の診断結果
-
-**ワークフロー**: <workflow from Phase 1 output>
-**カテゴリ**: <category>
-**確信度**: <confidence>
-
-### 原因の仮説
-<hypothesis>
-
-### 根拠
-<evidence array items>
-
-### 影響ファイル
-<affected_files array items>
-```
-
-If `confidence` is `"LOW"` and `category` is `"FLAKY"` or `"TIMEOUT"`, add a note:
-"この失敗はフレーキーテスト（非決定的な失敗）の可能性があります。再実行で解決する場合があります。"
-
-Use AskUserQuestion:
-- question: "この診断結果に基づいて修正プランを作成しますか？"
-- header: "Diagnosis"
-- options:
-  1. label: "修正プランを作成", description: "この仮説に基づいて修正プランを作成します"
-  2. label: "ヒントを追加して再分析", description: "追加情報を提供して再分析します（Otherで入力）"
-  3. label: "キャンセル", description: "診断を終了します"
-
-**If "修正プランを作成"**: Proceed to Phase 4
-**If "ヒントを追加して再分析"**: User provides additional context via "Other". Re-run Phase 2 with the original Phase 1 data PLUS user's hint. Do NOT re-run Phase 1.
-**If "キャンセル"**: Print "CI診断を終了しました。" and stop.
-
-**`"status": "UNCLEAR"` from Phase 2**:
-
-Display the partial analysis using JSON fields:
-
-```
-## CI失敗の部分分析
-
-原因を特定できませんでした。
-
-### 判明していること
-<partial_analysis>
-
-### 可能性のある原因
-<possible_causes array items>
-```
-
-Use AskUserQuestion:
-- question: "原因を特定できませんでした。どうしますか？"
-- header: "Diagnosis"
-- options:
-  1. label: "ヒントを追加して再分析", description: "追加情報を提供して再分析します（Otherで入力）"
-  2. label: "ブラウザでログを確認", description: "GitHub Actionsのログをブラウザで開きます"
-  3. label: "キャンセル", description: "診断を終了します"
-
-**If "ヒントを追加して再分析"**: Re-run Phase 2 with hint
-**If "ブラウザでログを確認"**: Run `gh run view <run-id> --web` via Bash, then print "CI診断を終了しました。" and stop.
-**If "キャンセル"**: Print "CI診断を終了しました。" and stop.
+**If user approves**: Proceed to Phase 4
+**If user provides hint**: Re-run Phase 2 with original Phase 1 data + hint
+**If user cancels**: Print "CI診断を終了しました。" and stop
 
 ---
 
 ### Phase 4: Fix Plan Creation (use Agent with subagent)
 
 Call the Agent tool with:
-- subagent_type: "custom"
-- agent: "ci-fix-planner"
+- subagent_type: "ci-fix-planner"
 - description: "create CI fix plan"
 - prompt: Use the approved hypothesis data as the hypothesis and the Phase 1 output as CI failure data.
 
@@ -197,3 +141,34 @@ Apply the approved fix plan directly (main agent uses Edit/Write tools, NOT a su
 - If `gh` commands fail with permission errors, suggest the user check their GitHub token permissions — permission issues cannot be resolved by the skill and require user action
 - Keep subagent prompts focused — include only the data each subagent needs — including unnecessary data increases subagent token usage and dilutes analysis focus
 - For FLAKY/TIMEOUT failures with LOW confidence, suggest re-running the workflow before attempting code fixes — flaky tests don't need code fixes and are likely resolved by re-running the workflow
+- For non-FLAKY/non-TIMEOUT failures with LOW confidence, ALWAYS show a low-confidence warning and offer browser log review as an additional option — low-confidence diagnoses have a higher chance of being incorrect, and users should be encouraged to verify before proceeding
+
+---
+
+### Examples
+
+#### Example 1: CI失敗の診断と修正
+User says: "CIが落ちた"
+Actions:
+1. ci-log-collector がGitHub Actionsの失敗ログを収集
+2. ci-failure-analyzer が原因の仮説を形成
+3. ユーザーに診断結果を表示し確認
+4. ci-fix-planner が修正プランを作成
+5. ユーザー確認後、修正を適用
+Result: CI失敗の原因が特定され、修正が適用される
+
+---
+
+### Troubleshooting
+
+#### "GH_AUTH_REQUIRED"
+Cause: GitHub CLIが未認証
+Solution: `gh auth login` を実行してGitHub認証を完了
+
+#### "NO_FAILED_RUNS"
+Cause: 現在のブランチにCIの失敗が存在しない
+Solution: `gh run list --status failure` でブランチと失敗ランを確認
+
+#### 確信度がLOW
+Cause: ログの情報が不十分で原因の特定が困難
+Solution: 「ヒントを追加して再分析」で追加情報を提供するか、「ブラウザでログを確認」で直接ログを確認

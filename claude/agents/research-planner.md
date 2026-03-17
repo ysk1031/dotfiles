@@ -78,7 +78,7 @@ Return following the output schema below.
 
 ## Output Schema: research-scope-output
 
-See `~/.claude/skills/develop/references/schemas.md#research-scope-output` for the full schema.
+See `~/.claude/skills/research/references/schemas.md#research-scope-output` for the full schema.
 
 Return your output as a JSON code block. Examples:
 

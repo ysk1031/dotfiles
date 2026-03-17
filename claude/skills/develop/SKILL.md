@@ -1,9 +1,12 @@
 ---
 name: develop
-description: "Run the full research, design, implement pipeline end-to-end. 新機能を作りたい、大きな変更を実装したい時に使用。調査から実装まで一気通貫で実行。"
+description: "Run the full research → design → implement pipeline end-to-end. Use when user says '開発して', 'build this feature', '新機能を作って', '一気通貫で実装', or wants the complete workflow from investigation to implementation. Do NOT use for research-only, design-only, or implementing an existing plan — use /research, /design, or /implement respectively."
 allowed-tools: Agent, AskUserQuestion, Bash, Read, Edit, Write, Glob, Grep
 argument-hint: "[task description] [--from 'research'|'design'|'implement'] [--research 'file.md'] [--output 'design-filename']"
 disable-model-invocation: true
+metadata:
+  author: ysk1031
+  version: 1.0.0
 ---
 
 # Develop Skill
@@ -59,7 +62,7 @@ After validation passes, execute phases sequentially starting from the `FROM` va
 
 ### Phase R: Research (executed when `FROM` is `research`)
 
-Read `~/.claude/skills/research/SKILL.md` with the Read tool and follow its
+Read the `/research/SKILL.md` file (relative to the skills directory where this SKILL.md resides) with the Read tool and follow its
 Instructions section with the following overrides:
 
 **Overrides**:
@@ -77,11 +80,11 @@ completion summary, then transition to Phase D.
 
 ### Phase D: Design (executed when `FROM` is `research` or `design`)
 
-Read `~/.claude/skills/design/SKILL.md` with the Read tool and follow its
+Read the `/design/SKILL.md` file (relative to the skills directory where this SKILL.md resides) with the Read tool and follow its
 Instructions section with the following overrides:
 
 **RESEARCH_FILE Resolution** (before Phase 1):
-- If Phase R was executed: use the file path output in Phase R
+- If Phase R was executed: use the file path written by the Write tool in Phase R's Phase 4 (Output Generation) of the research skill. This is the filename determined in Phase R Phase 4 Step 1 (either the `output` field from the Phase R Phase 1 result, or `research-<sanitized-topic>.md`). Store this path as RESEARCH_FILE when Phase R Phase 4 completes.
 - If `--from design` with `--research`: use the `--research` flag value
 - If `--from design` without `--research`: search for `research-*.md` in the
   current directory and display candidates (do NOT auto-select)
@@ -107,7 +110,7 @@ Instructions section with the following overrides:
 
 ### Phase I: Implement (executed in all flows)
 
-Read `~/.claude/skills/implement/SKILL.md` with the Read tool and follow its
+Read the `/implement/SKILL.md` file (relative to the skills directory where this SKILL.md resides) with the Read tool and follow its
 Instructions section with the following overrides:
 
 **Overrides**:
@@ -153,3 +156,34 @@ Each phase's specific error handling is defined in the referenced skill's SKILL.
 - When starting mid-pipeline with `--from`, validate preconditions for skipped phases — executing later phases without meeting preconditions leads to errors or incomplete results
 - NEVER commit or push changes — commits should only happen after user review; unintended pushes trigger unnecessary CI runs
 - Correctly pass data between phases (RESEARCH_FILE, OUTPUT, etc.) and maintain variable consistency — data inconsistency between phases silently produces incorrect results
+
+---
+
+### Examples
+
+#### Example 1: 新機能の一気通貫開発
+User says: "ユーザー認証機能を開発して"
+Actions:
+1. Phase R: research-planner → codebase-investigator で既存コードを調査、research-auth.md出力
+2. Phase D: project-profiler → plan-generator で実装計画生成、注釈サイクルで計画確定
+3. Phase I: 承認済み計画に沿って全ステップを自動実装
+Result: 調査→設計→実装が一気通貫で完了する
+
+#### Example 2: 途中から再開
+User says: "--from implement で実装"
+Actions:
+1. 既存のdesign-*.mdを読み込み
+2. Phase Iのみ実行（調査・設計をスキップ）
+Result: 既に承認済みの計画に沿って実装のみ実行される
+
+---
+
+### Troubleshooting
+
+#### Phase R失敗
+Cause: トピック指定が曖昧で関連ファイルが見つからない
+Solution: より具体的なキーワードを含むタスク説明を指定
+
+#### Phase D中止
+Cause: 計画の注釈サイクルで「キャンセル」を選択した
+Solution: `--from design` で設計フェーズから再開可能

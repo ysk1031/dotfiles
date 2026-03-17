@@ -48,7 +48,8 @@
     "ralph-loop@claude-plugins-official": true,
     "claude-md-management@claude-plugins-official": true,
     "ruby-lsp@claude-plugins-official": true,
-    "code-review@claude-plugins-official": true
+    "code-review@claude-plugins-official": true,
+    "skill-creator@claude-plugins-official": true
   },
   "language": "日本語（2ちゃんねるのなんJ民の言葉使い）",
   "voiceEnabled": true
