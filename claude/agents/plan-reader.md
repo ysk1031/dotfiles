@@ -115,7 +115,7 @@ Return following the output schema below.
 
 ## Output Schema: implement-load-output
 
-See `~/.claude/skills/develop/references/schemas.md#implement-load-output` for the full schema.
+See `~/.claude/skills/implement/references/schemas.md#implement-load-output` for the full schema.
 
 Return your output as a JSON code block. Examples:
 

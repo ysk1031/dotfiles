@@ -78,7 +78,7 @@ Return following the output schema below.
 
 ## Output Schema: design-context-output
 
-See `~/.claude/skills/develop/references/schemas.md#design-context-output` for the full schema.
+See `~/.claude/skills/design/references/schemas.md#design-context-output` for the full schema.
 
 Return your output as a JSON code block. Examples:
 
