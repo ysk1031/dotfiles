@@ -15,8 +15,7 @@ Diagnose failed GitHub Actions workflow runs, identify the root cause, propose a
 ### Phase 1: Data Collection (use Agent with subagent)
 
 Call the Agent tool with:
-- subagent_type: "custom"
-- agent: "ci-log-collector"
+- subagent_type: "ci-log-collector"
 - description: "collect CI failure logs"
 - prompt: Replace `$ARGUMENTS` in the agent's loaded prompt with actual arguments and execute.
 
@@ -29,8 +28,7 @@ The subagent will return collected failure data (or an error/status).
 If Phase 1 returned an error status (`"status": "GH_AUTH_REQUIRED"`, `"NO_REPO"`, `"NO_REMOTE"`, `"NO_FAILED_RUNS"`, `"RUN_NOT_FOUND"`), display the `message` field to the user and stop. Do NOT proceed to Phase 2.
 
 Call the Agent tool with:
-- subagent_type: "custom"
-- agent: "ci-failure-analyzer"
+- subagent_type: "ci-failure-analyzer"
 - description: "analyze CI failure cause"
 - prompt: Use the entire Phase 1 output as CI failure data and the user hint (if any) as additional context.
 
@@ -62,6 +60,9 @@ Display the hypothesis to the user in a clear format, using JSON fields:
 If `confidence` is `"LOW"` and `category` is `"FLAKY"` or `"TIMEOUT"`, add a note:
 "この失敗はフレーキーテスト（非決定的な失敗）の可能性があります。再実行で解決する場合があります。"
 
+If `confidence` is `"LOW"` and `category` is NOT `"FLAKY"` or `"TIMEOUT"`, add a warning:
+"⚠️ 診断の確信度が低い状態です。修正プランが的外れになる可能性があります。追加のヒントを提供するか、ログを直接確認することを推奨します。"
+
 Use AskUserQuestion:
 - question: "この診断結果に基づいて修正プランを作成しますか？"
 - header: "Diagnosis"
@@ -69,10 +70,12 @@ Use AskUserQuestion:
   1. label: "修正プランを作成", description: "この仮説に基づいて修正プランを作成します"
   2. label: "ヒントを追加して再分析", description: "追加情報を提供して再分析します（Otherで入力）"
   3. label: "キャンセル", description: "診断を終了します"
+  4. (LOW confidence + non-FLAKY/TIMEOUT only) label: "ブラウザでログを確認", description: "GitHub Actionsのログをブラウザで開きます"
 
 **If "修正プランを作成"**: Proceed to Phase 4
 **If "ヒントを追加して再分析"**: User provides additional context via "Other". Re-run Phase 2 with the original Phase 1 data PLUS user's hint. Do NOT re-run Phase 1.
 **If "キャンセル"**: Print "CI診断を終了しました。" and stop.
+**If "ブラウザでログを確認"**: Run `gh run view <run-id> --web` via Bash, then print "CI診断を終了しました。" and stop.
 
 **`"status": "UNCLEAR"` from Phase 2**:
 
@@ -107,8 +110,7 @@ Use AskUserQuestion:
 ### Phase 4: Fix Plan Creation (use Agent with subagent)
 
 Call the Agent tool with:
-- subagent_type: "custom"
-- agent: "ci-fix-planner"
+- subagent_type: "ci-fix-planner"
 - description: "create CI fix plan"
 - prompt: Use the approved hypothesis data as the hypothesis and the Phase 1 output as CI failure data.
 
@@ -197,3 +199,4 @@ Apply the approved fix plan directly (main agent uses Edit/Write tools, NOT a su
 - If `gh` commands fail with permission errors, suggest the user check their GitHub token permissions — permission issues cannot be resolved by the skill and require user action
 - Keep subagent prompts focused — include only the data each subagent needs — including unnecessary data increases subagent token usage and dilutes analysis focus
 - For FLAKY/TIMEOUT failures with LOW confidence, suggest re-running the workflow before attempting code fixes — flaky tests don't need code fixes and are likely resolved by re-running the workflow
+- For non-FLAKY/non-TIMEOUT failures with LOW confidence, ALWAYS show a low-confidence warning and offer browser log review as an additional option — low-confidence diagnoses have a higher chance of being incorrect, and users should be encouraged to verify before proceeding
