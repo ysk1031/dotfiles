@@ -34,9 +34,10 @@
     "metrics": false,
   },
   "terminal": {
-    "button": false,
+    "dock": "right",
+    "button": true,
     "font_size": 13.0,
-    "font_family": "Menlo",
+    "font_family": "JetBrainsMono Nerd Font",
   },
   "base_keymap": "VSCode",
   "minimap": {
