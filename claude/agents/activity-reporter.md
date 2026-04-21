@@ -52,7 +52,10 @@ else
 fi
 END_DATE=$(date +%Y-%m-%d)
 START_TS=$(date -j -f "%Y-%m-%d" "$START_DATE" +%s)000
+START_ISO_JST="${START_DATE}T00:00:00+09:00"
 ```
+
+All datetime comparisons below use JST (`+09:00`), not UTC. The user is in Japan — filtering by UTC midnight would either miss JST early-morning activity or leak in previous-day-evening activity.
 
 **Step 4: Determine GitHub Repositories**
 Determine the target repositories for GitHub PR collection. This list is used ONLY for GitHub activity collection (Step 5).
@@ -61,7 +64,7 @@ Claude Code sessions (Step 6) are collected from history.jsonl across ALL projec
 If `--repos` is specified, use those.
 Otherwise, auto-detect repositories with recent PR activity:
 ```bash
-gh search prs --author=@me --created=>=${START_DATE} --state=open --state=closed --state=merged --limit 100 --json repository --jq '[.[].repository.nameWithOwner] | unique | .[]'
+gh search prs --author=@me --created=">=${START_ISO_JST}" --state=open --state=closed --state=merged --limit 100 --json repository --jq '[.[].repository.nameWithOwner] | unique | .[]'
 ```
 
 If no repos found via search, fallback to current directory:
@@ -76,7 +79,7 @@ If `--repos` was NOT specified and no repos found after fallback, set repos to a
 
 For each repository, collect Pull Requests by user (including commits for each PR):
 ```bash
-gh pr list --repo {owner/repo} --author=@me --state all --json number,title,state,additions,deletions,changedFiles,createdAt,body,commits --jq '.[] | select(.createdAt >= "'${START_DATE}'T00:00:00Z")'
+gh pr list --repo {owner/repo} --author=@me --state all --json number,title,state,additions,deletions,changedFiles,createdAt,body,commits --jq '.[] | select(.createdAt >= "'${START_ISO_JST}'")'
 ```
 
 The `commits` field contains an array of commits for each PR with `oid` (SHA) and `messageHeadline`.
