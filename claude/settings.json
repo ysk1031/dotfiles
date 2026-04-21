@@ -52,6 +52,9 @@
     "skill-creator@claude-plugins-official": true,
     "typescript-lsp@claude-plugins-official": true
   },
-  "voiceEnabled": true,
-  "effortLevel": "high"
+  "effortLevel": "high",
+  "voice": {
+    "enabled": true,
+    "mode": "hold"
+  }
 }
