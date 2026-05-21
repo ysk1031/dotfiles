@@ -2,8 +2,15 @@
 # Source this file from ~/.zshrc:
 #   source ~/src/github.com/ysk1031/dotfiles/my.zsh
 
-# Options
-setopt hist_ignore_all_dups
+# History
+HISTFILE=~/.zsh_history
+HISTSIZE=10000
+SAVEHIST=10000
+setopt share_history          # share history across sessions in real time
+setopt extended_history       # record timestamp and duration
+setopt hist_ignore_all_dups   # drop older duplicates
+setopt hist_reduce_blanks     # collapse extra whitespace
+setopt hist_verify            # confirm before executing !! expansions
 
 # Case-insensitive completion
 zstyle ':completion:*' matcher-list 'm:{a-z}={A-Z} m:{A-Z}={a-z}'
