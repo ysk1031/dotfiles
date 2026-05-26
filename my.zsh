@@ -32,11 +32,14 @@ alias grep='rg'
 alias lzd='lazydocker'
 alias nv='nvim'
 
+# fzf
+export FZF_DEFAULT_OPTS="--height=40% --reverse --border"
+
 # Function: History search with fzf (Ctrl+r)
 function fzf_select_history() {
   BUFFER=$(fc -l -n 1 | fzf --tac --scheme=history --query "$LBUFFER")
   CURSOR=$#BUFFER
-  zle clear-screen
+  zle reset-prompt
 }
 zle -N fzf_select_history
 bindkey '^r' fzf_select_history
@@ -48,7 +51,7 @@ function fzf-src() {
     BUFFER="cd ${selected_dir}"
     zle accept-line
   fi
-  zle clear-screen
+  zle reset-prompt
 }
 zle -N fzf-src
 bindkey '^]' fzf-src
