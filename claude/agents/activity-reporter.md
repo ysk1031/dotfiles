@@ -51,11 +51,13 @@ else
   START_DATE=$(date -v-${DAYS_SINCE_MONDAY}d +%Y-%m-%d)
 fi
 END_DATE=$(date +%Y-%m-%d)
-START_TS=$(date -j -f "%Y-%m-%d" "$START_DATE" +%s)000
+START_TS=$(date -j -f "%Y-%m-%d %H:%M:%S" "${START_DATE} 00:00:00" +%s)000
 START_ISO_JST="${START_DATE}T00:00:00+09:00"
 ```
 
 All datetime comparisons below use JST (`+09:00`), not UTC. The user is in Japan — filtering by UTC midnight would either miss JST early-morning activity or leak in previous-day-evening activity.
+
+**Important — START_TS must be midnight, not "current time on START_DATE":** macOS `date -j -f "%Y-%m-%d" "$START_DATE" +%s` parses a date-only string but fills the time-of-day from *the current wall clock*, not 00:00:00. That yields a START_TS later in the day than intended, missing all history.jsonl entries from that morning. Always include the explicit `00:00:00` in both the format string and the input, as shown above.
 
 **Step 4: Determine GitHub Repositories**
 Determine the target repositories for GitHub PR collection. This list is used ONLY for GitHub activity collection (Step 5).
