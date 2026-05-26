@@ -57,5 +57,7 @@
     "enabled": true,
     "mode": "hold"
   },
-  "skipAutoPermissionPrompt": true
+  "skipAutoPermissionPrompt": true,
+  "voiceEnabled": true,
+  "language": "Japanese"
 }
