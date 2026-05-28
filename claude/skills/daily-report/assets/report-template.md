@@ -32,26 +32,31 @@ _（明日に持ち越すこと・気になっていることをここにメモ�
 
 ### 詳細ログ
 
-<details>
-<summary>GitHub PR ({{github_stats.prs_created}}件作成 / {{github_stats.prs_merged}}件マージ)</summary>
-
+> [!note]- GitHub PR ({{github_stats.prs_created}}件作成 / {{github_stats.prs_merged}}件マージ)
 {{#each github_prs grouped by repo}}
-#### {{repo}}
-
+> **{{repo}}**
 {{#each prs}}
-- **#{{number}} {{title}}** — {{state}} (+{{additions}}/-{{deletions}})
-  > {{body_preview || "説明なし"}}
+> - **#{{number}} {{title}}** — {{state}} (+{{additions}}/-{{deletions}})
+>   > {{body_preview || "説明なし"}}
 {{#each commits}}
-  - `{{sha}}` {{message}}
+>   - `{{sha}}` {{message}}
 {{/each}}
 {{/each}}
-
 {{/each}}
 {{#if no_github_activity}}
-_今日のPR活動はありませんでした。_
+> _今日のPR活動はありませんでした。_
 {{/if}}
 
-</details>
+> [!note]- Claude Code セッション ({{claude_stats.total_sessions}}件)
+{{#each claude_sessions}}
+> **{{project_path}}** ({{session_count}}セッション)
+{{#each prompts}}
+> - {{this}}
+{{/each}}
+{{/each}}
+{{#if no_claude_activity}}
+> _今日のClaude Codeセッションはありませんでした。_
+{{/if}}
 
 {{#if past_date_mode}}
 > ⚠️ 過去日付モード: `--date {{target_date}}` 指定。activity-reporter は対象日のJST 00:00 から「現在」までを収集するため、{{target_date}} 以降のデータが混入する可能性があります。

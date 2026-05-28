@@ -91,6 +91,7 @@ The template uses `{{placeholder}}` and `{{#each ...}}` blocks. Some slots map d
 | `claude_only_highlights` | Optional 0-3 line summary of project-level work surfaced only via Claude Code (no PR). Skip if redundant with `summarized_prs`. |
 | `reflection_bullets` | Array of 2-5 strings — see 「考えたこと・悩んだこと」 below. |
 | `no_github_activity` | Boolean: true if `github_prs` is empty. |
+| `no_claude_activity` | Boolean: true if `claude_sessions` is empty. |
 | `past_date_mode` | Boolean: true if `--date` was supplied. |
 | `target_date` | The user-supplied date (only used when `past_date_mode`). |
 
@@ -147,6 +148,8 @@ Avoid:
 ### 「詳細ログ」 section
 
 Mechanical expansion — list every PR (number, title, state, additions/deletions) and every Claude Code session group (project_path, session_count, all prompts). This is the raw record for when the narrative sections are insufficient.
+
+**Collapsing uses Obsidian foldable callouts, NOT HTML `<details>`.** This report is read primarily in Obsidian, where `<details>` blocks containing blank-line-separated Markdown fail to collapse (Obsidian terminates the HTML block at the first blank line, so the content renders outside the `<details>` and is always expanded). Use the `> [!note]- Title` callout syntax from the template instead, with every content line prefixed by `>`. Do not reintroduce `<details>`/`<summary>` for these sections.
 
 ### Writing the file
 
