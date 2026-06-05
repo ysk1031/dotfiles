@@ -43,8 +43,14 @@ Use AskUserQuestion:
 Then call subagent again with the language specified.
 
 **`"status": "OK"`**:
-1. **MUST: Output the proposed PR draft as user-visible response text (normal markdown output, NOT thinking) BEFORE calling AskUserQuestion.** The subagent's result is collapsed in the UI and invisible to the user — the user can only review the draft if you print it yourself. Never call AskUserQuestion in a response that contains no visible draft text. Display:
-   - `title`, `body` (full text), and **`base`** (target branch)
+1. **MUST: Output the proposed PR draft as user-visible response text (normal markdown output, NOT thinking) BEFORE calling AskUserQuestion.** The subagent's result is collapsed in the UI and invisible to the user — the user can only review the draft if you print it yourself. Never call AskUserQuestion in a response that contains no visible draft text. Unlike tool outputs or AskUserQuestion previews, normal response text is never truncated, so this is the only place the user can review the full draft. Display in this format:
+   ```
+   **Base:** <base>
+
+   # <title>
+
+   <body — full text, never summarized or truncated>
+   ```
 2. Display unpushed commit information (also as visible text):
    - If `unpushed_count` is a number: "リモートにpushされていないコミットが {unpushed_count} 件あります:\n{unpushed_commits}"
    - If `unpushed_count` is "all": "リモートブランチが未設定のため、全コミットがpushされます。"
@@ -52,17 +58,10 @@ Then call subagent again with the language specified.
    - question: "このPR内容でよろしいですか？"
    - header: "PR"
    - options:
-     1. label: "Accept", description: "このままPRを作成", preview: PR draft in the format below (so the draft is always reviewable in the UI even if step 1 is missed)
+     1. label: "Accept", description: "このままPRを作成"
      2. label: "Edit", description: "内容を編集（Otherで自由入力）"
      3. label: "Cancel", description: "PRを作成せずに終了"
-   - preview format for "Accept":
-     ```
-     **Base:** <base>
-
-     # <title>
-
-     <body>
-     ```
+   - **Do NOT use the `preview` field** — the preview pane has a fixed height and truncates long drafts, which misleads the user into thinking content is missing. The full draft is already shown as visible text in step 1; AskUserQuestion is for confirmation only.
 
 **If "Accept"**: Proceed to Phase 3
 **If "Edit"**: User provides custom content via "Other". Parse title and body from input (first line = title, rest = body)
