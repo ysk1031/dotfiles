@@ -43,17 +43,26 @@ Use AskUserQuestion:
 Then call subagent again with the language specified.
 
 **`"status": "OK"`**:
-1. Display the proposed PR `title`, `body`, and **`base`** (target branch)
-2. Display unpushed commit information:
+1. **MUST: Output the proposed PR draft as user-visible response text (normal markdown output, NOT thinking) BEFORE calling AskUserQuestion.** The subagent's result is collapsed in the UI and invisible to the user — the user can only review the draft if you print it yourself. Never call AskUserQuestion in a response that contains no visible draft text. Display:
+   - `title`, `body` (full text), and **`base`** (target branch)
+2. Display unpushed commit information (also as visible text):
    - If `unpushed_count` is a number: "リモートにpushされていないコミットが {unpushed_count} 件あります:\n{unpushed_commits}"
    - If `unpushed_count` is "all": "リモートブランチが未設定のため、全コミットがpushされます。"
 3. Use AskUserQuestion:
    - question: "このPR内容でよろしいですか？"
    - header: "PR"
    - options:
-     1. label: "Accept", description: "このままPRを作成"
+     1. label: "Accept", description: "このままPRを作成", preview: PR draft in the format below (so the draft is always reviewable in the UI even if step 1 is missed)
      2. label: "Edit", description: "内容を編集（Otherで自由入力）"
      3. label: "Cancel", description: "PRを作成せずに終了"
+   - preview format for "Accept":
+     ```
+     **Base:** <base>
+
+     # <title>
+
+     <body>
+     ```
 
 **If "Accept"**: Proceed to Phase 3
 **If "Edit"**: User provides custom content via "Other". Parse title and body from input (first line = title, rest = body)
