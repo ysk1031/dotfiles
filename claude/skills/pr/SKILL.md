@@ -1,49 +1,123 @@
 ---
 name: pr
 description: "Create a GitHub Pull Request with auto-generated title and description. Use when user says 'PR作って', 'create PR', 'プルリクエスト', or wants to push and open a pull request. Do NOT use for reviewing existing PRs, merging PRs, or updating PR descriptions."
-allowed-tools: Agent, AskUserQuestion, Bash
+allowed-tools: AskUserQuestion, Bash
 argument-hint: "[base-branch to specify target branch] [--draft to create as draft PR]"
 metadata:
   author: ysk1031
-  version: 1.0.0
+  version: 2.0.0
 ---
 
 # Pull Request Creation Skill
 
-Generate a PR title and description from current branch changes, let the user review/edit, then create the PR.
+Analyze current branch changes, generate a PR title and description, let the user review/edit, then create the PR. All phases run in the main agent — do NOT use subagents (their output is collapsed in the UI and invisible to the user).
 
 ## Instructions
 
-### Phase 1: Analyze Changes (use Agent with subagent)
+### Phase 1: Analyze Changes (Bash)
 
-Call the Agent tool with:
-- subagent_type: "pr-composer"
-- description: "analyze branch changes for PR"
-- prompt: Replace `$ARGUMENTS` in the agent's loaded prompt with the actual user arguments and execute.
+Use ONLY read-only commands (`git`, `gh`, `cat`) in this phase. NEVER modify, create, or delete any files.
 
-The subagent will return the proposed PR content (or an error/status).
+**Step 1: Check Current Branch**
+Run: `git branch --show-current`
 
----
+If empty (detached HEAD), display the following and stop:
+```
+現在detached HEAD状態です。ブランチを作成してください。
+git checkout -b <branch-name>
+```
 
-### Phase 2: User Confirmation (main agent)
+**Step 2: Determine Base Branch**
+If arguments specify a base branch, use that.
+Otherwise, auto-detect:
+1. Try: `git remote show origin 2>/dev/null | grep 'HEAD branch' | awk '{print $NF}'`
+2. If empty, check existence: main → master → develop
+   - `git show-ref --verify --quiet refs/heads/main && echo main`
+   - `git show-ref --verify --quiet refs/heads/master && echo master`
+   - `git show-ref --verify --quiet refs/heads/develop && echo develop`
 
-Handle based on subagent `status`:
+If no base branch found, display "ベースブランチを特定できませんでした。引数でベースブランチを指定してください。" and stop.
 
-**`"status": "NOT_ON_BRANCH"` / `"NO_BASE"` / `"NO_COMMITS"` / `"NO_CHANGES"`**:
-Display the `message` field and stop.
+**Step 3: Check for Commits**
+Run: `git log <base>..HEAD --oneline`
 
-**`"status": "ASK_LANGUAGE"`**:
-Use AskUserQuestion:
+If empty, display "ベースブランチとの差分コミットがありません。変更をコミットしてから再実行してください。" and stop.
+
+**Step 4: Check for Changes**
+Run: `git diff <base>...HEAD --stat`
+
+If empty, display "ベースブランチとの差分がありません。" and stop.
+
+**Step 5: Gather Information**
+- `git log <base>..HEAD --oneline` (commit list — already obtained in Step 3)
+- `git diff <base>...HEAD --stat` (already obtained in Step 4)
+- `git diff <base>...HEAD` (detailed diff)
+  - If the stat shows a very large diff (e.g. thousands of lines or generated/lock files), do NOT read the full diff. Instead, read per-file diffs for the meaningful source files only and skip generated files (lock files, build output, snapshots).
+
+**Step 5.5: Check Unpushed Commits**
+Check if a remote tracking branch exists and count unpushed commits:
+```bash
+REMOTE_BRANCH=$(git rev-parse --abbrev-ref --symbolic-full-name @{u} 2>/dev/null)
+if [ -n "$REMOTE_BRANCH" ]; then
+  git log ${REMOTE_BRANCH}..HEAD --oneline
+else
+  echo "(リモートブランチ未設定 — 全コミットがpushされます)"
+fi
+```
+
+**Step 6: Check PR Template**
+Check if `.github/pull_request_template.md` exists:
+- If exists, read its content for format reference
+
+**Step 7: Detect Language**
+Check recent commits and existing PRs:
+- `git log --oneline -10`
+- `gh pr list --limit 5 2>/dev/null || true`
+
+If majority contain Japanese text → use Japanese
+If majority contain English text → use English
+If unclear (mixed or cannot determine), use AskUserQuestion:
 - question: "PR説明文をどちらの言語で作成しますか？"
 - header: "Language"
 - options:
   1. label: "日本語", description: "日本語でPR説明文を作成"
   2. label: "English", description: "Create PR description in English"
 
-Then call subagent again with the language specified.
+Then continue to Phase 2 with the selected language (do NOT re-run the analysis — reuse the information already gathered).
 
-**`"status": "OK"`**:
-1. **MUST: Output the proposed PR draft as user-visible response text (normal markdown output, NOT thinking) BEFORE calling AskUserQuestion.** The subagent's result is collapsed in the UI and invisible to the user — the user can only review the draft if you print it yourself. Never call AskUserQuestion in a response that contains no visible draft text. Unlike tool outputs or AskUserQuestion previews, normal response text is never truncated, so this is the only place the user can review the full draft. Display in this format:
+---
+
+### Phase 2: Draft & User Confirmation
+
+**Step 1: Generate Title**
+- If single commit: use that commit message as title
+- If multiple commits: summarize changes into a concise title
+
+**Step 2: Generate Description**
+Writing style rules:
+- When writing in Japanese: ALWAYS use 常体 (plain form / だ・である調). NEVER use 丁寧語 (polite form / です・ます調).
+  - Good: 「認証ロジックを追加した」「エラーハンドリングを改善する」「不要な依存を削除した」
+  - Bad: 「認証ロジックを追加しました」「エラーハンドリングを改善します」「不要な依存を削除しました」
+- When writing in English: no special style constraint.
+
+If PR template exists: follow that format
+Otherwise, use default format:
+
+```markdown
+## Summary
+[Brief description of what this PR does and why]
+
+## Changes
+- [Change 1]
+- [Change 2]
+- [Change 3]
+
+## Test Plan
+- [ ] [How to verify this change]
+```
+
+**Step 3: Display Draft and Confirm**
+1. **MUST: Output the proposed PR draft as user-visible response text (normal markdown output, NOT thinking) BEFORE calling AskUserQuestion.** Normal response text is never truncated, so this is the only place the user can review the full draft. Display in this format:
    ```
    **Base:** <base>
 
@@ -52,8 +126,8 @@ Then call subagent again with the language specified.
    <body — full text, never summarized or truncated>
    ```
 2. Display unpushed commit information (also as visible text):
-   - If `unpushed_count` is a number: "リモートにpushされていないコミットが {unpushed_count} 件あります:\n{unpushed_commits}"
-   - If `unpushed_count` is "all": "リモートブランチが未設定のため、全コミットがpushされます。"
+   - If there are unpushed commits: "リモートにpushされていないコミットが {count} 件あります:\n{commit list}"
+   - If no remote tracking branch: "リモートブランチが未設定のため、全コミットがpushされます。"
 3. Use AskUserQuestion:
    - question: "このPR内容でよろしいですか？"
    - header: "PR"
@@ -69,7 +143,7 @@ Then call subagent again with the language specified.
 
 ---
 
-### Phase 3: Create PR (main agent with Bash)
+### Phase 3: Create PR (Bash)
 
 1. Push to remote:
 
@@ -95,8 +169,8 @@ If push fails for any other reason, display the error message and stop.
 
 2. Create PR:
 ```bash
-gh pr create --base <base from subagent output> --title "<title from subagent output>" --body "$(cat <<'EOF'
-<body>
+gh pr create --base <base from Phase 1> --title "<confirmed title>" --body "$(cat <<'EOF'
+<confirmed body>
 
 ---
 🤖 Generated with [Claude Code](https://claude.com/claude-code)
@@ -114,7 +188,7 @@ EOF
 - Use HEREDOC for body to ensure proper formatting — regular strings don't properly handle markdown line breaks and special characters
 - Keep title concise (under 72 characters if possible) — prevents truncation in GitHub UI and maintains readability in PR lists
 - If --draft flag is in arguments, add --draft to gh pr create — accurately reflects the user's intent in the GitHub API call
-- ALWAYS use the `base` value from the subagent output for `--base` — the subagent detects the correct base branch from git remote config; do NOT substitute the system prompt's "Main branch" value, as it may be inaccurate
+- ALWAYS use the `base` value detected in Phase 1 Step 2 for `--base` — do NOT substitute the system prompt's "Main branch" value, as it may be inaccurate
 - NEVER use `--force` for push — always use `--force-with-lease` to prevent overwriting others' commits — `--force` unconditionally overwrites the remote, while `--force-with-lease` fails if the remote has been updated by someone else since your last fetch
 - ALWAYS confirm with user before force pushing — force push is destructive and irreversible; silent force push can destroy teammates' work
 
@@ -125,7 +199,7 @@ EOF
 #### Example 1: 通常のPR作成
 User says: "PR作って"
 Actions:
-1. pr-composer がブランチの差分を分析
+1. ブランチの差分を分析
 2. PRタイトルと説明文を提案
 3. ユーザー確認後、push → PR作成
 Result: GitHub上にPRが作成され、URLが表示される
@@ -141,11 +215,11 @@ Result: ドラフト状態のPRが作成される
 
 ### Troubleshooting
 
-#### "NOT_ON_BRANCH"
+#### Detached HEAD
 Cause: detached HEAD状態でブランチに属していない
 Solution: `git checkout -b <branch-name>` でブランチを作成
 
-#### "NO_COMMITS"
+#### 差分コミットなし
 Cause: ベースブランチとの差分コミットがない
 Solution: 変更をコミットしてから再実行
 
