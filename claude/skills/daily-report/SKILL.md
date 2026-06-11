@@ -6,7 +6,7 @@ argument-hint: "[--repos owner/repo1,repo2 to restrict (default: auto-detect)] [
 disable-model-invocation: true
 metadata:
   author: ysk1031
-  version: 1.0.0
+  version: 1.1.0
 ---
 
 # Daily Development Reflection Report Skill
@@ -55,22 +55,28 @@ If "過去3日分", re-invoke with `--days 3 --output ~/Desktop/daily-report-${T
 If "キャンセル", print "レポート生成をキャンセルしました。" and stop.
 
 **`"OK"`**:
-Show a brief preview — for a daily report, keep this very short, since the user is about to read the full report anyway:
+Show a brief preview — for a daily report, keep this very short, since the user is about to read the full report anyway — then confirm via a normal chat reply, NOT AskUserQuestion.
 
-```
-今日の活動: PR {prs_created}件作成 / {prs_merged}件マージ, Claude Code セッション {total_sessions}件
-対象リポジトリ: {repos joined by ', ' — or "なし（GitHub PR活動なし）" if empty}
-出力先: {output_path}
-```
+**Why no AskUserQuestion here:** text output in the same turn is only guaranteed visible to the user when it is the FINAL message of the turn with NO tool calls after it. Calling AskUserQuestion after displaying the preview causes the dialog to redraw the terminal and hide the preview text (same issue previously fixed in [[pr]]). Confirmation MUST happen via the user's next chat message instead.
 
-Then use AskUserQuestion:
-- question: "このデータで日報を生成しますか？"
-- header: "Generate"
-- options:
-  1. label: "生成する", description: "リフレクション形式の日報を生成しファイルに保存"
-  2. label: "キャンセル", description: "中止"
+1. Output the following as the final response text of this turn:
 
-If "キャンセル", print "レポート生成をキャンセルしました。" and stop.
+   ```
+   今日の活動: PR {prs_created}件作成 / {prs_merged}件マージ, Claude Code セッション {total_sessions}件
+   対象リポジトリ: {repos joined by ', ' — or "なし（GitHub PR活動なし）" if empty}
+   出力先: {output_path}
+   ```
+
+   Followed by the confirmation prompt:
+   "このデータで日報を生成してよければ「OK」と返信してください。中止する場合は「キャンセル」と返信してください。"
+
+2. **END THE TURN immediately after this message.** Do NOT call any tool (Bash, AskUserQuestion, anything) after displaying the preview. The preview must be the last thing in the turn.
+
+3. Handle the user's reply:
+   - **Approval** ("OK", "生成して", "お願い", etc.): Proceed to Phase 3
+   - **Cancel** ("キャンセル", "やめる", etc.): Print "レポート生成をキャンセルしました。" and stop
+
+Note: The `"NO_DATA"` path above still uses AskUserQuestion — that is fine, because no preview text precedes the dialog there (the question itself is the only content).
 
 Note: We do NOT offer "期間を変更" here. Daily reports are scoped to a single day by design — if the user wants a multi-day view, they should use [[weekly-report]] instead.
 
@@ -182,7 +188,7 @@ After writing:
 User says: "日報作って"
 Actions:
 1. `activity-reporter` を `--days 0` で呼び出し
-2. 簡易プレビュー表示後、ユーザー確認
+2. 簡易プレビュー表示でターンを終了し、ユーザーのチャット返信で確認
 3. テンプレートに沿って `~/Desktop/daily-report-YYYY-MM-DD.md` を生成
 
 ### Example 2: 過去の日報生成
