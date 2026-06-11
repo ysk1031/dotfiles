@@ -5,12 +5,12 @@ allowed-tools: AskUserQuestion, Bash
 argument-hint: "[base-branch to specify target branch] [--draft to create as draft PR]"
 metadata:
   author: ysk1031
-  version: 2.0.0
+  version: 2.1.0
 ---
 
 # Pull Request Creation Skill
 
-Analyze current branch changes, generate a PR title and description, let the user review/edit, then create the PR. All phases run in the main agent — do NOT use subagents (their output is collapsed in the UI and invisible to the user).
+Analyze current branch changes, generate a PR title and description, let the user review/edit, then create the PR. All phases run in the main agent — do NOT use subagents (their output is collapsed in the UI and invisible to the user). Draft confirmation happens via a normal chat reply, NOT AskUserQuestion (see Phase 2 Step 3 for why).
 
 ## Instructions
 
@@ -116,8 +116,11 @@ Otherwise, use default format:
 - [ ] [How to verify this change]
 ```
 
-**Step 3: Display Draft and Confirm**
-1. **MUST: Output the proposed PR draft as user-visible response text (normal markdown output, NOT thinking) BEFORE calling AskUserQuestion.** Normal response text is never truncated, so this is the only place the user can review the full draft. Display in this format:
+**Step 3: Display Draft and END THE TURN — do NOT use AskUserQuestion for confirmation**
+
+**Why no AskUserQuestion here:** text output in the same turn is only guaranteed visible to the user when it is the FINAL message of the turn with NO tool calls after it. Calling AskUserQuestion after displaying the draft causes the dialog to redraw the terminal and hide the draft text — this has repeatedly broken in the past. Confirmation MUST happen via the user's next chat message instead.
+
+1. Output the following as the final response text of this turn:
    ```
    **Base:** <base>
 
@@ -125,21 +128,19 @@ Otherwise, use default format:
 
    <body — full text, never summarized or truncated>
    ```
-2. Display unpushed commit information (also as visible text):
+   Followed by unpushed commit information:
    - If there are unpushed commits: "リモートにpushされていないコミットが {count} 件あります:\n{commit list}"
    - If no remote tracking branch: "リモートブランチが未設定のため、全コミットがpushされます。"
-3. Use AskUserQuestion:
-   - question: "このPR内容でよろしいですか？"
-   - header: "PR"
-   - options:
-     1. label: "Accept", description: "このままPRを作成"
-     2. label: "Edit", description: "内容を編集（Otherで自由入力）"
-     3. label: "Cancel", description: "PRを作成せずに終了"
-   - **Do NOT use the `preview` field** — the preview pane has a fixed height and truncates long drafts, which misleads the user into thinking content is missing. The full draft is already shown as visible text in step 1; AskUserQuestion is for confirmation only.
 
-**If "Accept"**: Proceed to Phase 3
-**If "Edit"**: User provides custom content via "Other". Parse title and body from input (first line = title, rest = body)
-**If "Cancel"**: Print "PRの作成をキャンセルしました。" and stop
+   Followed by the confirmation prompt:
+   "この内容でPRを作成してよければ「OK」と返信してください。修正したい場合は修正内容を、中止する場合は「キャンセル」と返信してください。"
+
+2. **END THE TURN immediately after this message.** Do NOT call any tool (Bash, AskUserQuestion, anything) after displaying the draft. The draft must be the last thing in the turn.
+
+3. Handle the user's reply:
+   - **Approval** ("OK", "いいよ", "作成して", etc.): Proceed to Phase 3
+   - **Edit request** (correction instructions or replacement text): Revise the title/body accordingly, then repeat this Step 3 (re-display the full revised draft and end the turn again)
+   - **Cancel** ("キャンセル", "やめる", etc.): Print "PRの作成をキャンセルしました。" and stop
 
 ---
 
