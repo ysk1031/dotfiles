@@ -56,7 +56,7 @@ font-feature = "-liga"
 adjust-cell-height = 10%
 
 window-height = 40
-window-width = 160
+window-width = 164
 window-padding-x = 4
 window-padding-y = 4
 window-padding-balance = true
