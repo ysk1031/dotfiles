@@ -15,7 +15,6 @@
     ]
   },
   "hooks": {
-    "PreToolUse": [],
     "PostToolUse": [
       {
         "matcher": "Bash",
@@ -41,12 +40,12 @@
     "skill-creator@claude-plugins-official": true,
     "typescript-lsp@claude-plugins-official": true
   },
+  "language": "Japanese",
   "effortLevel": "xhigh",
   "voice": {
     "enabled": true,
     "mode": "hold"
   },
-  "skipAutoPermissionPrompt": true,
-  "voiceEnabled": true,
-  "language": "Japanese"
+  "inputNeededNotifEnabled": true,
+  "skipAutoPermissionPrompt": true
 }
