@@ -120,16 +120,16 @@ Compute today's date in JST: `date +%Y-%m-%d` via Bash, and use the same value f
 
 Body composition:
 - **One learning, simple** → no need for h2 sections. Write it as a coherent short essay or a few labeled bullets.
-- **One learning with multiple facets** → start with a **1-2行のリード段落**（日付の引用ブロック直下、最初の h2 の前）で結論を先に述べる。その後、h2 は **トピック/側面で切る**（例: 仕様 / 補足事実 / 教訓 / 参考）。**時系列構成は避ける**（背景 → 試したこと → 解決、のような narrative arc は使わない）。理由: 未来の自分はストーリーを聞きに来る読者ではなく、事実を引きに来る読者。リードで結論を出し、各論で深掘れる構成のほうが後で再利用しやすい。
-- **Multiple related learnings** → use h2 (`##`) per learning. Order by what would matter most to future-self, not chronologically. リード段落で「3点まとめて何の話か」を1行で示すと、ノートを開いた瞬間に内容が分かる。
+- **One learning with multiple facets** → open with a **1-2 line lead paragraph** (right below the date quote block, before the first h2) that states the conclusion up front. Then split the h2 sections **by topic/facet** (e.g., 仕様 / 補足事実 / 教訓 / 参考). **Avoid a chronological structure** — don't use a narrative arc like 背景 → 試したこと → 解決. Rationale: future-self reads to pull facts, not to hear a story; leading with the conclusion and letting each section go deep is more reusable later.
+- **Multiple related learnings** → use h2 (`##`) per learning. Order by what would matter most to future-self, not chronologically. A one-line lead paragraph stating 「3点まとめて何の話か」 makes the note's content clear the moment it is opened.
 
 ### Writing rules
 
-- **抽象化して書く** — このセッション固有の文脈をそのまま転記せず、未来の自分が読んで再利用できる形に。「`auth/middleware.go:132` の `JWT.Verify` が...」ではなく「JWT検証で `iat` と `exp` を扱う際の注意点」のように、汎用化できる部分は汎用化する。
-- **ただしコードベース固有の知見は固有のまま残す** — 「`internal/foo/` 配下は単体テスト不要」のようなリポジトリ規約は、汎用化すると価値が消える。固有事実はそのまま、抽象化できる学びは抽象化、と書き分ける。
-- **言い回しは日本語** — vault 内の既存ノートが日本語中心。技術用語・コード識別子・コマンド名は原文のまま。
-- **日付は本文に書く** — ファイル名には日付を入れない（vault の慣習）。ノートを開いたとき鮮度が分かるように、frontmatter 直後（本文の最初の行）に `> YYYY-MM-DD` を引用ブロックで置く（H1 タイトルは書かない — 上述の通り Obsidian が自動表示する）。
-- **必要なら参考リンク** — 公式ドキュメントURL、PR/コミットへのリンク、関連ファイルパス（このリポジトリ固有の話の場合）は本文末尾に書く。
+- **Write at an abstraction level** — don't transcribe this session's specific context verbatim; frame it so future-self can reread and reuse it. Generalize what can be generalized: prefer 「JWT検証で `iat` と `exp` を扱う際の注意点」 over 「`auth/middleware.go:132` の `JWT.Verify` が...」.
+- **But keep codebase-specific knowledge specific** — a repository convention like 「`internal/foo/` 配下は単体テスト不要」 loses its value if generalized. Write specific facts as-is and abstract the generalizable learnings — distinguish between the two.
+- **Phrasing stays Japanese** — the existing notes in the vault are mostly Japanese. Keep technical terms, code identifiers, and command names in their original form.
+- **Put the date in the body** — don't put the date in the filename (vault convention). So freshness is visible when the note is opened, place a `> YYYY-MM-DD` quote block right after the frontmatter (the first line of the body). Don't write an H1 title — as noted above, Obsidian displays it automatically.
+- **Reference links when useful** — official doc URLs, links to PRs/commits, and related file paths (when the topic is specific to this repo) go at the end of the body.
 
 ### Filename and conflict handling
 
@@ -156,12 +156,12 @@ If a numbered suffix was used due to conflict, call it out:
 
 ## Rules
 
-- **明示的依頼があったときのみ動く** — `disable-model-invocation: true` のため自動発動はしない。ユーザーが `/obsidian-learning-note` や明確な日本語/英語のリクエストで呼んだときだけ動作する。
-- **保存はユーザー確認後** — Obsidian vault はユーザーの長期記憶。プレビューを必ず見せ、タイトルを確認してから書き込む。確認なしで書き込まない。
-- **学びがなければ作らない** — 価値の薄いノートを増やすと検索ノイズになる。「学びなし」を素直に報告して終了する選択肢を必ず提示する。
-- **常に新規ノート作成** — 既存ノートへの追記はこのスキルの対象外。タイトル衝突したら必ず別名で保存する。
-- **会話の文脈から書く** — diff やコミット履歴を漁る必要はない。ユーザーとのやりとりが学びの源泉であり、コードは結果に過ぎない。
-- **1セッション = 1ノート（デフォルト）** — 複数の学びがあっても1つのノートに h2 でまとめる。完全に独立した話題で分けたほうがよさそうな場合のみ、ユーザーに確認した上で複数ノートにする。
+- **Run only on explicit request** — `disable-model-invocation: true` means no auto-invocation. Act only when the user calls `/obsidian-learning-note` or makes a clear request in Japanese/English.
+- **Save only after user confirmation** — the Obsidian vault is the user's long-term memory. Always show a preview and confirm the title before writing. Never write without confirmation.
+- **Don't create a note when there's no learning** — padding the vault with low-value notes creates search noise. Always offer the option to honestly report "no learnings" and stop.
+- **Always create a new note** — appending to an existing note is out of scope for this skill. On a title collision, always save under a different name.
+- **Write from the conversation** — no need to dig through diffs or commit history. The exchange with the user is the source of learnings; the code is merely the result.
+- **One session = one note (default)** — consolidate multiple learnings into a single note using h2 sections. Split into multiple notes only when the topics are genuinely independent, and only after confirming with the user.
 
 ---
 

@@ -141,7 +141,7 @@ Example of **too concrete** (avoid this):
 - `is_first_use` の命名を悩んだ。`current_last_used_at` の等号/不等号を悩んだ。`_ensure_utc` の呼び出し要否を悩んだ。
 ```
 
-→ これは個別論点の列挙。「ドメインモデルの責務境界と命名」のような一段上の抽象に畳む。
+→ This is a list of individual points. Fold it up one level of abstraction, e.g. 「ドメインモデルの責務境界と命名」.
 
 If no reflective material is found, write: `- 今日は淡々と手を動かす日だった様子（明確な悩み・迷いのシグナルは見当たらず）`
 
