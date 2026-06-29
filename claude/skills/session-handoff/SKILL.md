@@ -1,74 +1,76 @@
 ---
-name: session-handoff
 description: >-
-  作業セッションの終わりに、次の作業セッションが前提知識ゼロで再開できる「引き継ぎ
-  doc（markdown 1本）＋ そのまま貼れるキックオフメッセージ」を生成する。狙いは、
-  会話の自動要約（compaction）では失われがちな情報——下した判断とその理由、採用／
-  却下した規約・選択肢、実際に使った検証コマンドやツールチェーンのハマり所、コードや
-  git から再導出できないプロジェクト固有の方針、残作業と保留理由——を正確に残すこと。
-  次のような場面では、明示的に "doc" や "引き継ぎ" という語が無くても積極的に発火する:
-  「引き継ぎ／handoff を作って」「別のセッション・別チャットに渡したい／そっちで続きを
-  やる」「次のセッション用にまとめて」「(会話の)context・コンテキストがいっぱい／そろそろ
-  限界」「このまま /clear・compact する前に今の状態を残したい」「compact すべきか doc に
-  残すべきか迷う」「今日はここまで／作業を中断する／一区切りつけるので、明日や後で再開
-  する自分が迷わず続けられるよう状態を残して」。
-  一方、次は対象外なので発火しない: 関数の切り出し・リネーム・1ファイル内のリファクタ
-  などコード整理そのもの；PR 説明文・コミットメッセージ・README・設計ドキュメント
-  (design doc) など一般の文書作成；Slack などへの作業報告・分報のまとめ；退職や担当交代
-  に伴う人・チームへの業務引き継ぎ資料；「もっとファイルを読んで文脈(context)を把握して
-  直して」のような、会話の context 枯渇ではなくコード理解を指す依頼。
+  At the end of a work session, generate a handoff doc (a single markdown file)
+  plus a ready-to-paste kickoff message so the next session can resume with zero
+  prior context. The goal is to preserve exactly what conversation
+  auto-summarization (compaction) tends to lose: the decisions made and their
+  rationale, the conventions/options adopted or rejected, the verification
+  commands and toolchain gotchas actually hit, project-specific policies that
+  can't be re-derived from code or git, and remaining work with why it's
+  deferred. Fire proactively even when the words "doc" or "引き継ぎ" don't appear,
+  e.g.: 「引き継ぎ／handoff を作って」「別のセッション・別チャットに渡したい／そっちで
+  続きをやる」「次のセッション用にまとめて」「(会話の)context・コンテキストがいっぱい／
+  そろそろ限界」「このまま /clear・compact する前に今の状態を残したい」「compact すべきか
+  doc に残すべきか迷う」「今日はここまで／作業を中断する／一区切りつけるので、明日や後で
+  再開する自分が迷わず続けられるよう状態を残して」. Do NOT fire for: code cleanup
+  itself (関数の切り出し・リネーム・1ファイル内のリファクタ); general document
+  authoring (PR 説明文・コミットメッセージ・README・設計ドキュメント design doc);
+  work reports / 分報 summaries to Slack and the like; human/team business
+  handover material for offboarding or role changes (退職や担当交代に伴う業務引き継ぎ
+  資料); and requests like 「もっとファイルを読んで文脈(context)を把握して直して」 that
+  mean code comprehension, not running out of conversation context.
 ---
 
 # Session Handoff
 
-## なぜこのスキルがあるのか
+## Why this skill exists
 
-セッションを閉じる方法は2つある。**compaction** は今のセッションを続けるために履歴を自動要約するもので、要約は機械任せ・取捨選択できず、判断の「なぜ」や捨てた選択肢から先に落ちる。**引き継ぎ doc** はセッションの境界をまたぐためのもので、何を残すかをこちらが選べる。
+There are two ways to close a session. **Compaction** auto-summarizes the history so the *current* session can keep going; the summary is machine-driven, you can't curate it, and the "why" behind decisions and the options you discarded are the first things to drop. A **handoff doc** is for crossing a session boundary, and you choose what to keep.
 
-だから doc の価値は「正確さ」ではなく「**再導出できないものだけを選んで残す**」ことにある。コードや git log を読めば分かることを書き写しても、次セッションはどうせ読み直すので価値はゼロで、むしろ本当に大事な情報を埋もれさせる。残すべきは、要約や再読では戻ってこないもの——**下した判断とその理由、採用／却下した規約や選択肢、実際に通った検証コマンドとハマり所、コードに書いていないプロジェクト方針、残作業と「なぜ今やらないか」**。この原則が全工程を貫く。
+So the value of the doc is not "accuracy" but "**keeping only what cannot be re-derived**". Copying down what the next session could learn by reading the code or `git log` has zero value — it will reread that anyway — and it buries the information that actually matters. What to keep is what a summary or a reread won't bring back: **the decisions made and their rationale, the conventions/options adopted or rejected, the verification commands that actually worked and the gotchas, project policies not written in the code, and remaining work plus "why not now"**. This principle runs through every step.
 
-## 最初の確認: compaction か doc か（軽く、毎回はやらない）
+## First check: compaction or doc (lightly — not every time)
 
-状況を見て、次のどちらかに振り分ける。長い講釈はしない。
+Read the situation and route to one of the two below. Don't lecture.
 
-- **危ういコミット前の in-flight 状態がある**（やりかけの編集が未コミットで散らばっている／中断状態が複雑でコードだけ見ても再構成しづらい）、**または**ユーザー自身が「compact すべきか doc か迷う」と言っている場合のみ、一言トレードオフを述べて勧めを出す。要点は「**未コミットの作業中編集は doc では正確に再現できない。境界をまたぐ（/clear・別セッション）なら先に commit か stash、あるいはこのまま続けるなら compaction が安全。どうしても今 doc に渡すなら、未コミット分は §0 で明示的に保全する**」。勧めを述べたら、止まらずそのまま doc 生成に進む（迷っているユーザーには判断材料を渡しつつ手は動かす）。
-- **状態がコミット済みで意図も明確**なら、ゲートには触れず黙って生成に進む。
+- Only when there is a **risky pre-commit in-flight state** (half-done edits scattered uncommitted / a mid-interruption state complex enough that the code alone is hard to reconstruct from), **or** the user themselves says they're torn between compacting and a doc, state the trade-off in one line and give a recommendation. The gist: "**Uncommitted work-in-progress edits can't be faithfully reproduced in a doc. If you're crossing a boundary (/clear, another session), commit or stash first; or if you're continuing here, compaction is safer. If you really must hand off via a doc now, explicitly preserve the uncommitted parts in §0.**" After stating the recommendation, don't stop — proceed straight to generating the doc (give a wavering user the decision input, but keep your hands moving).
+- If the **state is committed and the intent is clear**, don't touch the gate — silently proceed to generation.
 
-## 生成の手順
+## How to generate
 
-### 1. 現在地を git で裏取りする
+### 1. Ground the current state in git
 
-§0 のハッシュや status を**捏造しない**。同梱スクリプトで実際の git 出力をまとめて取る:
+**Do not fabricate** the hashes or status in §0. Use the bundled script to grab the actual git output in one go:
 
 ```bash
-bash <skill-dir>/scripts/collect_git_state.sh 10   # 引数 = 直近ログ件数（既定10）
+bash <skill-dir>/scripts/collect_git_state.sh 10   # arg = number of recent log entries (default 10)
 ```
 
-得られるのは branch / 直近ログ / 作業ツリー（status --short）/ 未コミット差分の stat。これは**生データ**。doc にそのまま貼るのではなく、§0 で「未コミットの各変更が何で、なぜまだコミットされていないか」へと**解釈**する（git に出ない「なぜ」がこちらの仕事）。リポジトリ外なら git パートは省く。
+You get the branch / recent log / working tree (status --short) / stat of uncommitted changes. This is **raw data**. Don't paste it into the doc as-is; in §0, **interpret** it into "what each uncommitted change is, and why it hasn't been committed yet" (the "why" that git doesn't show is your job). Outside a repo, omit the git part.
 
-### 2. doc の置き場所を決める
+### 2. Decide where the doc goes
 
-置き場所をグローバルに決め打ちしない。リポジトリによって流儀が違う（特定トピックの doc だけ専用ディレクトリに集約されている、等）。今回の作業に関連する**既存 doc がどこにあるかを見て寄せる**:
+Don't hardcode the location globally. Conventions differ per repo (e.g., docs for a specific topic are consolidated into a dedicated directory). **Look at where the existing docs related to this work live, and conform to them**:
 
 ```bash
-# 既存の handoff/summary 系 doc を探して土地勘をつかむ
+# find existing handoff/summary-style docs to get your bearings
 find . -type f -name '*.md' \( -iname '*handoff*' -o -iname '*summary*' -o -iname '*引き継ぎ*' \) -not -path '*/node_modules/*' 2>/dev/null
 find . -type d \( -name docs -o -name summary -o -name handoff \) -not -path '*/node_modules/*' 2>/dev/null
 ```
 
-- 関連トピックの doc が集まっているディレクトリがあれば、そこに合わせる（ファイル名の付け方・形式も既存に倣う）。
-- 候補が複数あって決め手がない、または既存 doc が見当たらず迷うときは、**ユーザーに置き場所を訊く**。勝手に新ディレクトリを作って散らかさない。
-- ファイル名は内容が分かる形＋**絶対日付**（例 `<topic>_handoff_2026-06-22.md`）。「今日」「先週」等の相対表現は doc 本文でも使わず絶対日付に直す。
+- If there's a directory where docs on related topics are gathered, match it (follow the existing filename style and format too).
+- When there are multiple candidates with no clear winner, or no existing doc and you're unsure, **ask the user where to put it**. Don't create a new directory on your own and leave clutter.
+- The filename is a descriptive form + an **absolute date** (e.g. `<topic>_handoff_2026-06-22.md`). Don't use relative expressions like "today" or "last week" even in the doc body — convert them to absolute dates.
 
-### 3. doc を書く（§0–§5）
+### 3. Write the doc (§0–§5)
 
-下の「doc テンプレート」に沿って書く。各節で「[書くこと／書かないこと](#書くこと書かないこと核の原則)」の原則を効かせる。短くてよい——薄い節は1〜2行、無ければ「特になし」で省略せず明示。
+Write it following the "doc template" below. In each section, apply the [What to write vs. skip](#what-to-write-vs-skip-core-principle) principle. Short is fine — a thin section is 1–2 lines; if there's nothing, state it explicitly with "特になし" rather than dropping the section.
 
-### 4. キックオフメッセージをチャットに出す
+### 4. Emit the kickoff message to chat
 
-doc とは別に、次セッションの冒頭にそのまま貼れる自己完結プロンプトを**チャット本文に**出す（doc の §5 にも同じものを載せる）。「さっきの続き」的な、文脈を前提にした書き方は禁止——貼った人＝前提知識ゼロの前提で書く。詳細は下の「[キックオフメッセージ](#キックオフメッセージ)」。
+Separately from the doc, emit a self-contained prompt — ready to paste at the start of the next session — **into the chat body** (put the same thing in §5 of the doc). Writing that assumes context, like "continue from before", is forbidden — write as if the person pasting it has zero prior knowledge. Details in [Kickoff message](#kickoff-message) below.
 
-## doc テンプレート
+## doc template
 
 ```markdown
 # <トピック> 引き継ぎ (YYYY-MM-DD)
@@ -101,39 +103,39 @@ doc とは別に、次セッションの冒頭にそのまま貼れる自己完�
 <セクション「キックオフメッセージ」の自己完結プロンプトをそのまま転記>
 ```
 
-節の番号・見出しは目安。既存 doc に強い様式があればそちらに寄せてよい。空に近い節を埋めるために水増ししない。
+The section numbers and headings are a guideline. If an existing doc has a strong style, you may conform to it. Don't pad to fill a near-empty section.
 
-## 書くこと／書かないこと（核の原則）
+## What to write vs. skip (core principle)
 
-**書かない（コード・git から再導出できる＝次セッションが読み直せる）**
+**Don't write (re-derivable from code/git = the next session can reread it)**
 
-- ディレクトリ構造、関数シグネチャ、実装の逐語的説明
-- `git log` / `git diff` の生貼り付け
-- 「あとは普通にやるだけ」の一般論
+- Directory structure, function signatures, verbatim explanations of the implementation
+- Raw pastes of `git log` / `git diff`
+- Generic "just do the rest the usual way" filler
 
-**書く（要約・再読では戻ってこない）**
+**Write (won't come back from a summary or a reread)**
 
-- 下した判断と**理由**、検討して**却下した代替案**（なぜ却下したか）
-- 採用した規約・命名・パターンと、その**出どころ／前例**
-- 実際に通った**検証コマンド**（コピペできる形）と**ハマり所**
-- コードに現れない**プロジェクト固有の方針・制約**
-- 残作業と「**なぜ今やらない／保留か**」
+- The decisions made and the **rationale**, and the **alternatives rejected** after consideration (why they were rejected)
+- The conventions/naming/patterns adopted, and their **origin / precedent**
+- The **verification commands** that actually worked (in copy-pasteable form) and the **gotchas**
+- **Project-specific policies/constraints** that don't appear in the code
+- Remaining work and "**why not now / why deferred**"
 
-判定の物差し: 「これは次セッションがコードか git を見れば5分で分かるか？」分かるなら書かない。**ファイル一覧でも、各行に『なぜ要るか・何の役割か』の注釈が付くなら価値がある**（注釈のない羅列は不要）。
+The yardstick: "Can the next session figure this out in 5 minutes by looking at code or git?" If yes, don't write it. **Even a file list has value if each line carries a 'why it's needed / what role it plays' annotation** (an unannotated list is unnecessary).
 
-## キックオフメッセージ
+## Kickoff message
 
-次セッションの最初の一手として**単体で成立する**プロンプト。満たすべき条件:
+A prompt that **stands on its own** as the first move of the next session. Conditions to meet:
 
-- 冒頭でリポジトリ・作業対象・doc のパスを名指しする（文脈ゼロの前提）
-- doc のどの節を見ればよいか案内する
-- §4 から導いた「最初にやる具体的な一手」を書く
-- 作業ブランチ名を含める
+- Name the repository, the work target, and the doc's path up front (assume zero context)
+- Point to which sections of the doc to read
+- Write the "concrete first move" derived from §4
+- Include the working branch name
 
-**例**（良い—単体で貼れば再開できる）:
+**Example** (good — paste it standalone and you can resume):
 
 > green-api で「ターゲットリスト抽出」バッチの Go 本実装を引き継ぎます。まず `curation_research/docs/summary/<topic>_handoff_2026-06-22.md` を読んでください——前セッションの引き継ぎ doc で、§0=現在地、§1=確定済みの決定（蒸し返さない）、§4=残作業です。作業ブランチは `GR-20488-...`。読んだら §4 の先頭タスク「週次更新版の反映ロジック追加」に着手してください。設計の正本は同 doc が指す `judgment_axis_aggregation_spec.md` です。
 
-**避ける**（悪い—文脈依存で単体では動かない）:
+**Avoid** (bad — context-dependent, doesn't work standalone):
 
 > さっきの続きをやってください。残りのタスクをお願いします。
