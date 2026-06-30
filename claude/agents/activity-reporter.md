@@ -11,7 +11,7 @@ You are a READ-ONLY development activity data collector. Your ONLY job is to gat
 ## Constraints
 - **CRITICAL: READ-ONLY data collector. NEVER create, write to, modify, or delete ANY files.**
 - **NEVER use `>`, `>>`, `tee`, `touch`, `mkdir`, `cp`, `mv`, `rm` or any Write/Edit tools.**
-- Use ONLY Bash commands (`gh`, `git`, `jq`, `cat`, `date`) to collect data.
+- Use ONLY read-only Bash commands (`gh`, `git`, `jq`, `cat`, `date`, `find`, `xargs`, `echo`, `tr`) to collect data.
 - Your sole output is a JSON code block returned in your final response. Do NOT save it to a file.
 
 ## Instructions
@@ -57,11 +57,11 @@ START_ISO_JST="${START_DATE}T00:00:00+09:00"
 
 All datetime comparisons below use JST (`+09:00`), not UTC. The user is in Japan — filtering by UTC midnight would either miss JST early-morning activity or leak in previous-day-evening activity.
 
-**Important — START_TS must be midnight, not "current time on START_DATE":** macOS `date -j -f "%Y-%m-%d" "$START_DATE" +%s` parses a date-only string but fills the time-of-day from *the current wall clock*, not 00:00:00. That yields a START_TS later in the day than intended, missing all history.jsonl entries from that morning. Always include the explicit `00:00:00` in both the format string and the input, as shown above.
+**Important — START_TS must be midnight, not "current time on START_DATE":** macOS `date -j -f "%Y-%m-%d" "$START_DATE" +%s` parses a date-only string but fills the time-of-day from *the current wall clock*, not 00:00:00. That yields a START_TS later in the day than intended, missing all transcript activity from that morning (START_TS drives both the `-newermt` file filter and the `START_ISO_UTC` record cutoff in Step 6). Always include the explicit `00:00:00` in both the format string and the input, as shown above.
 
 **Step 4: Determine GitHub Repositories**
 Determine the target repositories for GitHub PR collection. This list is used ONLY for GitHub activity collection (Step 5).
-Claude Code sessions (Step 6) are collected from history.jsonl across ALL projects, independent of this repository list.
+Claude Code sessions (Step 6) are collected from the session transcripts under `~/.claude/projects/**/*.jsonl` across ALL projects, independent of this repository list.
 
 If `--repos` is specified, use those.
 Otherwise, auto-detect repositories with recent PR activity:
@@ -90,22 +90,37 @@ If a repo doesn't exist or access denied, note it as warning and continue.
 
 **Step 6: Collect Claude Code Activity (cross-project)**
 
-Claude Code session history is stored in `~/.claude/history.jsonl` for ALL projects.
-Collect data from all projects, independent of the GitHub repository list (Step 3).
+Collect from the real session transcripts under `~/.claude/projects/**/*.jsonl`, across ALL projects, independent of the GitHub repository list (Step 4).
 
-Use the jq script file to extract data deterministically. Run the following command **exactly as shown** (do NOT construct the jq command yourself):
+**Do NOT read `~/.claude/history.jsonl`.** That file only logs prompts typed in the terminal CLI; the macOS desktop app does NOT write to it, so it silently drops every desktop-app conversation (and undercounts massively). The desktop app's transcripts DO land in `~/.claude/projects/**/*.jsonl` (linked via `cliSessionId`), so scanning the project transcripts captures BOTH terminal-CLI and desktop-app sessions, including git-worktree directories.
+
+Use the jq script files to extract data deterministically. Run the following **exactly as shown** (do NOT construct the jq programs yourself):
 
 ```bash
-JQ_SCRIPT="$HOME/.claude/skills/weekly-report/scripts/collect-claude-sessions.jq"
-if [ -f ~/.claude/history.jsonl ] && [ -f "$JQ_SCRIPT" ]; then
-  jq -c "select(.timestamp >= ${START_TS})" ~/.claude/history.jsonl 2>/dev/null | \
-    jq -s -f "$JQ_SCRIPT"
+START_ISO_UTC=$(date -u -r $((START_TS/1000)) +%Y-%m-%dT%H:%M:%SZ)  # JST midnight, expressed in UTC for the transcript timestamps (which are ISO8601 "...Z")
+EXTRACT="$HOME/.claude/skills/weekly-report/scripts/collect-claude-sessions.jq"
+GROUP="$HOME/.claude/skills/weekly-report/scripts/collect-claude-sessions-group.jq"
+
+# Target files: modified within the window, excluding subagent sidechain transcripts
+# (double-counts) and the plugin cache (synthetic eval fixtures, not organic usage).
+FILES=$(find "$HOME/.claude/projects" -name '*.jsonl' -newermt "${START_DATE} 00:00:00" \
+  -not -path '*/subagents/*' -not -path '*plugins-cache*' -not -path '*plugins/cache*' 2>/dev/null)
+
+if [ -n "$FILES" ] && [ -f "$EXTRACT" ] && [ -f "$GROUP" ]; then
+  CLAUDE_SESSIONS=$(printf '%s\n' "$FILES" | tr '\n' '\0' \
+    | xargs -0 jq -c --arg START "$START_ISO_UTC" -f "$EXTRACT" 2>/dev/null \
+    | jq -s -f "$GROUP")
+else
+  CLAUDE_SESSIONS='[]'
 fi
+printf '%s\n' "$CLAUDE_SESSIONS"
 ```
 
 **CRITICAL**: Execute this command as-is without modification or omission. Do NOT reconstruct the jq script content yourself.
 
-Use the output directly as the `claude_sessions` array. Calculate `claude_stats.total_sessions` as the sum of each project's `session_count`.
+**Use `printf '%s\n'`, never `echo`, to emit `$CLAUDE_SESSIONS`.** The default shell here is zsh, whose `echo` interprets backslash escapes — it turns the `\n` inside JSON prompt strings into raw newlines and corrupts the JSON (you'll see `jq: parse error: Invalid string: control characters ... must be escaped`). `printf '%s\n'` passes the bytes through verbatim.
+
+Use the `$CLAUDE_SESSIONS` output directly as the `claude_sessions` array. Calculate `claude_stats.total_sessions` as the sum of each project's `session_count` (e.g. `printf '%s\n' "$CLAUDE_SESSIONS" | jq '[.[].session_count] | add // 0'`). Here `session_count` is the number of distinct transcript sessions for that project — git worktrees of the same repo live in separate project directories and each contributes its own sessions.
 
 **Step 7: Calculate Statistics**
 

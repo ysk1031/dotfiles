@@ -86,7 +86,7 @@ JSON Schema for activity-reporter agent output.
           }
         }
       },
-      "description": "Cross-project Claude Code session details. Collected from history.jsonl, independent of GitHub repos"
+      "description": "Cross-project Claude Code session details. Collected from session transcripts under ~/.claude/projects/**/*.jsonl (captures both terminal-CLI and desktop-app sessions), independent of GitHub repos"
     },
     "warnings": {
       "type": "array",
