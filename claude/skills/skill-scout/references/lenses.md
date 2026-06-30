@@ -104,13 +104,25 @@ and plugin skills. If a pattern is already covered, reclassify it as
 `existing-skill-fix` (if the existing skill underperforms) or drop it (if fully covered).
 
 ### 4. Classify into one of four destinations
-- **new-skill** — a stable, repeated *procedure* worth packaging. Default home:
+In Claude Code, **a slash command and a skill are the same mechanism** (custom
+commands were merged into skills). So `new-skill` vs `slash-command` is not "which
+kind of artifact" but a single skill destination with an **invocation mode**: keep
+both labels — they carry useful intent — but the real question is *should the model
+auto-trigger it, and does it bundle files?*
+- **new-skill** — a stable, repeated *procedure* worth packaging that the model
+  should be able to **auto-invoke** (carries a real `description`). Default home:
   a **user-level skill** in the user's `claude/skills/` (project-independent),
   *unless* it is work-specific (then a **project-level skill** in that repo's `.claude/skills/`).
+- **slash-command** — the **manual-only** flavor of the same artifact: a skill
+  with `disable-model-invocation: true` (or a lightweight `.claude/commands/*.md`
+  file). Pick this over `new-skill` when the model should *not* decide to run it —
+  short canned invocations and side-effecting actions (deploy/commit/send) the user
+  fires deliberately.
 - **claude-md-rule** — a standing preference/correction. The same correction
   repeated is this, not a skill. user-level vs project-level CLAUDE.md.
-- **slash-command** — a short, fixed canned invocation.
-- **subagent** — a heavy, self-contained research/analysis routine.
+- **subagent** — a heavy, self-contained research/analysis routine. (Also
+  expressible as a forked skill via `context: fork` + `agent:`; propose a real
+  `.claude/agents/` subagent when it needs its own system prompt / tool allowlist / model.)
 - (**existing-skill-fix** — a defect/gap in a skill that already exists.)
 
 ### 5. Score each candidate on 5 axes (low / med / high)

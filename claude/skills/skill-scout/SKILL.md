@@ -2,22 +2,26 @@
 name: skill-scout
 description: >-
   Mine the user's own recent Claude Code session transcripts to surface what is
-  worth codifying — Agent Skills, plus CLAUDE.md rules, slash commands, or
-  subagents — each ranked by a value score, backed by quoted evidence, and
-  tagged with a 4-way destination and a publishability flag. Produces a
-  candidate report only; it never auto-creates anything — the user decides what
-  to build, then hands it to skill-creator. Fire proactively whenever the user
-  wants to discover or extract reusable patterns from how they actually work,
-  even if they don't say the word "skill", e.g.: 「最近のセッションからスキル化
-  できるものを探して」「よくやってる指示を Skill 候補として出して」「自分の作業から
-  繰り返してる手順を抽出して」「skill 候補をレコメンドして」「最近の会話から自動化
-  できそうなものある？」「extract skill candidates from my sessions」「what should
-  I turn into a skill or a CLAUDE.md rule」. Also fire when the user reflects that
-  they keep giving the same instruction/correction and wonders if it should be
-  codified. Do NOT fire for: creating or editing one specific, already-named
-  skill (use skill-creator); writing CLAUDE.md content directly (claude-md
-  tooling); activity/work reports such as 分報・週報 (daily-report/weekly-report);
-  or analyzing a codebase rather than the user's own session history.
+  worth codifying, and route each finding to the right home — an Agent Skill, a
+  CLAUDE.md rule, a slash command, or a subagent. Every candidate is ranked by a
+  value score, backed by quoted evidence, and tagged with a 4-way destination and
+  a publishability flag; expect most findings to land as CLAUDE.md rules, not new
+  skills (the most-repeated thing is usually a correction). Produces a candidate
+  report only — it never auto-creates anything; the user decides what to build,
+  then hands each pick to its tool (skill-creator for skills, CLAUDE.md edits for
+  rules, etc.). Fire proactively whenever the user wants to discover or extract
+  reusable patterns from how they actually work, even if they don't say the word
+  "skill", e.g.: 「最近のセッションから繰り返してる指示を棚卸しして」「自分の作業から
+  仕組み化できるものを探して」「何を CLAUDE.md ルールにすべき？」「よくやってる手順を
+  skill か slash command にできない？」「最近の会話から自動化できそうなものある？」
+  「skill 候補をレコメンドして」「extract reusable patterns from my sessions」「what
+  should I turn into a skill, a CLAUDE.md rule, or a slash command」. Also fire when
+  the user reflects that they keep giving the same instruction/correction and
+  wonders if it should be codified. Do NOT fire for: creating or editing one
+  specific, already-named skill (use skill-creator); writing CLAUDE.md content
+  directly (claude-md tooling); activity/work reports such as 分報・週報
+  (daily-report/weekly-report); or analyzing a codebase rather than the user's own
+  session history.
 ---
 
 # Skill Scout
