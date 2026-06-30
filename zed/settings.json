@@ -64,9 +64,5 @@
   "soft_wrap": "editor_width",
   "ui_font_size": 16.0,
   "buffer_font_size": 14.0,
-  "theme": {
-    "mode": "system",
-    "light": "Gruvbox Light",
-    "dark": "Gruvbox Dark",
-  },
+  "theme": "Gruvbox Dark",
 }
