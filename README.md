@@ -100,9 +100,14 @@ To set up the symlinks:
 ln -sf /path/to/dotfiles/claude/settings.json ~/.claude/settings.json
 ln -sf /path/to/dotfiles/claude/statusline-command.sh ~/.claude/statusline-command.sh
 
-# Create symlinks for directories (use -n to replace existing dirs)
-ln -sfn /path/to/dotfiles/claude/skills ~/.claude/skills
-ln -sfn /path/to/dotfiles/claude/agents ~/.claude/agents
+# Create per-item symlinks for skills/agents
+/path/to/dotfiles/claude/sync-links.sh
 ```
+
+`sync-links.sh` symlinks each skill/agent individually instead of linking
+`~/.claude/skills`/`~/.claude/agents` as whole directories. This keeps them as
+real directories on disk, so tools like `pnpm dlx skills add` can add their
+own entries there without writing into this repo. Re-run the script after
+adding a new skill or agent here.
 
 After creating the symlinks, restart Claude Code to apply the configuration.
