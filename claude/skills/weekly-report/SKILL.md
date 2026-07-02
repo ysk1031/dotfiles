@@ -98,7 +98,7 @@ Report generated: {OUTPUT_PATH}
 - For PRs: Include body summary (first 200 chars) if available, otherwise show "説明なし" — PR summaries help recall context during review
 - For Claude Code: Extract actual prompt content, exclude slash commands (/clear, /exit, etc.) — slash commands are utility operations and irrelevant to development activity review
 - Remove file path prefixes (@path/to/file) from prompts, keep only the question/request part — file paths are noise; retain only the essence of what was consulted
-- Use Japanese for all report content (the output report should be in Japanese) — the user is a Japanese speaker and needs to conduct reviews in Japanese
+- Use Japanese for all report content (the output report should be in Japanese) — the user is a Japanese speaker and needs to conduct reviews in Japanese. ALWAYS use 常体 (plain form / だ・である調), NEVER 丁寧語 (です・ます調)
 - If a repository has no activity, still list it with "活動なし" — explicitly shows no activity occurred, distinguishing from missing data
 
 ---

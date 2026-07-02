@@ -176,7 +176,7 @@ After writing:
 - **Reflective tone, not status-report tone** — this report is for the user themselves. Use phrasing like "〜に悩んでいた様子" or "〜を考えていた" rather than "〜を完了しました". The user is the audience; objectivity matters more than achievement-emphasis.
 - **Don't over-extract from prompts** — Claude Code prompts include a lot of routine task-giving. Only the reflective/uncertain ones belong in the 「考えたこと・悩んだこと」 section. When in doubt, leave it out — the appendix preserves the raw record.
 - **Past-date mode is approximate** — `--date YYYY-MM-DD` translates to `--days N`, which means the activity-reporter scans from JST 00:00 of the target date to *now*, not to 23:59 of that date. This is generally fine for the most-recent day or two, but data from later dates will leak in. Note this in a footer warning when `--date` is used.
-- **Japanese output** — the report body must be in Japanese (the user is a Japanese speaker writing in Japanese).
+- **Japanese output** — the report body must be in Japanese (the user is a Japanese speaker writing in Japanese). ALWAYS use 常体 (plain form / だ・である調), NEVER 丁寧語 (です・ます調).
 - **Include the Claude Code footer** — for traceability.
 - **GitHub activity may be sparse** — the underlying agent only fetches PRs created in the window, not commits-without-PR or comments on older PRs. For a daily report this often means GitHub section is empty; that's expected, and the Claude Code section carries the day.
 
