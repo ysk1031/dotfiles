@@ -1,0 +1,27 @@
+{
+  "skill_name": "second-opinion",
+  "note": "このスキルの客観的に検証できる品質は「別モデルへ送るプロンプトにバイアスが漏れていないか」であり、出力の技術的正しさではない。各evalは、Claudeが技術的結論を出した直後にユーザーがセカンドオピニオンを求める状況を与える。送信プロンプトを検査可能にするため、実行タスクでは実際にAgentツールを呼ぶ代わりに『Fable 5 へ送るはずのプロンプト』を outputs/fable_prompt.md に書き出させる。assertionはそのファイルを対象に、Claude自身の結論・立場の漏れと、中立的な材料の有無をチェックする。",
+  "evals": [
+    {
+      "id": 0,
+      "name": "design-decision-idempotency-key",
+      "prompt": "決済 webhook ハンドラ app/controllers/webhooks/stripe_controller.rb の冪等性をどこで担保するか、さっきまで議論してた。結論として、Redis で挿入前に存在チェックするんじゃなくて、events.stripe_event_id に unique index を張って、コントローラで ActiveRecord::RecordNotUnique を rescue する方針にした。該当コードは create アクション（30行くらい）で、今は Event.find_or_create_by(stripe_event_id: params[:id]) をやってる。制約は、高並行（重複 webhook がミリ秒単位で届く）・MySQL・Sidekiq はすでに使ってる、という感じ。コミットする前に、この判断について別のモデルにもセカンドオピニオンをもらってきて。",
+      "expected_output": "outputs/fable_prompt.md に、冪等性の問題を中立的に述べ、コード/制約を含め、DBの unique index 案と Redis チェック案を偏りなく並べ、オープンな問いを投げるバイアス除去済みプロンプトが書かれている。かつ Claude が unique index 案を選んだことを一切明かしていない。",
+      "files": []
+    },
+    {
+      "id": 1,
+      "name": "root-cause-diagnosis-n-plus-one",
+      "prompt": "遅い /users/:id/dashboard エンドポイントを追ってて、根本原因は JobApplySerializer の N+1 クエリ（apply ごとに job_offer.client を読んでる）だと結論づけた。修正はコントローラで includes(job_offer: :client) を足すつもり。シリアライザとコントローラのコードはこれ。まとめる前に、この診断を別のモデルでクロスチェックしたい。本当の原因を見落としてないか確かめたいんだ。",
+      "expected_output": "Fable 5 へのプロンプトが、パフォーマンスの症状とコードを中立的に提示し、根本原因は何かをオープンに問うている。かつ Claude がすでに『原因は JobApplySerializer の N+1』『修正は includes』と結論づけたことを明かしていない。",
+      "files": []
+    },
+    {
+      "id": 2,
+      "name": "trivial-lookup-should-not-run",
+      "prompt": "Rails のコントローラで render と redirect_to って何が違うんだっけ？ちょっと確認したいだけ。",
+      "expected_output": "スキルは発動すべきでない。これは正解が一意に決まる単純な事実確認で、別モデルの価値がない。エージェントは直接答えるだけで、fable_prompt.md を作らない。",
+      "files": []
+    }
+  ]
+}
