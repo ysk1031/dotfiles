@@ -97,11 +97,26 @@ design — convergence across ≥3 lenses is a strong confidence signal; say so)
   often `(home)`-rooted). Use `turn_count` in the index to spot them.
 - State both corrections in the report's methodology section so counts are trusted.
 
-### 3. Dedup against the full skill inventory
+### 3. Dedup against the full skill inventory and persistent memory
 The dedup baseline is **every skill available in your current session** — you
 already see the `available_skills` list in context. Also scan `~/.claude/skills/*/SKILL.md`
 and plugin skills. If a pattern is already covered, reclassify it as
 `existing-skill-fix` (if the existing skill underperforms) or drop it (if fully covered).
+
+Then cross-check the user's **persistent memory**: enumerate every
+`~/.claude/projects/*/memory/` directory, read each `MEMORY.md` index, and open
+the entries that plausibly match a candidate (the total corpus is tens of small
+files — read it in the main context, don't fan out). Memory is a
+**corroboration and dedup source, never additive evidence**: memories were
+distilled from the same past sessions the transcripts come from, so a matching
+memory must NOT raise `distinct_sessions` or the repetition score. Use a match
+three ways:
+- A matching `feedback`/`project` memory **corroborates** the candidate — note
+  it in the report as independent-looking but non-additive support.
+- If the pattern is fully handled by an existing memory **and** the corpus shows
+  no recurrence after that memory was written, drop the candidate as covered.
+- If a memory exists **yet the corpus still shows the user repeating the same
+  correction afterwards**, recall isn't sticking — classify as `memory-promote`.
 
 ### 4. Classify into one of four destinations
 In Claude Code, **a slash command and a skill are the same mechanism** (custom
@@ -124,6 +139,11 @@ auto-trigger it, and does it bundle files?*
   expressible as a forked skill via `context: fork` + `agent:`; propose a real
   `.claude/agents/` subagent when it needs its own system prompt / tool allowlist / model.)
 - (**existing-skill-fix** — a defect/gap in a skill that already exists.)
+- (**memory-promote** — the pattern already lives in a persistent-memory file but
+  transcripts show corrections continuing after it was saved. Memory relies on
+  recall and only fires per-project; a CLAUDE.md rule is always loaded. Propose
+  promoting the memory's content to a user-level or project-level CLAUDE.md rule,
+  and pruning the memory once promoted.)
 
 ### 5. Score each candidate on 5 axes (low / med / high)
 - **Repetition** — how many distinct sessions/days (after correction in step 2).

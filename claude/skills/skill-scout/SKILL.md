@@ -4,7 +4,7 @@ description: >-
   Mine the user's own recent Claude Code session transcripts to surface what is
   worth codifying, and route each finding to the right home — an Agent Skill, a
   CLAUDE.md rule, a slash command, or a subagent. Every candidate is ranked by a
-  value score, backed by quoted evidence, and tagged with a 4-way destination and
+  value score, backed by quoted evidence, and tagged with a destination and
   a publishability flag; expect most findings to land as CLAUDE.md rules, not new
   skills (the most-repeated thing is usually a correction). Produces a candidate
   report only — it never auto-creates anything; the user decides what to build,
@@ -35,8 +35,11 @@ and procedures they repeat often enough to be worth codifying. The output is a
 The guiding principle (settled with the user): **frequency alone is a weak
 signal.** The most-repeated thing is often a *correction* the user keeps giving,
 which means a missing CLAUDE.md rule, not a new skill. So every candidate is
-sorted into one of four destinations and scored on five axes — never ranked by
-raw count. Expect the headline finding to be "most frequent pain → CLAUDE.md
+sorted into a destination taxonomy (four primary homes, plus fix/promote
+outcomes for existing skills and memories) and scored on five axes — never
+ranked by raw count. Persistent memory (`~/.claude/projects/*/memory/`) is
+cross-checked in reduce as a corroboration/dedup source — details in
+`references/lenses.md`. Expect the headline finding to be "most frequent pain → CLAUDE.md
 rules; genuine new-skill candidates are fewer." That's the point of classifying.
 
 ## Hard constraints (read before running)
@@ -95,9 +98,13 @@ Follow the reduce rubric in `references/lenses.md`:
 2. **Correct the counts**: name-merge worktree re-entries; discount non-organic
    single-turn near-duplicate sessions (eval fixtures). Record both in the report.
 3. Dedup against the **full skill inventory available in your current session**
-   (you already see `available_skills`; also scan `~/.claude/skills` + plugins).
+   (you already see `available_skills`; also scan `~/.claude/skills` + plugins),
+   then cross-check **persistent memory** (`~/.claude/projects/*/memory/`) —
+   corroboration/dedup only, never additive to counts (memories come from the
+   same past sessions as the corpus).
 4. Classify into new-skill / claude-md-rule / slash-command / subagent /
-   existing-skill-fix.
+   existing-skill-fix / memory-promote (a memory that isn't sticking →
+   promote to a CLAUDE.md rule).
 5. Score each on the 5 axes (repetition, stability, per-use cost, coverage gap,
    generalizability); priority = their product, not raw frequency.
 6. Flag generalizability (generalizable / work-specific-sanitize / personal-env) —
