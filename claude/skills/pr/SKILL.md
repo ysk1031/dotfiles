@@ -69,6 +69,9 @@ fi
 Check if `.github/pull_request_template.md` exists:
 - If exists, read its content for format reference
 
+**Step 6.5: Check Project Conventions**
+Read the project's `CLAUDE.md` (if present) for PR-related conventions — e.g. a required title prefix (issue number, ticket ID), a default draft state, or required sections. Apply anything found there in Phase 2.
+
 **Step 7: Detect Language**
 Check recent commits and existing PRs:
 - `git log --oneline -10`
@@ -92,6 +95,7 @@ Then continue to Phase 2 with the selected language (do NOT re-run the analysis 
 **Step 1: Generate Title**
 - If single commit: use that commit message as title
 - If multiple commits: summarize changes into a concise title
+- If Step 6.5 found a required title prefix convention, apply it
 
 **Step 2: Generate Description**
 Writing style rules:
