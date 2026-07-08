@@ -16,6 +16,14 @@ mkdir -p "$CLAUDE_DIR/skills" "$CLAUDE_DIR/agents"
 
 for skill in "$DIR"/skills/*/; do
   name="$(basename "$skill")"
+  # Place a `.sync-ignore` file in a skill directory to keep its code in the
+  # repo but stop it from being linked into ~/.claude (i.e. disable the skill).
+  # Any stale symlink left from a previous sync is removed.
+  if [[ -e "$skill/.sync-ignore" ]]; then
+    rm -f "$CLAUDE_DIR/skills/$name"
+    echo "Skipping $name (.sync-ignore)"
+    continue
+  fi
   ln -sfn "$DIR/skills/$name" "$CLAUDE_DIR/skills/$name"
 done
 
