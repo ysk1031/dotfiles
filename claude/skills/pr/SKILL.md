@@ -5,7 +5,7 @@ allowed-tools: AskUserQuestion, Bash
 argument-hint: "[base-branch to specify target branch] [--draft to create as draft PR]"
 metadata:
   author: ysk1031
-  version: 2.1.0
+  version: 2.2.0
 ---
 
 # Pull Request Creation Skill
@@ -17,6 +17,14 @@ Analyze current branch changes, generate a PR title and description, let the use
 ### Phase 1: Analyze Changes (Bash)
 
 Use ONLY read-only commands (`git`, `gh`, `cat`) in this phase. NEVER modify, create, or delete any files.
+
+**Step 0: Suggest pre-pr-check (once, non-blocking)**
+If ALL of the following hold, suggest — in one line, once per session — running the `pre-pr-check` skill before continuing, then wait for the user's reply:
+- the `pre-pr-check` skill has NOT been run for this branch in this session
+- the diff vs. the base branch is non-trivial (new files, new exported types, or roughly 50+ changed lines)
+
+Example: 「PR作成前に /pre-pr-check（単純化＋慣習整合のセルフレビュー）を回しますか？ 回さず進める場合はこのまま続けます。」
+If the user declines, has already run it, or the diff is trivial: continue without mentioning it again.
 
 **Step 1: Check Current Branch**
 Run: `git branch --show-current`
