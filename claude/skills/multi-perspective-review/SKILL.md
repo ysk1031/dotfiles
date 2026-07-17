@@ -56,7 +56,7 @@ This skill owns **the review and the adjudication list only** — it never edits
 ### Step 4: Launch in parallel
 
 - Issue all the Agent tool calls in **one message, at the same time**. Subagents run in the background, so waiting serially is wasted time.
-- Use `general-purpose` as the subagent_type and the **strongest available model** (fable at the time this skill was written).
+- Use `general-purpose` as the subagent_type and pass `model: "opus"` explicitly on every Agent call — regardless of which model is running the main agent (e.g. even when the main agent itself is Fable). Pinning to Opus keeps review quality independent of the main agent's model.
 - Each perspective's prompt follows the skeleton below. Embedding the **shared constraints** (behavior-preserving, separate-bucket reporting, no relitigating, read-only) into every prompt is the core of the quality.
 
 ### Step 5: Integrate and build the adjudication list

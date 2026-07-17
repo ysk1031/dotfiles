@@ -34,9 +34,9 @@ Extract the inputs deterministically — do not rely on the LLM to enumerate:
 
 ## Phase 2: Two blind passes (parallel subagents)
 
-Launch BOTH subagents in a single message so they run concurrently. Each gets: the working directory, base branch name, and the instruction to read the diff itself (`git diff <base>...HEAD`). Neither gets this conversation's context or the reasons behind design choices.
+Launch BOTH subagents in a single message so they run concurrently. Each gets: the working directory, base branch name, and the instruction to read the diff itself (`git diff <base>...HEAD`). Neither gets this conversation's context or the reasons behind design choices. Pass `model: "opus"` explicitly on both Agent calls, regardless of which model is running the main agent (e.g. even when the main agent itself is Fable) — this keeps review quality independent of the main agent's model.
 
-**Pass A — Simplification reviewer** (subagent_type: general-purpose). Prompt it to find, in the changed lines only:
+**Pass A — Simplification reviewer** (subagent_type: general-purpose, model: opus). Prompt it to find, in the changed lines only:
 - conversions/copies that disappear if a variable is declared as the target type from the start
 - defensive code with no consumer: ORDER BY no caller depends on, locks/retries/options nothing exercises, parameters always passed the same value
 - code duplicating an existing helper in the repo (it should grep for candidates)
@@ -44,7 +44,7 @@ Launch BOTH subagents in a single message so they run concurrently. Each gets: t
 
 Explicitly out of scope: bugs, style nits, renames. Each finding: file:line, one-sentence claim, evidence, confidence (high/medium/low). Return findings as a list; empty list is a valid result.
 
-**Pass B — Convention-consistency reviewer** (subagent_type: general-purpose). Give it the new-item list from Phase 1 and the convention doc paths. For EACH new item it answers exactly four fixed questions, using grep/read on the repo for evidence:
+**Pass B — Convention-consistency reviewer** (subagent_type: general-purpose, model: opus). Give it the new-item list from Phase 1 and the convention doc paths. For EACH new item it answers exactly four fixed questions, using grep/read on the repo for evidence:
 
 1. **置き場**: Does an existing type/interface/file already own this responsibility or return this kind of value? (Search by return type and by responsibility keywords. Example of the failure mode: adding a single-method `XxxIDDAO` when an existing `JobOfferIDDAO` already collects job-offer-ID queries.)
 2. **層**: Per the convention docs, is this the layer that should decide this value? (Example: an application-decided schema version constant defined in the infrastructure layer looks like a DB default; it belongs in domain.)

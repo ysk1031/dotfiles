@@ -47,10 +47,13 @@ Have a subagent, launched via the Agent tool, write the explanation. Two reasons
 ```
 Agent(
   subagent_type: "general-purpose",
+  model: "opus",
   description: "Generate diff explainer page",
   prompt: <template below>
 )
 ```
+
+Pass `model: "opus"` explicitly, regardless of which model is running the main agent (e.g. even when the main agent itself is Fable), so the explanation's quality doesn't depend on the main agent's model.
 
 Prompt template:
 
@@ -69,7 +72,7 @@ Read the change's intent and merit yourself, from the diff, the surrounding code
 
 ### Step 3: Verify (a separate subagent)
 
-Have a second subagent check the generated HTML against the actual diff. Explanations can be "plausible but wrong," and a wrong quiz answer is worse than no quiz — it actively undermines the comprehension check. Don't skip this step.
+Have a second subagent (Agent tool, `subagent_type: "general-purpose"`, `model: "opus"` — pinned regardless of the main agent's model, same reason as Step 2) check the generated HTML against the actual diff. Explanations can be "plausible but wrong," and a wrong quiz answer is worse than no quiz — it actively undermines the comprehension check. Don't skip this step.
 
 Verification prompt template:
 
