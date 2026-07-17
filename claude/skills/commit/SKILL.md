@@ -38,7 +38,7 @@ If subagent returns `"status": "OK"`, decide whether to auto-commit or confirm.
 **Step 2: Evaluate confirmation conditions** — confirmation is required if ANY of:
 1. `-r` or `--review` was passed in the arguments.
 2. **Sensitive path**: any changed path matches the sensitive list below (case-insensitive; match the basename unless noted).
-3. **Large change**: files > 5 **OR** total changed lines > 100.
+3. **Large change**: files > 8 **OR** total changed lines > 200.
 
 Sensitive path list (high-precision filename/path patterns only — deliberately NOT matching broad `*key*`/`*token*`, which hit files like `keybindings.json`):
 - `.env`, `.env.*`, `*.env` — but EXCLUDE `*.example` / `*.sample` / `*.template` / `*.dist`
@@ -134,11 +134,11 @@ Actions:
 Result: 確認モーダルなしで `docs: update README` のようなコミットが作成される
 
 #### Example 2: 大規模な変更（確認あり）
-User says: "コミットして"（8ファイル・143行）
+User says: "コミットして"（10ファイル・260行）
 Actions:
 1. commit-composer が分析
-2. リスクゲート判定: 大規模（>5ファイル）→ 確認
-3. 「変更が大きいため（8 ファイル / 143 行）確認します。」を添えて AskUserQuestion
+2. リスクゲート判定: 大規模（>8ファイル かつ >200行）→ 確認
+3. 「変更が大きいため（10 ファイル / 260 行）確認します。」を添えて AskUserQuestion
 Result: ユーザーが Accept してコミット
 
 #### Example 3: 機微パスを含む（確認あり）
