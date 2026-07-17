@@ -53,7 +53,11 @@ normal flow (per-commit plan → pre-work gate → evidence-backed report).
   catalog of 10 perspectives, each defined by a role declaration, a
   "when it helps" note, and a checklist.
 - Pick **3–5 perspectives** from the diff, and add a one-line "why this helps
-  for this diff" to each.
+  for this diff" to each. 3–5 is the usual range, not a hard floor: for a
+  genuinely thin diff (e.g. a mechanical rename) where only two perspectives
+  truly earn their cost, recommend two. Never pad the list with a low-value
+  perspective just to reach a count — that produces the generic remarks this
+  skill exists to avoid.
 - **Do not run all of them every time.** Always state the cost:
   ~100k tokens and 4–5 minutes per perspective (e.g. 4 in parallel ≈ 400k
   tokens total).
