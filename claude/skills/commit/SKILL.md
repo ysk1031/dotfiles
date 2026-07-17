@@ -41,7 +41,7 @@ If subagent returns `"status": "OK"`, decide whether to auto-commit or confirm.
 3. **Large change**: files > 5 **OR** total changed lines > 100.
 
 Sensitive path list (high-precision filename/path patterns only — deliberately NOT matching broad `*key*`/`*token*`, which hit files like `keybindings.json`):
-- `.env`, `.env.*` — but EXCLUDE `*.example` / `*.sample` / `*.template` / `*.dist`
+- `.env`, `.env.*`, `*.env` — but EXCLUDE `*.example` / `*.sample` / `*.template` / `*.dist`
 - basename contains `secret` or `credential`
 - extension `.pem` / `.key` / `.p12` / `.pfx` / `.keystore` / `.jks`
 - `id_rsa*` / `id_ed25519*` / `id_dsa*` / `id_ecdsa*`
