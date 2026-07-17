@@ -1,12 +1,6 @@
 # Report template
 
-Author the candidate report as **markdown** (the canonical, editable source) and write
-it to the **current working directory** (the project root where the skill was invoked) as
-`skill_candidates_report_<YYYY-MM-DD>.md`. An HTML rendering is optional — see SKILL.md
-step 5 for the `md`/`html`/`both` format option (default `md`). The report quotes
-work-repo content, so it is not auto-committed; if the directory is a shared/public repo,
-suggest gitignoring `skill_candidates_report_*` (covers .md and .html).
-Fill the template; keep evidence quotes verbatim; drop empty sections rather than padding.
+Author the candidate report as **markdown** (the canonical, editable source) and write it to the **current working directory** (the project root where the skill was invoked) as `skill_candidates_report_<YYYY-MM-DD>.md`. An HTML rendering is optional — see SKILL.md step 5 for the `md`/`html`/`both` format option (default `md`). The report quotes work-repo content, so it is not auto-committed; if the directory is a shared/public repo, suggest gitignoring `skill_candidates_report_*` (covers .md and .html). Fill the template; keep evidence quotes verbatim; drop empty sections rather than padding.
 
 ```markdown
 # Skill 候補レポート（直近<N>日・<YYYY-MM-DD> 生成）
@@ -60,8 +54,4 @@ Fill the template; keep evidence quotes verbatim; drop empty sections rather tha
 ```
 
 ## Presentation note
-After writing the file, summarize in chat: the validated headline (is the
-frequent pain mostly CLAUDE.md-rules or genuine new skills?), the shortlist
-table, your recommended order of action, and the per-candidate decisions to
-discuss. **Stop there** — do not create any skill. Skill-ification is a separate,
-human-gated step handed to skill-creator.
+After writing the file, summarize in chat: the validated headline (is the frequent pain mostly CLAUDE.md-rules or genuine new skills?), the shortlist table, your recommended order of action, and the per-candidate decisions to discuss. **Stop there** — do not create any skill. Skill-ification is a separate, human-gated step handed to skill-creator.
