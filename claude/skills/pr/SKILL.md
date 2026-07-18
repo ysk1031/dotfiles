@@ -1,16 +1,18 @@
 ---
 name: pr
-description: "Create a GitHub Pull Request with auto-generated title and description. Use when user says 'PR作って', 'create PR', 'プルリクエスト', or wants to push and open a pull request. Do NOT use for reviewing existing PRs, merging PRs, or updating PR descriptions."
+description: "Create a GitHub Pull Request with auto-generated title and description. Use when user says 'PR作って', 'create PR', 'プルリクエスト', or wants to push and open a pull request. ALSO use whenever you (the agent) are about to open a pull request as the culmination of a task — never run `gh pr create` directly; always route through this skill. When creating a PR autonomously without an interactive user available to confirm, invoke with `--auto` (creates a draft and skips the chat confirmation). Do NOT use for reviewing existing PRs, merging PRs, or updating PR descriptions."
 allowed-tools: AskUserQuestion, Bash
-argument-hint: "[base-branch to specify target branch] [--draft to create as draft PR]"
+argument-hint: "[base-branch to specify target branch] [--draft to create as draft PR] [--auto for autonomous/non-interactive runs: create as draft and skip chat confirmation]"
 metadata:
   author: ysk1031
-  version: 2.2.0
+  version: 2.3.0
 ---
 
 # Pull Request Creation Skill
 
 Analyze current branch changes, generate a PR title and description, let the user review/edit, then create the PR. All phases run in the main agent — do NOT use subagents (their output is collapsed in the UI and invisible to the user). Draft confirmation happens via a normal chat reply, NOT AskUserQuestion (see Phase 2 Step 3 for why).
+
+**Autonomous mode (`--auto`):** When invoked with `--auto` (agent-initiated PR with no interactive user to confirm), the skill still runs Phase 1 analysis, but skips the Phase 2 Step 3 chat confirmation and forces a **draft** PR. The draft is the asynchronous approval gate: the human reviews it on GitHub and marks it "Ready for review" when satisfied. `--auto` never force-pushes (see Phase 3).
 
 ## Instructions
 
@@ -130,6 +132,8 @@ Otherwise, use default format:
 
 **Step 3: Display Draft and END THE TURN — do NOT use AskUserQuestion for confirmation**
 
+**If `--auto` was passed:** skip this entire step (no draft display, no turn end, no confirmation). Proceed directly to Phase 3 with `--draft` forced. The GitHub draft is the approval gate instead.
+
 **Why no AskUserQuestion here:** text output in the same turn is only guaranteed visible to the user when it is the FINAL message of the turn with NO tool calls after it. Calling AskUserQuestion after displaying the draft causes the dialog to redraw the terminal and hide the draft text — this has repeatedly broken in the past. Confirmation MUST happen via the user's next chat message instead.
 
 1. Output the following as the final response text of this turn:
@@ -169,7 +173,8 @@ git fetch origin
 - If the remote branch exists: run `git status` to check ahead/behind status
   - If local is ahead only (fast-forward possible): proceed with `git push -u origin HEAD`
   - If local has diverged or is behind (history rewritten by rebase/amend/etc.):
-    Use AskUserQuestion:
+    **If `--auto` was passed:** do NOT force push (no interactive user to authorize a destructive operation). Print "リモートブランチと履歴が分岐しているため、自律モードではpushを中止した。手動で確認してほしい。" and stop.
+    Otherwise, use AskUserQuestion:
     - question: "リモートブランチとローカルブランチの履歴が分岐しています（rebase/amendなどによる可能性があります）。Force pushしますか？"
     - header: "Push"
     - options:
@@ -188,10 +193,11 @@ gh pr create --base <base from Phase 1> --title "<confirmed title>" --body "$(ca
 ---
 🤖 Generated with [Claude Code](https://claude.com/claude-code)
 EOF
-)" [--draft if specified]
+)" [--draft if specified, OR always --draft when --auto]
 ```
 
 3. Display the PR URL from the command output
+   - If `--auto` was used: also print "自律作成のためdraftで作成した。レビューして問題なければ GitHub で Ready for review に切り替えてほしい。"
 
 ---
 
@@ -201,6 +207,8 @@ EOF
 - Use HEREDOC for body to ensure proper formatting — regular strings don't properly handle markdown line breaks and special characters
 - Keep title concise (under 72 characters if possible) — prevents truncation in GitHub UI and maintains readability in PR lists
 - If --draft flag is in arguments, add --draft to gh pr create — accurately reflects the user's intent in the GitHub API call
+- If --auto flag is in arguments, always create as draft and skip the Phase 2 Step 3 chat confirmation — autonomous runs have no interactive user, so the draft PR serves as the asynchronous approval gate the human flips to "Ready for review"
+- Under --auto, NEVER force push — abort on diverged history instead — force push is destructive and there is no interactive user to authorize it
 - ALWAYS use the `base` value detected in Phase 1 Step 2 for `--base` — do NOT substitute the system prompt's "Main branch" value, as it may be inaccurate
 - NEVER use `--force` for push — always use `--force-with-lease` to prevent overwriting others' commits — `--force` unconditionally overwrites the remote, while `--force-with-lease` fails if the remote has been updated by someone else since your last fetch
 - ALWAYS confirm with user before force pushing — force push is destructive and irreversible; silent force push can destroy teammates' work
@@ -223,6 +231,14 @@ Actions:
 1. 通常と同じ分析・提案フロー
 2. `--draft` フラグ付きでPR作成
 Result: ドラフト状態のPRが作成される
+
+#### Example 3: 自律作成（--auto）
+Context: エージェントがタスクの締めくくりとして、対話ユーザーの確認を取れないまま PR を作る
+Actions:
+1. Phase 1 の分析は通常どおり実行
+2. Phase 2 Step 3 のチャット確認をスキップ
+3. `--draft` を強制して `gh pr create`
+Result: draft PR が作成され、URL と「Ready for review に切り替えてほしい」旨を報告。承認権は GitHub の draft ゲートに残る
 
 ---
 
