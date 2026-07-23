@@ -36,8 +36,9 @@ Select prefix: feat/fix/perf/refactor/style/test/docs/build/ci/chore/release
 
 **Step 6: Generate and Return Message**
 Return following the output schema below.
-- Title: under 72 characters
-- Body: Add when changes are complex (multiple files, significant changes). Explain WHAT and WHY.
+- Title: under 72 characters.
+- Body (optional): add only when the title alone isn't enough (multiple files, non-obvious rationale). Explain WHAT and WHY in 1-2 sentences, no bullet lists. A commit is a single concern, so a body that wants to grow usually means the commit itself is doing too much.
+- Body must not include process history: review feedback, second opinions, or tool/session names (e.g. "crit"). Readers need the change and its rationale, not how it was reached.
 - Consider user arguments as hints.
 
 ---
