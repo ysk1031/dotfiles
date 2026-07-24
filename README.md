@@ -87,6 +87,8 @@ After creating the symlink, restart Zed to apply the configuration.
 
 Claude Code's global configuration files are managed in `claude/`. The following files/directories are included:
 
+- `CLAUDE.md` - Global instructions shared across machines
+- `CLAUDE.local.md.example` - Template for machine-specific instructions
 - `settings.json` - Main settings (language, permissions, hooks, plugins)
 - `statusline-command.sh` - Custom status line script
 - `agents/` - Custom subagent definitions
@@ -97,11 +99,22 @@ To set up the symlinks:
 
 ```bash
 # Create symlinks for files
+ln -sf /path/to/dotfiles/claude/CLAUDE.md ~/.claude/CLAUDE.md
 ln -sf /path/to/dotfiles/claude/settings.json ~/.claude/settings.json
 ln -sf /path/to/dotfiles/claude/statusline-command.sh ~/.claude/statusline-command.sh
 
 # Create per-item symlinks for skills/agents
 /path/to/dotfiles/claude/sync-links.sh
+```
+
+`CLAUDE.md` imports `~/.claude/CLAUDE.local.md` (via the `@path` syntax) for
+machine-specific instructions that should stay out of version control, such as
+constraints tied to one machine's environment. Create it from the example even
+if you have nothing to put in it yet, so the import target always exists:
+
+```bash
+cp /path/to/dotfiles/claude/CLAUDE.local.md.example ~/.claude/CLAUDE.local.md
+# Then edit ~/.claude/CLAUDE.local.md with machine-specific rules (or leave it empty)
 ```
 
 `sync-links.sh` symlinks each skill/agent individually instead of linking
