@@ -1,0 +1,9 @@
+Retired 2026-07-27. Last used 2026-03-17; daily-report covers the reflection
+side and this aggregate weekly view stopped being used.
+
+The collection assets this skill used to own (scripts/*.jq, references/schemas.md)
+now live under daily-report/, and the activity-reporter agent points there — both
+skills always shared them, so daily-report would break if they stayed here.
+
+To bring this skill back: delete this file and re-run sync-links.sh. The assets
+stay where they are; nothing needs moving back.
