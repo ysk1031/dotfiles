@@ -98,8 +98,8 @@ Use the jq script files to extract data deterministically. Run the following **e
 
 ```bash
 START_ISO_UTC=$(date -u -r $((START_TS/1000)) +%Y-%m-%dT%H:%M:%SZ)  # JST midnight, expressed in UTC for the transcript timestamps (which are ISO8601 "...Z")
-EXTRACT="$HOME/.claude/skills/weekly-report/scripts/collect-claude-sessions.jq"
-GROUP="$HOME/.claude/skills/weekly-report/scripts/collect-claude-sessions-group.jq"
+EXTRACT="$HOME/.claude/skills/daily-report/scripts/collect-claude-sessions.jq"
+GROUP="$HOME/.claude/skills/daily-report/scripts/collect-claude-sessions-group.jq"
 
 # Target files: modified within the window, excluding subagent sidechain transcripts
 # (double-counts) and the plugin cache (synthetic eval fixtures, not organic usage).
@@ -141,7 +141,7 @@ If no data found, return a `NO_DATA` JSON response per the output schema below.
 
 ## Output Schema: weekly-report-collect-output
 
-See `~/.claude/skills/weekly-report/references/schemas.md#weekly-report-collect-output` for the full schema.
+See `~/.claude/skills/daily-report/references/schemas.md#weekly-report-collect-output` for the full schema.
 
 Return your output as a JSON code block. Escape newlines in JSON strings as `\n`.
 
