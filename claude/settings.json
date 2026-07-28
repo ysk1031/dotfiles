@@ -41,7 +41,8 @@
     "typescript-lsp@claude-plugins-official": true
   },
   "language": "Japanese",
-  "effortLevel": "xhigh",
+  "effortLevel": "high",
+  "tui": "fullscreen",
   "voice": {
     "enabled": true,
     "mode": "hold"
