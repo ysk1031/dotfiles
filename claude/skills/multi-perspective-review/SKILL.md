@@ -1,7 +1,7 @@
 ---
 name: multi-perspective-review
 description: >-
-  実装完了後のブランチ差分を、複数の専門家観点（言語・設計・ドメイン・セキュリティ等）で並行レビューし、挙動を変えないリファクタ候補を洗い出して裁定用の一覧にする（コードは修正しない）。コストが大きいので、ユーザーの承諾を得てから起動する。トリガー例:「多観点でレビューして」「専門家の観点で改善点を洗い出して」「リファクタ候補を洗い出して」「レビューパネルにかけて」「いろんな角度からこの差分を見て」および同義の言い回し。大きめの実装が一段落して PR を作る前なら一言で提案してよい（1セッション1回まで。断られたら再提案しない）。Do NOT use for: PR 前の定型セルフレビュー（「PR前チェック」「PR出す前に見て」「セルフレビューして」と言われたら pre-pr-check を既定にし、多観点も要るか一言確認する）、単一パスのバグ探し（code-review / review）、外部レビュー指摘への対応判断（review-triage）、自分の結論のブラインド照合（second-opinion）、実装前の計画・設計への尋問（grilling）。
+  Review an already-implemented branch diff from several expert perspectives (language, design, domain, security…) in parallel, and surface behavior-preserving refactor candidates as an adjudication list. It reports only and never edits code. Costly, so get the user's consent before launching. Triggers on 「多観点でレビューして」「専門家の観点で改善点を洗い出して」「リファクタ候補を洗い出して」「レビューパネルにかけて」「いろんな角度からこの差分を見て」and the like. Once a sizable implementation settles and before the PR is opened, you may offer it in one line (once per session; never re-offer once declined). Do NOT use for: the routine pre-PR self-review — when the user says 「PR前チェック」「PR出す前に見て」「セルフレビューして」, default to pre-pr-check and ask in one line whether the multi-perspective sweep is wanted too; single-pass bug hunting (code-review / review); judging external review comments (review-triage); blind cross-check of your own conclusion (second-opinion); interrogating a plan or design before implementation (grilling).
 ---
 
 # Multi-Perspective Review
