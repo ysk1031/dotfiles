@@ -17,7 +17,7 @@ Two routine passes always run; on request, expert add-on perspectives (from [ref
 
 Three hard rules:
 1. **Report first, touch nothing.** All passes are read-only. Fixes happen only after the user approves specific findings.
-2. **Blind reviewers.** The passes run in subagents that see the diff and the repo but NOT this conversation, so the implementer's own rationalizations ("I made a separate DAO because…") don't leak into the review. A settled-decisions doc (a file, not conversation) may be passed so reviewers don't relitigate what's already decided.
+2. **Blind reviewers.** The passes run in subagents that see the diff and the repo but NOT this conversation, so the implementer's own rationalizations ("I made a separate DAO because…") don't leak into the review. A settled-decisions doc may be passed so reviewers don't relitigate what's already decided — but only a doc that **already existed before this review**, and only as a path for the reviewer to read, never as your summary of it. Two things are therefore forbidden, because both carry the implementer's framing across the wall by hand: suggesting the user add a rationale they just told you to that doc in order to pre-empt a finding, and telling the user what the reviewers are about to flag before they have flagged it. If a rationale you heard in conversation deserves to be a settled decision, that is a decision for after the review, not before it.
 3. **Behavior-changing findings are never quick-applied.** Even when the user says "直して", a ⚠️ finding goes back to the normal implementation flow (per-commit plan → pre-work gate → evidence-backed report), never straight to a commit.
 
 ## Phase 0: Scope
@@ -32,6 +32,7 @@ The two core passes (A: simplification, B: convention consistency) always run. D
 
 - **The user's request carries a multi-perspective signal** (多観点 / 専門家 / いろんな角度 / レビューパネル, or they named specific expert angles): read [references/perspectives.md](references/perspectives.md), pick 2–5 perspectives that fit the diff, and confirm via AskUserQuestion (multiSelect) with a one-line "why this helps for this diff" and the cost (~100k tokens, 4–5 min per perspective) stated. Perspectives the user already named go in pre-selected. Don't pad the list to reach a count — for a thin diff, two honest perspectives beat four generic ones.
 - **Anything else** (plain 「PR前チェック」-style trigger, the pr skill's suggestion, a bare slash invocation): run core only, ask nothing. Same zero-friction behavior as the old pre-pr-check.
+- **When the user asks to narrow for cost** ("観点は絞って"): cut from the non-default slots first. The three default slots (language pro, library pro, senior architect) come out **only** when their own exclusion condition in perspectives.md is met — never merely because the user wants fewer. Dropping the library pro on a diff that uses an ORM, or the language pro at all, is a rule violation, not a cost saving. Present it this way: state the surviving default slots as the floor in one line of prose (with their combined cost), and put **only the non-default candidates** in the AskUserQuestion options. Never offer "just the defaults is fine" as an option — the floor is not something the user is being asked to vote on, and turning it into a choice produces a menu that contradicts itself.
 - **Add-on preparation** (only when add-ons were selected): detect the language version and major libraries from the manifest (go.mod / pyproject.toml / package.json / Gemfile / Cargo.toml…) to concretize the language/library checklists. For the domain perspective, ask two things before launching: which spec docs the reviewer should read (concrete paths), and where the settled design decisions live.
 - **Incremental runs**: if the core passes already ran on this branch in this session, run only the newly requested add-ons and merge the results into the existing table's numbering.
 - If the user explicitly asks to skip the routine passes ("定型はいいから観点だけ"), obey — but say in one line that naming/placement conventions won't be covered.
@@ -41,16 +42,38 @@ The two core passes (A: simplification, B: convention consistency) always run. D
 Extract the inputs deterministically — do not rely on the LLM to enumerate:
 
 1. **New files**: `git diff <base>...HEAD --diff-filter=A --name-only`
-2. **New exported symbols** (Go example; adapt the grep to the project language):
-   `git diff <base>...HEAD -- '*.go' | grep -E '^\+(type|func|const|var) ' | sort -u`
-   Include symbols in new files too (the diff covers them). Keep test-file symbols out of the consistency pass unless they define shared helpers.
+2. **New top-level declarations, with the file each one lives in** (Go example; adapt the pattern to the project language):
+   `git diff -U0 <base>...HEAD -- '*.go' | grep -E '^(\+\+\+ b/|\+(type|func|const|var) )'`
+   Keeping the `+++ b/<path>` headers in the output is the point — a bare symbol list cannot answer the 置き場 and 層 questions, and guessing the file afterwards is exactly the LLM enumeration this phase exists to avoid. Include symbols in new files too (the diff covers them). Keep test-file symbols out of the consistency pass unless they define shared helpers.
+   **Unexported declarations are in scope** — 置き場 / 型 / 命名 apply to them as much as to exported ones. Mark each item exported or not, and tell Pass B to skip the 層 question for unexported ones (a package-private value has no cross-layer contract to violate).
+   **Pass B's four questions apply only to code**: declarations and the code files holding them. New docs/specs/config files go to the reviewers as background material, never as items to answer 置き場 / 層 / 型 / 命名 about — asking a convention reviewer where a markdown spec belongs is wasted budget.
 3. **Convention sources**: collect paths of the project `CLAUDE.md` and any convention docs it references (e.g. `agent_docs/*.md`). These are handed to the consistency reviewer. If the project has no written conventions, note it — the layer-responsibility question will be weaker and the final report must say so.
 
 ## Phase 3: Parallel blind launch
 
-Launch ALL subagents — both core passes and any selected add-ons — in a single message so they run concurrently. Each gets: the working directory, base branch name, and the instruction to read the diff itself (`git diff <base>...HEAD`). None gets this conversation's context or the reasons behind design choices; if a settled-decisions doc is known, pass its path to every reviewer. Pass `model: "opus"` explicitly on every Agent call, regardless of which model is running the main agent (e.g. even when the main agent itself is Fable) — this keeps review quality independent of the main agent's model.
+Launch ALL subagents — both core passes and any selected add-ons — in a single message so they run concurrently. Each gets: the working directory, base branch name, and the instruction to read the diff body itself (`git diff <base>...HEAD`, not just `--stat`). None gets this conversation's context or the reasons behind design choices; if a settled-decisions doc exists, **pass its path and let the reviewer read it** — do not paste a summary of it into the prompt, or your own reading of the decisions becomes the one thing that leaks past the blind wall. Pass `model: "opus"` explicitly on every Agent call, regardless of which model is running the main agent (e.g. even when the main agent itself is Fable) — this keeps review quality independent of the main agent's model.
 
-Every prompt — core and add-on alike — carries this shared constraint: *the goal is behavior-preserving findings, but if you spot a behavior bug, a mismatch with the spec, or an operational risk, report it in a separate bucket marked as such (this side-channel is welcomed — in practice it yields the highest-value findings).*
+Every prompt — core and add-on alike — carries these two shared constraints, worded into the prompt itself rather than assumed:
+- *The goal is behavior-preserving findings, but if you spot a behavior bug, a mismatch with the spec, or an operational risk, report it in a separate bucket marked as such (this side-channel is welcomed — in practice it yields the highest-value findings).*
+- *Findings are limited to the lines the diff touched. Existing code is read for comparison only and is never itself the target of a finding.*
+
+Both core passes end with this **fixed output block**, verbatim, so Phase 4 can merge them mechanically alongside the add-ons (add-ons use their own skeleton's block). Do not paraphrase the labels or invent your own confidence scale:
+
+```
+## 出力形式（最終メッセージ。日本語）
+発見ごとに:
+- **[{接頭辞}-連番] タイトル**（file_path:line）
+- 確信度: 高/中/低
+- 現状の何が問題か（1〜3行、具体例つき）
+- 改善案（具体的に）
+- 挙動不変であることの根拠（1行）
+
+接頭辞は {簡素化パスなら S / 規約整合パスなら V}。指摘がなければ「指摘なし」とだけ返す（無理に作らない）。
+挙動が変わる発見・仕様との食い違い・運用リスクは、上とは別の「⚠️別枠」節にまとめる
+（この別枠報告は歓迎される。無理に挙動不変の枠へ押し込めない）。
+```
+
+That block is the whole contract — don't move pieces of it into the prose above or below, or the two passes come back in different shapes and Phase 4 stops being mechanical.
 
 **Pass A — Simplification reviewer** (subagent_type: general-purpose, model: opus). Prompt it to find, in the changed lines only:
 - conversions/copies that disappear if a variable is declared as the target type from the start
@@ -58,7 +81,7 @@ Every prompt — core and add-on alike — carries this shared constraint: *the 
 - code duplicating an existing helper in the repo (it should grep for candidates)
 - dead or write-only fields introduced by the diff
 
-Explicitly out of scope: style nits, renames. Each finding: file:line, one-sentence claim, evidence, confidence (high/medium/low). Return findings as a list; empty list is a valid result.
+Explicitly out of scope: style nits, renames. Use the fixed output block above with prefix `S`.
 
 **Pass B — Convention-consistency reviewer** (subagent_type: general-purpose, model: opus). Give it the new-item list from Phase 2 and the convention doc paths. For EACH new item it answers exactly four fixed questions, using grep/read on the repo for evidence:
 
@@ -67,7 +90,7 @@ Explicitly out of scope: style nits, renames. Each finding: file:line, one-sente
 3. **型**: Do fields with the same meaning use the same type across layers and neighboring types? (Example: one LLM-output job_offer_id declared int while every other ID in the codebase is uint.)
 4. **命名**: Do sibling types in the same file/table share a prefix/vocabulary scheme? (Example: row type `MLJobOfferCriteriaProposal` but inner types without the `ML` prefix.)
 
-A question with a clean answer produces no finding. Each finding: the new item, which question, the existing code it conflicts with (file:line), and a concrete alternative. Return findings as a list.
+A question with a clean answer produces no finding. Skip question 2 (層) for unexported declarations. Use the fixed output block above with prefix `V`, and name which of the four questions the finding came from in the title.
 
 **Add-on perspectives** use the prompt skeleton below, with the checklist taken from the matching entry in perspectives.md and concretized with the Phase 1 detection results.
 
@@ -120,14 +143,16 @@ Each add-on perspective's prompt is a variation on the skeleton below (written i
 新規コードをレビューする。読み取り専用のレビューであり、ファイルの変更は一切禁止。
 
 ## 対象
-`git diff {base}...HEAD --stat` で変更ファイル一覧が見られる。主対象: {ファイル群の列挙}
-背景資料: {設計資料のパス}（確定済みの設計判断が書かれている。設計判断そのものは蒸し返さない）
+`git diff {base}...HEAD` を自分で実行して**差分の本体を読む**（`--stat` はファイル一覧の把握用）。
+主対象: {ファイル群の列挙}
+背景資料: {設計資料のパス} — このファイルを自分で読むこと。確定済みの設計判断が書かれている。
 
 ## レビューの前提
 - 目的は「仕様・挙動を一切変えないリファクタリング」の候補を洗い出すこと。
   挙動が変わる提案は不可。ただし挙動バグ・仕様との食い違い・運用リスクを見つけたら
   「リファクタではなくバグ/リスク」と明示して別枠で報告する（この別枠報告は歓迎される）
-- 確定済みの設計判断（{要点の列挙}）は前提として受け入れる
+- **指摘は差分が触った行に限る。** 既存コードは比較対象として読むだけで、指摘の対象にはしない
+- 背景資料に書かれた設計判断は前提として受け入れ、蒸し返さない
 - 命名・置き場所の定型指摘はコアの規約整合パスが担当するので出さない
 
 ## 観点（{観点名}として）
