@@ -1,19 +1,21 @@
 ---
 name: multi-perspective-review
 description: >-
-  Review an already-implemented branch diff from several expert perspectives (language, design, domain, security…) in parallel, and surface behavior-preserving refactor candidates as an adjudication list. It reports only and never edits code. Costly, so get the user's consent before launching. Triggers on 「多観点でレビューして」「専門家の観点で改善点を洗い出して」「リファクタ候補を洗い出して」「レビューパネルにかけて」「いろんな角度からこの差分を見て」and the like. Once a sizable implementation settles and before the PR is opened, you may offer it in one line (once per session; never re-offer once declined). Do NOT use for: the routine pre-PR self-review — when the user says 「PR前チェック」「PR出す前に見て」「セルフレビューして」, default to pre-pr-check and ask in one line whether the multi-perspective sweep is wanted too; single-pass bug hunting (code-review / review); judging external review comments (review-triage); blind cross-check of your own conclusion (second-opinion); interrogating a plan or design before implementation (grilling).
+  Review an already-implemented branch diff from several expert perspectives (language, design, domain, security…) in parallel, and collect the behavior-preserving refactor candidates into one multi-perspective review list for the user to decide on. It reports only and never edits code. Costly, so always get the user's consent before launching — even when they asked for it outright. Triggers on 「多観点でレビューして」「専門家の観点で改善点を洗い出して」「リファクタ候補を洗い出して」「レビューパネルにかけて」「いろんな角度からこの差分を見て」and the like. Once a sizable implementation settles and before the PR is opened, you may offer it in one line (once per session; never re-offer once declined). Do NOT use for: the routine pre-PR self-review — when the user says 「PR前チェック」「PR出す前に見て」「セルフレビューして」, default to pre-pr-check and ask in one line whether the multi-perspective sweep is wanted too; single-pass bug hunting (code-review / review); judging external review comments (review-triage); blind cross-check of your own conclusion (second-opinion); interrogating a plan or design before implementation (grilling).
 ---
 
 # Multi-Perspective Review
 
 ## What this skill is for
 
-Take a branch diff that is implemented but not yet in a PR, have several expert-perspective subagents review it **in parallel**, then merge their findings into a list the user can adjudicate. There are two goals:
+Take a branch diff that is implemented but not yet in a PR, have several expert-perspective subagents review it **in parallel**, then merge their findings into the **multi-perspective review list** the user decides on. There are two goals:
 
 1. Exhaustively surface **refactor candidates that do not change behavior**.
 2. Flag any **behavior-changing problems** found along the way (bugs, mismatches with the spec, operational risks). In practice this second bucket yields the highest-value findings.
 
-This skill owns **the review and the adjudication list only** — it never edits code. Once the user decides what to act on, implementation goes back to the normal flow (per-commit plan → pre-work gate → evidence-backed report).
+This skill owns **the review and the multi-perspective review list only** — it never edits code. Once the user decides what to act on, implementation goes back to the normal flow (per-commit plan → pre-work gate → evidence-backed report).
+
+The list's name is load-bearing, not decoration. `pre-pr-check` produces an "adjudication table" for the same stage of work, so a later turn ("fix #1 and #3") can only tell which skill's list it is looking at if the two names stay distinct — and the follow-up differs (this skill never edits; pre-pr-check applies approved fixes one-per-commit). Always present it under the heading 「多観点レビュー一覧」 and never call it 裁定用の一覧 / an adjudication table.
 
 ## Overall flow
 
@@ -21,7 +23,7 @@ This skill owns **the review and the adjudication list only** — it never edits
 2. Recommend 3–5 perspectives → get user confirmation.
 3. Concretize perspectives (detect the manifest, ask about domain docs).
 4. Launch all perspectives in one message, in parallel.
-5. Integrate → present the adjudication list → wait for the user's call.
+5. Integrate → present the multi-perspective review list → wait for the user's call.
 
 ### Step 1: Understand the diff
 
@@ -49,11 +51,11 @@ This skill owns **the review and the adjudication list only** — it never edits
 - Use `general-purpose` as the subagent_type and pass `model: "opus"` explicitly on every Agent call — regardless of which model is running the main agent (e.g. even when the main agent itself is Fable). Pinning to Opus keeps review quality independent of the main agent's model.
 - Each perspective's prompt follows the skeleton below. Embedding the **shared constraints** (behavior-preserving, separate-bucket reporting, no relitigating, read-only) into every prompt is the core of the quality.
 
-### Step 5: Integrate and build the adjudication list
+### Step 5: Integrate and build the multi-perspective review list
 
 Integration steps:
 
-1. **Deduplicate.** If several perspectives independently flag the same spot, that convergence is itself a strong signal — note it as "flagged independently by N perspectives" (it drives adjudication priority; in the original run, 3 of 4 perspectives independently flagged the same duplicated definition → it was tackled first).
+1. **Deduplicate.** If several perspectives independently flag the same spot, that convergence is itself a strong signal — note it as "flagged independently by N perspectives" (it drives what the user tackles first; in the original run, 3 of 4 perspectives independently flagged the same duplicated definition → it was tackled first).
 2. **Separate "⚠️ changes behavior / needs a call" from "behavior-preserving refactor"**, and put the former first.
 3. Classify the behavior-preserving side into buckets (structure / readability & domain vocabulary / tests, etc.) and lay it out in an **importance × effort** table.
 4. Finally, narrow the **"points to discuss"** down to 2–3 and wait for the user's decision. **Do not fix anything on your own.**
@@ -65,7 +67,7 @@ Wording of the list:
 
 ### Step 6: Exit
 
-Break the "do it" items from the adjudication into per-commit tasks and hand them to the normal implementation flow (pre-work gate → evidence-backed report). This skill's responsibility ends here.
+Break the "do it" items from the list into per-commit tasks and hand them to the normal implementation flow (pre-work gate → evidence-backed report). This skill's responsibility ends here.
 
 ## Subagent prompt skeleton
 
