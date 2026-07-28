@@ -77,7 +77,8 @@ fi
 
 **Step 6: Check PR Template**
 Check if `.github/pull_request_template.md` exists:
-- If exists, read its content for format reference
+- If exists, read its content for format reference — follow its headings and checklist as-is. Do NOT invent your own structure (a `Summary / Changes / Test Plan` layout written over a template that asks for something else has been rejected before). Keep sections that don't apply, filled with 該当なし / N/A or left as unchecked `[ ]`
+- Only the repository root's `.github/` (or root / `docs/`) template is the one GitHub uses. In a monorepo, ignore template-looking files under subdirectories
 
 **Step 6.5: Check Project Conventions**
 Read the project's `CLAUDE.md` (if present) for PR-related conventions — e.g. a required title prefix (issue number, ticket ID), a default draft state, or required sections. Apply anything found there in Phase 2.
