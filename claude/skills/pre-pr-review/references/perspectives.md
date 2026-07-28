@@ -6,7 +6,7 @@ Role declarations and checklist items are written in Japanese because they get e
 
 Recommendation guidance:
 
-- **Language pro, library pro, and the senior architect are the default slots** — recommend all three unless a slot's exclusion condition below is met. Language/library content can be concretized from the manifest; the architect earns its slot on the deep structural side (dependency direction, boundary design), leaving routine convention checks (naming, placement of new public types) to pre-pr-check.
+- **Language pro, library pro, and the senior architect are the default slots** — recommend all three unless a slot's exclusion condition below is met. Language/library content can be concretized from the manifest; the architect earns its slot on the deep structural side (dependency direction, boundary design), leaving routine convention checks (naming, placement of new public types) to the core convention pass (Pass B).
   - **Drop the architect** only when the diff has no new or changed public type, module boundary, or inter-module dependency, and triggers no placement judgment (e.g. a single-purpose bug fix, a constant tweak, or a mechanical rename across many files). Number of files touched is not the signal — a one-file change can introduce a boundary, and a ten-file rename may hold no structural judgment at all.
   - **Drop the library pro** when the diff uses no framework, ORM, task queue, or external SDK and touches no name-wired integration (routes, DI registration, ORM relations) — its idioms are then covered by the language pro. You can judge this from the diff itself; the manifest detected later only confirms it. If genuinely unsure, keep it.
   - **The language pro effectively never drops**: any code change has language-level structure (types, iteration, error handling) worth a look.
@@ -43,13 +43,13 @@ Recommendation guidance:
 
 - **Role declaration**: `このコードベース全体の構造に責任を持つシニアアーキテクト`
 - **When it helps**: a default slot — include it unless the exclusion condition in the recommendation guidance is met. It pays off on changes that span multiple files or introduce a new public type or module boundary, not only on brand-new modules.
-- **Checklist** (weighted toward deep structure; leave routine convention checks to pre-pr-check):
+- **Checklist** (weighted toward deep structure; leave routine convention checks to the core convention pass):
   - レイヤ間の依存方向（循環・レイヤ飛び越え）
   - 境界の型・インターフェースが将来の差し替えに耐えるか
   - 責務分割（大きすぎるモジュール・クラス、関心の混在）
   - テスト構造がリファクタの安全網として十分か
-  - 命名の一貫性・定数の置き場所は、**深い構造上の問題を示しているときだけ**触れる（単なる表記ゆれ・置き場所の好みは pre-pr-check の担当なので出さない）
-- **Perspective-specific instruction**: emphasize "works now but will hurt later"; do not raise matters of taste, and defer routine naming/placement nits to pre-pr-check （`「動くが将来困る」系を重視し、好みの問題は出さない。命名・置き場所の定型指摘は pre-pr-check に譲る` として渡す）
+  - 命名の一貫性・定数の置き場所は、**深い構造上の問題を示しているときだけ**触れる（単なる表記ゆれ・置き場所の好みはコアの規約整合パスの担当なので出さない）
+- **Perspective-specific instruction**: emphasize "works now but will hurt later"; do not raise matters of taste, and defer routine naming/placement nits to the core convention pass （`「動くが将来困る」系を重視し、好みの問題は出さない。命名・置き場所の定型指摘はコアの規約整合パスに譲る` として渡す）
 
 ## Domain expert (prefix: D)
 
