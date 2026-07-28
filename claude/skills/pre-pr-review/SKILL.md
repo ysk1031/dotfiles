@@ -84,16 +84,20 @@ Merge all passes. Deduplicate — when several reviewers independently flag the 
 | 1 | <file:line> | <一文> | <根拠> | <観点名> |
 
 ### 挙動を変えない改善
-| # | 対象 | 指摘 | 根拠 | 出所 | 推奨 |
-|---|------|------|------|------|------|
-| 2 | <file:line or 型名> | <一文> | <既存コードとの対比> | 簡素化 | 直す / 見送り可 / 相談 |
+| # | 対象 | 指摘 | 根拠 | 出所 | 重要度 | 工数 | 推奨 |
+|---|------|------|------|------|--------|------|------|
+| 2 | <file:line or 型名> | <一文> | <既存コードとの対比> | 簡素化 | 中 | 小 | 直す / 見送り可 / 相談 |
+
+**議論したい点**: <2〜3個に絞る。トレードオフが実在するものだけ>
 
 対応する番号を返信してください（例:「2,3」「全部」「なし」）。
 ```
 
 - Numbering is continuous across both tables, so "1番直して" is unambiguous about which group it hits.
 - The ⚠️ table comes first and holds everything the reviewers put in the separate bucket (bugs, spec mismatches, operational risks). If it's empty, omit it.
-- 出所 uses plain Japanese labels (簡素化 / 規約 / 言語 / ライブラリ / アーキ / ドメイン / セキュリティ / 性能 / テスト / 運用 / 並行処理 / 互換性) — the catalog's ID prefixes (P-1, L-2…) are for internal traceability only and never appear in the table (Pass A and the architect perspective would both claim "A"). On a core-only run the 出所 column may be dropped.
+- 出所 uses plain Japanese labels (簡素化 / 規約 / 言語 / ライブラリ / アーキ / ドメイン / セキュリティ / 性能 / テスト / 運用 / 並行処理 / 互換性) — the catalog's ID prefixes (P-1, L-2…) are for internal traceability only and never appear in the table (Pass A and the architect perspective would both claim "A"). Titles must read plainly in Japanese: no invented abbreviations or coinages.
+- On a **core-only** run, drop the 出所 / 重要度 / 工数 columns — the core passes return confidence, not an importance×effort rating — and the table is the same shape the old pre-pr-check produced. 重要度×工数 exists so the add-on perspectives' ratings have somewhere to land.
+- 議論したい点 is capped at 2–3 and only for genuine trade-offs. Omit the line when there are none; it is not a summary of the table.
 - 推奨 must take a position — don't mark everything 直す. 見送り可 is for real-but-cheap-to-ignore items; 相談 is for genuine trade-offs.
 - If all passes return nothing, say exactly that ("全パスとも指摘なし") and stop — do not manufacture findings.
 - On a core-only run where the diff shows strong signals for a catalog perspective (auth/authz, concurrency, schema changes…), you may add ONE plain-text line after the table: 「追加の専門家観点（〜）も掛けられます。番号の返信と一緒にどうぞ」.
