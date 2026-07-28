@@ -112,6 +112,7 @@ The confirmed path (Phase 2 Step 3b) does not print these hints — the user alr
 ---
 
 ### Rules
+- NEVER include a scope in the subject: `type: description`, never `type(scope): description`. If commit-composer returns a scoped title, strip the parenthesized scope before the risk gate / AskUserQuestion — the user has corrected this in multiple repositories, so it applies regardless of what the repo's history looks like
 - Auto-commit (no confirmation) when the change is small and touches no sensitive path — local commits are reversible (`git reset --soft HEAD^` / `git commit --amend`), so gating every message costs more friction than it saves
 - ALWAYS confirm when a sensitive path is touched, even with `-f` — committing secrets is the one costly mistake this gate exists to prevent
 - `-f`/`--force` only skips the granularity (NEEDS_SPLIT) check; it does NOT bypass the risk gate. `-r`/`--review` forces confirmation regardless of risk

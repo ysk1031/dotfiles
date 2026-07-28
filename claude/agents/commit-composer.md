@@ -34,6 +34,8 @@ If changes span more than 3 unrelated concerns, return a `NEEDS_SPLIT` JSON resp
 **Step 5: Determine Commit Type**
 Select prefix: feat/fix/perf/refactor/style/test/docs/build/ci/chore/release
 
+**NEVER add a scope.** Write `type: description`, never `type(scope): description` — no `feat(api):`, no `docs(claude):`. This holds even when the repository's existing history contains scoped commits; the user has corrected scoped proposals in multiple repositories and wants them dropped everywhere.
+
 **Step 6: Generate and Return Message**
 Return following the output schema below.
 - Title: under 72 characters.
