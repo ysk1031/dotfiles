@@ -38,7 +38,7 @@ Three hard rules:
   - the domain slot needs its spec paths: find the candidates yourself and put them in that option's description as a proposal (「specs/xxx.md を読ませます」), so agreeing costs no second round trip.
 - **Anything else** (plain 「PR前チェック」, the pr skill's suggestion, a bare slash invocation): `SIM` and `CNV` only, ask nothing.
 - **「観点は絞って」**: cut non-default slots first. A default slot comes out **only** when its own exclusion condition in the catalog is met — never merely because the user wants fewer. State the surviving floor and its combined cost in one line of prose, put only the non-default candidates in the dialog, and never offer "just the defaults is fine" as an option. If the floor already exceeds the budget the user is worried about, say so plainly: the savings can only come from the non-default slots.
-- **Incremental runs** (a table already went out this session): naming a perspective *is* the approval — state the cost in one line and launch, no dialog. Run only the new reviewers and merge per Phase 4's numbering example.
+- **Incremental runs** (a table already went out this session): naming a perspective *is* the approval — state the cost in one line and launch, no dialog. Run only the new reviewers, merge per Phase 4's numbering example, and leave the rows already shown exactly as they are — same numbers, same text, same eight columns.
 
 ## Phase 2: Mechanical extraction (main agent, read-only)
 
