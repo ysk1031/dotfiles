@@ -1,7 +1,9 @@
 [
   {"query": "context そろそろ限界そう。別のセッションで続きやりたいから、今の状態の引き継ぎ作っといて", "should_trigger": true},
   {"query": "このあと /clear するけど、その前に今やってる作業の状態を次のセッションに残しておきたい", "should_trigger": true},
-  {"query": "compact しようか迷ってる…それとも一回 doc に状態残したほうがいいかな?どっちがいい?", "should_trigger": true},
+  {"query": "compact しようか迷ってる…それとも一回 doc に状態残したほうがいいかな?どっちがいい?", "should_trigger": true,
+   "setup": "git checkout -b GR-20620-inferred-criteria-reflection && printf '\\n// WIP: 週次更新の反映ロジック追加中\\n' >> app/pkg/usecase/generate_job_offer_inferred_criteria_usecase.go",
+   "note": "他の true ケースと違い作成の指示ではなく問いかけだけなので、引き継ぐ作業が実在しないと発火しない。クリーンな新規セッションで流すと compaction と doc の対比を答えたうえで「どのセッションの作業か」と聞き返して終わる（妥当な応答だが非発火）。setup で未コミットの作業を作ってから測る。"},
   {"query": "今日はもうここまでにする。明日の自分が迷わず再開できるように、決めたこととか残タスクまとめといて", "should_trigger": true},
   {"query": "handoff doc とキックオフメッセージ作って。GR-20543 の reflection ロジックの作業ぶん", "should_trigger": true},
   {"query": "セッション長くなってきたから一回区切りたい。ここまでの判断と次やることを別チャット用に書き出して", "should_trigger": true},
