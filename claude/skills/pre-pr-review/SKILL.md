@@ -31,14 +31,14 @@ Three hard rules:
 
 `SIM` and `CNV` run every time, no questions asked. Whether expert perspectives join:
 
-- **The request carries a multi-perspective signal** (多観点 / 専門家 / いろんな角度 / レビューパネル, or a named expert angle): read the catalog and keep the entries whose 合図 you actually found in the diff. Cap the experts at 5; the three default slots (language / library / architect) take three of those, so the user is choosing 0–2 more. Confirm via AskUserQuestion (multiSelect), where:
+- **The request carries a multi-perspective signal** (多観点 / 専門家 / いろんな角度 / レビューパネル, or a named expert angle): read the catalog and keep the entries whose 合図 you actually found in the diff. Cap the experts at 5; the three default slots (language / library / architect) take three of those, so the user is choosing 0–2 more. List no more candidate options than those open slots — the dialog cannot cap how many get selected, so the option count is the cap. Confirm via AskUserQuestion (multiSelect), where:
   - each option quotes **the 合図 you found** and the cost (~100k tokens, 4–5 min each). Quote the signal and stop — what might be *wrong* with it is the pre-announcement hard rule 2 forbids.
   - perspectives the user named go first in the list, labeled as theirs (AskUserQuestion has no pre-selection; ordering and labeling is the whole mechanism).
   - selecting nothing means "defaults only". Say that in one line of prose, never as an option.
   - the domain slot needs its spec paths: find the candidates yourself and put them in that option's description as a proposal (「specs/xxx.md を読ませます」), so agreeing costs no second round trip.
 - **Anything else** (plain 「PR前チェック」, the pr skill's suggestion, a bare slash invocation): `SIM` and `CNV` only, ask nothing.
 - **「観点は絞って」**: cut non-default slots first. A default slot comes out **only** when its own exclusion condition in the catalog is met — never merely because the user wants fewer. State the surviving floor and its combined cost in one line of prose, put only the non-default candidates in the dialog, and never offer "just the defaults is fine" as an option. If the floor already exceeds the budget the user is worried about, say so plainly: the savings can only come from the non-default slots.
-- **Incremental runs** (a table already went out this session): naming a perspective *is* the approval — state the cost in one line and launch, no dialog. Run only the new reviewers, merge per Phase 4's numbering example, and leave the rows already shown exactly as they are — same numbers, same text, same eight columns.
+- **Incremental runs** (a table already went out this session): naming a perspective *is* the approval — state the cost in one line and launch, no dialog. Run only the new reviewers, reusing Phase 2's outputs from the earlier run as-is, merge per Phase 4's numbering example, and leave the rows already shown exactly as they are — same numbers, same text, same eight columns.
 
 ## Phase 2: Mechanical extraction (main agent, read-only)
 
@@ -51,15 +51,19 @@ Extract the inputs deterministically — do not rely on the LLM to enumerate:
    **Unexported declarations are in scope** — 置き場 / 型 / 命名 apply to them as much as to exported ones. Mark each item exported or not by its own name (an exported function returning an unexported type is exported), and tell `CNV` to skip the 層 question for unexported ones: a package-private value has no cross-layer contract to violate.
    A test-file symbol joins the list only when a second test file uses it. New docs/specs/config files never join it — they go to the reviewers as background material, because asking where a markdown spec belongs is wasted budget.
 3. **Convention sources**: paths of the project's own `CLAUDE.md` (not the machine-wide `~/.claude/CLAUDE.md`, which is not a project convention) and any convention docs it references (e.g. `agent_docs/*.md`). If the project has no written conventions, note it — the 層 question will be weaker and the final report must say so.
-4. **Manifest**: the language version and major libraries (go.mod / pyproject.toml / package.json / Gemfile / Cargo.toml…). Always, even on a two-reviewer run — it costs one file read, and both the role declarations and Phase 1's 合図 quotes depend on it.
+4. **Manifest**: the language version and major libraries (go.mod / pyproject.toml / package.json / Gemfile / Cargo.toml…). Always, even on a two-reviewer run — it costs one file read, and the template's 言語/主要ライブラリ line, the expert role declarations, and Phase 1's 合図 quotes all depend on it.
 
 ## Phase 3: Parallel blind launch
 
-Launch ALL selected reviewers in a single message so they run concurrently, each built from the one template at the bottom of this file. Pass `model: "opus"` explicitly on every Agent call, regardless of which model runs the main agent (even when it is Fable) — this keeps review quality independent of the main agent's model.
+Launch ALL selected reviewers in a single message so they run concurrently, each built from the one template at the bottom of this file. Every Agent call is `subagent_type: "general-purpose"` with `model: "opus"` passed explicitly, regardless of which model runs the main agent (even when it is Fable) — read-only is enforced by the prompt text, and pinning opus keeps review quality independent of the main agent's model.
 
 Only five things vary between reviewers: **役割宣言 / 接頭辞 / チェックリスト / 観点固有の追加指示 / 主対象ファイル**. Everything else in the template is identical for all of them, which is what lets Phase 4 merge mechanically.
 
-Inputs every reviewer gets: the repo path, the base branch, the instruction to read the diff body itself (not just `--stat`), and the paths of any background docs — **paths only, never your summary of them** (hard rule 2). `CNV` additionally gets Phase 2's item list and the convention doc paths; expert perspectives may take the convention docs as background too. Set 最大件数 to 12–15.
+Inputs are fixed per the template, not per-reviewer judgment calls:
+- **Every reviewer, always**: the repo path, the base branch, the instruction to read the diff body itself (not just `--stat`), the 言語/主要ライブラリ line (from Phase 2-4), and the paths of every background doc — the settled-decisions docs AND the convention docs, `SIM` included. **Paths only, never your summary of them** (hard rule 2).
+- **主対象 defaults to the code files the diff touched, minus test files.** An entry's 観点固有の追加指示 may widen or narrow that — `SIM` adds the test files back; `CNV`'s targets are the files holding its item list.
+- **`CNV` only**: Phase 2's item list.
+- Set 最大件数 to 12–15 (small diff → 12; large or many reviewers → 15).
 
 ## Phase 4: One table (main agent) — HARD STOP
 
@@ -73,7 +77,9 @@ Merge every reviewer's output.
 - Anything whose target is a file the diff didn't touch. Reviewers do violate that constraint.
 - A finding whose target is right but whose stated evidence is wrong (a claimed existing method that turns out not to exist) is neither dropped nor kept as-is: correct the wording, keep the row, note the correction.
 
-**You assign 重要度 and 工数 for every row** — reviewers return 確信度 only, because importance needs the repo-wide view a single reviewer doesn't have. Rate 重要度 by whether a written convention is violated and how far the problem reaches; 工数 by the number of call sites you can count with grep. Where a reviewer argued severity in its finding body (an exploitable path, a spec mismatch), you may adopt that in 重要度. Confidence is not importance.
+These rules chain rather than compete. An unverified 低 drops. Once you have verified a finding, only the verdict matters: wrong target drops the row; right target with wrong evidence keeps the corrected row.
+
+**You assign 重要度 and 工数 for every row** — reviewers return 確信度 only, because importance needs the repo-wide view a single reviewer doesn't have. Rate 重要度 by whether a written convention is violated and how far the problem reaches; 工数 by the number of call sites you can count with grep. Where a reviewer argued severity in its finding body (an exploitable path, a spec mismatch), you may adopt that in 重要度. Confidence is not importance. Both scales are three-valued: 重要度 高/中/低, 工数 小/中/大.
 
 Present in Japanese under the heading 「PR前レビュー結果」. **Both tables have the same eight columns**:
 
@@ -93,9 +99,9 @@ Present in Japanese under the heading 「PR前レビュー結果」. **Both tabl
 対応する番号を返信してください（例:「2,3」「全部」「なし」）。
 ```
 
-- Numbering is continuous across both tables, so 「1番直して」 is unambiguous. N in the heading is the `--stat` file count, docs included.
+- Numbering is continuous across both tables, so 「1番直して」 is unambiguous. Within each table, order rows by 重要度 (高 first) and number them in that order. N in the heading is the `--stat` file count, docs included.
 - The ⚠️ table comes first and holds everything the reviewers filed in their separate bucket. Omit it when empty. The reviewer's label is not binding: promote a finding it filed as behavior-preserving when the fix would change a repeated or externally visible side effect — how many rows get written, whether a request is retried, whether a lock is still held. Rewording a message or an error string is not that.
-- **Incremental runs never renumber.** Example: 1–6 already went out, and a security perspective then returns one ⚠️ and two behavior-preserving findings → the ⚠️ table (new) holds **7**, and the behavior-preserving table continues **8, 9** after the existing 1–6. The ⚠️ table still sits on top even though its number is larger, and rows 1–6 keep both their numbers and their text.
+- **Incremental runs never renumber.** Example: 1–6 already went out, and a security perspective then returns one ⚠️ and two behavior-preserving findings → the ⚠️ table (new) holds **7**, and the behavior-preserving table continues **8, 9** after the existing 1–6. The ⚠️ table still sits on top even though its number is larger, and rows 1–6 keep both their numbers and their text. Among the new findings, the ⚠️ rows take the smaller numbers first, as in the example.
 - 出所 names the reviewer that produced the finding (not the nature of the finding), as a plain Japanese label: 簡素化 / 規約 / 言語 / ライブラリ / アーキ / ドメイン / セキュリティ / 性能 / テスト / 運用 / 並行処理 / 互換性. Finding IDs (`SIM-1`, `P-2`…) are for internal traceability and never appear in the table; match findings by file:line when merging, never by ID alone. Titles must read plainly in Japanese: no invented abbreviations.
 - 推奨 must take a position — don't mark everything 直す. In the ⚠️ table, 「仕様を確認」 is for a spec question, 「実装フローで直す」 for a real defect, 「様子見」 for something to record and not act on.
 - 議論したい点 is capped at 2–3 and only for genuine trade-offs. Omit the line when there are none; it is not a summary of the table.
@@ -151,6 +157,7 @@ git の状態を変える操作も禁止。
 
 ## 対象
 base ブランチ: {base}
+言語 / 主要ライブラリ: {マニフェスト検出の結果}
 `git diff {base}...HEAD` を自分で実行して**差分の本体を読む**（`--stat` はファイル一覧の把握用）。
 主対象: {ファイル群の列挙}
 背景資料: {設計資料・規約ドキュメントのパス} — 自分で読むこと。
@@ -164,8 +171,9 @@ base ブランチ: {base}
   実際に最も価値の高い発見になることが多い）
 - **指摘は差分が触った行に限る。** 既存コードは比較対象として読むだけで、指摘の対象にはしない
 - 背景資料に書かれた設計判断は前提として受け入れ、蒸し返さない
-- 置き場・層・型・命名の4問は規約整合レビュアーの担当。あなたがその担当でなければ、
-  この4問に当たる定型指摘は出さない（深い構造上の問題を示しているときだけ触れてよい）
+- 置き場・層・型・命名の定型指摘は、接頭辞 CNV のレビュアーの担当。あなたの接頭辞が
+  CNV なら、この4問こそがあなたの仕事。CNV でないなら、この4問に当たる定型指摘は
+  出さない（深い構造上の問題を示しているときだけ触れてよい）
 
 ## 観点（{観点名}として）
 {チェックリスト 4〜8項目}

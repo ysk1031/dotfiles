@@ -2,7 +2,7 @@
 
 Each entry is the same four-part schema the two always-on reviewers use in SKILL.md: **role declaration**, **合図**, **checklist**, and (where needed) a **perspective-specific instruction**.
 
-**合図 are the grep-able signals that make the perspective worth running.** They must be things you can confirm by reading the diff or grepping the repo — never an interpretation of whether the code looks wrong. Phase 1 quotes the signal it actually found as the "why this helps" line, which is what keeps the recommendation on the safe side of hard rule 2 (no pre-announcing what reviewers will flag).
+**合図 are the grep-able signals that make the perspective worth running.** Each one names a literal pattern — an identifier, a call, a file kind — so finding it is a grep, not a judgment; if applying a 合図 needs any interpretation, treat it as not found. Phase 1 quotes the actual line it found as the "why this helps" text, which is what keeps the recommendation on the safe side of hard rule 2 (no pre-announcing what reviewers will flag).
 
 Prefixes are used in finding IDs (e.g. `P-1`) so findings stay traceable to their source after merging. The always-on reviewers take `SIM` and `CNV`; a new entry's prefix must collide with neither those nor another entry's — that is why Security is `SEC`.
 
@@ -58,7 +58,7 @@ Recommendation guidance:
 ## Domain expert (prefix: D)
 
 - **Role declaration**: `{対象ドメイン} の仕様に精通したドメインエキスパート`
-- **合図**: 仕様ドキュメントが存在し（`specs/`・`docs/` 配下など）、かつ差分にドメインの判定・計算・状態遷移がある
+- **合図**: `specs/`・`docs/` 配下に仕様・設計ドキュメントが存在し、かつその文書の用語（見出し・定義語）が差分の識別子・コメントに現れている
 - **Preparation**: name the spec docs to read explicitly in the prompt (this is the crux — do not run it without settling the paths; Phase 1 proposes the candidates it found).
 - **Checklist**:
   - ドメインルールがコード上で仕様と同じ語彙・構造で読めるか
@@ -71,7 +71,7 @@ Recommendation guidance:
 ## Security (prefix: SEC)
 
 - **Role declaration**: `アプリケーションセキュリティの専門家`
-- **合図**: 差分に外部入力の受け取り、SQL・コマンド・パス・テンプレートの組み立て、認証・認可の分岐、秘密情報（環境変数・トークン・鍵）の読み書きがある
+- **合図**: 差分に文字どおり次のいずれかがある: SQL・コマンド・パスを文字列連結や `Sprintf` で組み立てる行 / `token`・`secret`・`password`・`key`・`Getenv` を含む識別子 / `auth`・`role`・`permission` を含む識別子
 - **Checklist**:
   - 外部入力のバリデーションとエスケープ（SQL・コマンド・パスの組み立て箇所）
   - 認可チェックの漏れ（誰でも呼べるようになっていないか）
@@ -83,7 +83,7 @@ Recommendation guidance:
 ## Performance and scale (prefix: PS)
 
 - **Role declaration**: `データ量とトラフィックの伸びに責任を持つパフォーマンスエンジニア`
-- **合図**: ループの中に DB クエリ・外部 API 呼び出し・I/O がある。または上限のないクエリ・全件取得・大きなデータ構造がある
+- **合図**: ループ本体の中に DB クエリ・外部 API・ファイル I/O の呼び出しが書かれている。または `LIMIT` や件数上限の無い全件取得クエリがある
 - **Checklist**:
   - N+1 クエリ、ループ内の I/O・API 呼び出し
   - データ量が10倍・100倍になったときに壊れる箇所（全件ロード・無制限クエリ）
@@ -95,7 +95,7 @@ Recommendation guidance:
 ## Test design (prefix: T)
 
 - **Role declaration**: `テスト設計の専門家`
-- **合図**: 差分のうちテストファイルの変更が3割以上を占める。またはテストの無い新しい分岐が増えている
+- **合図**: `--stat` で数えるとテストファイルの変更行が差分の3割以上を占める。または差分が追加した新しいコードファイルに、対応するテストファイルが無い
 - **Checklist**:
   - 仕様の分岐に対するカバレッジの穴（境界値・異常系）
   - テストの独立性（実行順序・共有状態への依存）
@@ -107,7 +107,7 @@ Recommendation guidance:
 ## Operations and observability (prefix: O)
 
 - **Role declaration**: `このシステムの障害対応を担う SRE`
-- **合図**: 差分に非同期ジョブ・外部連携・リトライ・タイムアウト・ロック・例外の catch がある
+- **合図**: 差分に `retry`・`timeout`・`lock`・`TTL` を含む識別子か設定値、リトライのループ、catch して何もしない例外処理、ジョブ・キュー登録の呼び出しが文字どおりある
 - **Checklist**:
   - 障害時に原因を追えるログが出るか（入力の識別子・失敗理由が残るか）
   - 例外の握りつぶし（catch して何もしない・ログだけで続行が意図的か）
@@ -119,7 +119,7 @@ Recommendation guidance:
 ## Concurrency and contention (prefix: C)
 
 - **Role declaration**: `並行処理と競合状態の専門家`
-- **合図**: 差分に goroutine / スレッド / async の起動、ロック、トランザクション、存在確認してから作成する流れがある
+- **合図**: 差分に `go func` などの並行実行の起動、`Lock`/`Unlock`・`Mutex`、`Begin`/`Commit` のトランザクション境界が文字どおりある
 - **Checklist**:
   - 同じ処理が同時に2つ走ったときの挙動（冪等性・二重実行の防止）
   - check-then-act の隙間（存在確認してから作成する間の競合）
