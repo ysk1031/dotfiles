@@ -16,7 +16,7 @@ The guiding principle (settled with the user): **frequency alone is a weak signa
 
 - **Report only.** Never create a skill, write a CLAUDE.md, or commit anything. End at the report and hand off to skill-creator for whatever the user picks.
 - **The final report is written to the current working directory** (the project root where the skill was invoked) as `skill_candidates_report_<YYYY-MM-DD>.{md,html}`, so it persists and is easy to find. Only the *intermediate* corpus files stay in the session scratchpad. The report quotes work-repo content, so after writing it, tell the user its path and that it is **not** auto-committed; if the cwd is a shared/public repo, suggest adding `skill_candidates_report_*` to `.gitignore` (covers both extensions).
-- **No headless `claude -p`.** It 401s in this environment. All analysis runs through in-session subagents (the Agent tool). This is why the pipeline is a subagent map-reduce, not a script that shells out to a model.
+- **In-session subagents, not shell-outs.** All analysis runs through the Agent tool. `claude -p` does work here (measured 2026-07-29 — an earlier note claiming it 401s was stale), but every fresh process re-reads the system prompt, CLAUDE.md and the skill list, costing ~15K tokens of cache creation even for a trivial call, and it needs JSON plumbing on top. The lenses only need the corpus files already sitting in the session scratchpad, so that overhead buys nothing. This is why the pipeline is a subagent map-reduce, not a script that shells out to a model.
 - **Analyze the user's sessions, including work repos** (the user opted in), but keep the publishability flag honest so work-specific patterns aren't proposed for public skills.
 
 ## Pipeline
