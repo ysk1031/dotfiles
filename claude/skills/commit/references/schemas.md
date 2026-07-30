@@ -38,12 +38,17 @@ JSON Schema for commit-composer agent output.
       "type": "array",
       "items": { "type": "string" },
       "description": "Suggested split descriptions (for NEEDS_SPLIT)"
+    },
+    "warnings": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Non-blocking notes about the staged diff, as `file:line — detail` (for OK). Currently: added comments that only restate the code"
     }
   }
 }
 ```
 
 ### Status variants
-- `OK`: includes `title` (required), `body` (optional)
+- `OK`: includes `title` (required), `body` (optional), `warnings` (optional)
 - `NO_CHANGES`: includes `message` with guidance to stage files
 - `NEEDS_SPLIT`: includes `message`, `suggestions` array of split descriptions
