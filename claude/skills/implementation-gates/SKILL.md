@@ -1,41 +1,40 @@
 ---
 name: implementation-gates
 description: >-
-  非自明な実装（「新設するもの」があるか「対外契約」に触れる実装）を「計画 → ゲート提示 →
-  証拠つき報告」で進めるための詳細手順。CLAUDE.md「非自明な実装作業」ルールの本体で、
-  そこから参照される。実装 Go が出たら、計画を書き始める前に起動する。内容: タスク分解の
-  5項目書式・通知型/承認型ゲートの使い分けと10行制限・純粋関数の分担確認・証拠つき完了報告の
-  基準・複数タスクの進行（レビュー指摘の表、subagent 並行の条件）・差分承認の使い分け。
-  新設するものも対外契約も無い修正や、実装 Go が出る前の調査・設計・提案の段階では使わない。
+  Detailed procedure for carrying out a non-trivial implementation — one that has "new declarations" or touches an "external contract" — as "plan → gate → evidence-backed report". This is the body of the CLAUDE.md rule 「非自明な実装作業」, and is referenced from there. Launch it once implementation has been approved, before starting to write the plan. Contents: the five-field task format, choosing between notification-type and approval-type gates and the ten-line limit, agreeing who writes pure functions, the bar for an evidence-backed completion report, running multiple tasks (the review-feedback table, conditions for parallel subagents), and which diffs need approval before commit. Do NOT use for changes with no new declarations and no external contract, nor during investigation, design, or proposal work before implementation has been approved.
 ---
 
 # Implementation Gates
 
-狙いは、設計判断がコードの奥に埋まって後出しになり、ユーザーがレビューで発掘する負荷を無くすこと。CLAUDE.md「非自明な実装作業」に置いた絶対ルール3つ（①対外契約に触れるタスクは承認まで実装しない ②自分で決めた判断は一言可視化 ③完了報告は実物の証拠つき）の詳細版。
+The aim is to remove the burden of design decisions being buried deep in the code, surfacing late, and having to be excavated by the user in review. This is the long form of the three absolute rules placed in CLAUDE.md 「非自明な実装作業」 (① tasks touching an external contract are not implemented until approved ② judgments you made yourself are surfaced in one line ③ completion reports carry evidence from the real thing).
 
-## 用語と適用判断
+## Terms and when this applies
 
-- **新設するもの**: 新しく作る公開型・interface・ファイル。
-- **対外契約**: 本番スキーマ・API・enum など、このリポジトリの外から参照される取り決め。
-- **⚠️新規判断**: 既存慣習にないパターン・自分で決めるしきい値。スキルの起動条件ではない（計画書式の記入欄として残り、可視化の対象になる）。
+- **New declarations** (新設するもの): public types, interfaces, or files you are newly creating — the ones for which "could this have gone in an existing home instead?" is a real question. Three things therefore do not count, because they leave nothing to weigh: a file whose existence is dictated by an established convention (a numbered migration, generated code, a test file paired with its source); a new value added to an existing enum or type; and a function added to a file that already exists. Write "none" for those.
+- **External contract** (対外契約): production schemas, APIs, enums — agreements referenced from outside this repository. Judge this independently of new declarations: "new declarations: none" together with approval type is a perfectly normal combination, and adding one enum value is exactly that. When the repository cannot tell you whether something is externally referenced (say, whether a list view feeds a public response), treat the task as approval type and state in one line what you could not determine.
+- **⚠️ Novel judgment** (⚠️新規判断): anything you chose that a reader of the diff could not tell was a choice — a threshold you picked, where to put something, which of several workable designs you took. Mechanical steps with one obvious right answer are not novel judgments, and neither are conventions you followed (a migration's serial number, a sibling file's naming). The carve-out in the pure-function bullet below narrows only who writes a function, never what gets surfaced here. This field is *not* a trigger for launching the skill; it stays as a field in the plan format.
 
-新設するものが無く、対外契約にも触れない修正では、この手順を省略してよい。⚠️新規判断だけの修正も省略対象で、その判断はチャットで一言可視化して進む（CLAUDE.md の絶対ルール②）。例: 既存ロジックをそのまま使う CLI フラグ追加や、しきい値を1つ決めるだけの修正は省略。新しい公開型を作る・本番スキーマに触れる実装は適用。適用するのは実装 Go が出た**後**（Go 前にコード・ファイルを変更しないルールは CLAUDE.md「調査・提案系の依頼はコード変更前に立ち止まる」のとおり）。
+For a change with no new declarations that touches no external contract, this procedure may be skipped. A change carrying only a ⚠️ novel judgment is also skippable; surface that judgment in one line in chat and proceed (CLAUDE.md absolute rule ②). Examples: adding a CLI flag that reuses existing logic, or a change that just picks one threshold, is skippable; creating a new public type or touching a production schema means this applies. Apply it **after** implementation has been approved (the rule against changing code or files before that approval is CLAUDE.md 「調査・提案系の依頼はコード変更前に立ち止まる」).
 
-## 計画とゲート
+## Plan and gate
 
-- 計画はコミット1個相当のタスクに分解し、各タスクを「内容(1〜3行) / ⚠️新規判断 / 新設するもの / 依存する前提 / 完了条件(検証コマンドか確認方法)」の書式で書く。「新設するもの」は、既存の置き場（同じ責務・同じ返り値のもの）で代替できない理由を一言添える。無い項目は「なし」。
-- ゲートはタスクごとに上記5項目（＋質問があれば）を5〜10行で提示する。提示後の進み方はリスクで二段:
-  - **承認型**（対外契約に触れるタスク）: 提示して承認を得てから実装する。
-  - **通知型**（それ以外）: 提示したら返事を待たずに実装へ進んでよい。異論はユーザーが途中で挟む。
-- ⚠️新規判断をコードに埋めて後出しにしない。各項目は「質問→提案→理由」の順で1〜3行にその場で書き切る（「上記の論点」のような外部参照にしない）。関数名・条件分岐など diff で見せるべき実装の中身はゲートに書かない。10行に収まらないときはゲートを詳しくせず、タスクを分割する。
-- 分類・判定・計算のコアになる純粋関数は、着手前に分担（決定的な例をユーザーが書く / 本体をユーザーが書く / 全部委譲）を確認する。
-- 完了報告は証拠つき: 「テスト通過」の主張だけでなく、動いた実物（生成物・ログ・DB行・描画結果）を見せる。ただし証拠は、完了条件が指す対象そのもので示すこと。手間を惜しんで安い代替手段に置き換えない。やむを得ず代替で確認したときは、実物との差分を明示する。
+- Break the plan into tasks, and write each task in the format "content (1–3 lines) / ⚠️ novel judgment / new declarations / assumptions relied on / completion criteria (verification command or how to check)". Write "none" for any field that does not apply.
+- **One task is one commit: the smallest slice worth reviewing on its own.** An interface and its first implementation are one task, because the interface alone verifies nothing; a domain constant and the migration mirroring it are one task, because neither is meaningful alone. Split only when a part would be judged separately in review, or when the gate will not fit in ten lines. Being verifiable on its own is not the test, and neither is sitting in a different directory or layer.
+- Say why an existing home cannot serve **once**, in the "new declarations" field: name the thing, and add one line on why nothing with the same responsibility and the same return value can hold it. Raise placement under ⚠️ novel judgment as well only when you had to invent a home that does not exist yet (a new package or layer) — there the open question is *which* home, so it takes the question → proposal → reason form.
+- The gate presents the five fields above (plus questions, if any) in 5–10 lines per task, counting one line per field rather than wrapped screen lines. Ten is a hard ceiling, and it is the same ceiling referred to below. How you proceed after presenting depends on risk, in two tiers:
+  - **Approval type** (tasks touching an external contract): present, and implement only after approval.
+  - **Notification type** (everything else): once presented, you may proceed to implement without waiting for a reply. The user interjects if they disagree.
+- Write the gate out in full before touching any file — announcing that a gate follows is not presenting it.
+- The plan lives in the chat. Move it into a file at the moment the first piece of generalizable review feedback arrives and needs somewhere to accumulate (see Running multiple tasks); the number of tasks never triggers the move on its own.
+- Do not bury a ⚠️ novel judgment in the code and surface it late. Write each one out on the spot in 1–3 lines, ordered "question → proposal → reason" (no external references such as "the point discussed above"). Do not put implementation internals that belong in the diff — function names, conditional branches — into the gate. When it will not fit in ten lines, split the task rather than elaborating the gate.
+- For pure functions that form the core of a classification, decision, or calculation, agree on the division of labour before starting (the user writes the deterministic examples / the user writes the body / fully delegated). This applies to a function carrying a domain rule or a threshold whose correctness a reader cannot confirm by inspection; a conversion whose correctness is obvious on sight needs no such agreement. This decides only who writes the function — never whether a choice gets surfaced under ⚠️ novel judgment.
+- Completion reports carry evidence: not just a claim that tests pass, but the real thing that ran (generated output, logs, DB rows, rendered result). The evidence must be the very thing the completion criteria point at. Do not substitute a cheaper proxy to save effort. When a proxy is genuinely unavoidable, state explicitly how it differs from the real thing.
 
-## 複数タスクの進行
+## Running multiple tasks
 
-複数タスクに分解したときの進行ルール。狙いは、先行タスクへの指摘が後続に反映されず、同じ指摘を人に繰り返させる無駄を無くすこと。
+Rules for making progress once the plan is split into several tasks. The aim is to remove the waste of feedback on an earlier task not reaching the later ones, making a person repeat the same point.
 
-- 一般化できるレビュー指摘は、その場で計画ファイルに決定・規約の表として追記し、以後のタスクは提示前にその表で自己点検する（同じ指摘を人に2度させない）。恒久化すべきものは従来どおり CLAUDE.md / memory へ昇格する。
-- 承認型のタスクが承認待ちの間も、通知型の後続タスクは進めてよい。ただし承認待ちタスクの結果を引き継ぐ後続（その型・スキーマ・命名に依存するもの）は、承認が出るまで着手しない。
-- subagent による並行実装は、全タスクが「⚠️新規判断なし・『新設するもの』なし・対外契約に触れない」を満たし、かつユーザーが明示的に許可したときだけ。並行時は subagent ごとに worktree を分けるか、git の状態を変える操作（stash / checkout / reset / commit）を親セッションだけに限定する。
-- 差分の承認もゲートと同じ軸で二段: 対外契約に触れる変更は「差分説明→承認→コミット」。それ以外は差分説明をチャットに置いたうえで、承認を待たずコミットまで進んでよい（commit スキルのリスクゲートは別途効く）。
+- Review feedback that generalizes goes straight into the plan file as a table of decisions and conventions, and later tasks are self-checked against that table before being presented (never make a person raise the same point twice). Anything that should become permanent is promoted to CLAUDE.md / memory as before.
+- While an approval-type task awaits approval, later notification-type tasks may proceed. However, do not start a later task that inherits the result of the task awaiting approval (its types, schema, or naming) until that approval arrives.
+- Parallel implementation by subagents is allowed only when every task satisfies "no ⚠️ novel judgment, no new declarations, touches no external contract", and the user has explicitly permitted it. When running in parallel, either give each subagent its own worktree, or confine operations that change git state (stash / checkout / reset / commit) to the parent session.
+- Diff approval follows the same axis as the gate, in two tiers: changes touching an external contract go "explain the diff → approval → commit". Everything else may proceed to commit without waiting for approval, provided the diff explanation is placed in the chat. Either way, commit through the `commit` skill, whose own risk gate applies separately.
