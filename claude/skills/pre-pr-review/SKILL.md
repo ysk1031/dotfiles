@@ -19,7 +19,7 @@ Three hard rules:
 
 1. **Report first, touch nothing.** Every reviewer is read-only. Fixes happen only after the user approves specific findings.
 2. **Blind reviewers.** They see the diff and the repo but NOT this conversation, so the implementer's own rationalizations ("I made a separate DAO because…") don't leak in. A settled-decisions doc may be passed so reviewers don't relitigate what's decided — but only a doc that **already existed before this review** (one committed on the branch qualifies even if this diff added it; one written or edited during this conversation does not), and only as a path they read themselves, never as your summary. Two things are therefore forbidden, because both carry the implementer's framing across the wall by hand: suggesting the user add a rationale they just told you to that doc, and telling the user what the reviewers are about to flag before they have flagged it.
-3. **Approval is permission to apply, not exemption from procedure.** Even when the user says 「直して」, a finding that is behavior-changing, or that carries ⚠️新規判断 or 新設するもの, goes back to the normal implementation flow (per-commit plan → pre-work gate → evidence-backed report). See Phase 5.
+3. **Approval is permission to apply, not exemption from procedure.** Even when the user says 「直して」, a finding whose fix is behavior-changing, creates a new public type/interface/file, or touches an externally referenced contract (production schema, API, enum) is treated as a fresh implementation request: plan first, then implement. See Phase 5.
 
 ## Phase 0: Scope
 
@@ -111,10 +111,10 @@ Present in Japanese under the heading 「PR前レビュー結果」. **Both tabl
 
 ## Phase 5: Apply
 
-**The gate for applying a finding yourself is the same one the user's global CLAUDE.md uses for 軽微な修正: behavior-preserving, no ⚠️新規判断, no 新設するもの.** All three must hold. 工数 is shown in the table but is not the gate — a mechanical rename reaching three files qualifies; a one-line constant that introduces a new concept does not.
+**The gate for applying a finding yourself: the fix is behavior-preserving, creates no new public type/interface/file, and touches no externally referenced contract (production schema, API, enum).** All three must hold. 工数 is shown in the table but is not the gate — a mechanical rename reaching three files qualifies. A fix that embeds a judgment you made yourself (a threshold, a pattern new to this codebase) may still be applied directly, but state that judgment in one line when presenting the fix.
 
 - **Findings that pass the gate**, in table order: fix → verify (build + the project's relevant test command from CLAUDE.md) → stage only that finding's files → commit via the `commit` skill. **One finding = one commit**, so each fix stays reviewable.
-- **Approved findings that don't pass** (⚠️ items, or anything carrying 新設するもの / ⚠️新規判断): hard rule 3. Treat the request as approval to *start* the normal implementation flow (per-commit plan → pre-work gate → evidence-backed report) and say so in one line.
+- **Approved findings that don't pass** (behavior-changing ⚠️ items, fixes that create a new public type/interface/file or touch an externally referenced contract): hard rule 3. Treat the request as approval to *start* a fresh implementation task — plan before code — and say so in one line.
 - Skip everything the user didn't pick, silently.
 - **Add-on requests arriving after the table** (「セキュリティ観点も見て」): Phase 1's incremental rule.
 
