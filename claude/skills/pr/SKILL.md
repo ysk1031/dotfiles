@@ -1,6 +1,6 @@
 ---
 name: pr
-description: "Create a GitHub Pull Request with auto-generated title and description. Use when user says 'PR作って', 'create PR', 'プルリクエスト', or wants to push and open a pull request. ALSO use whenever you (the agent) are about to open a pull request as the culmination of a task — never run `gh pr create` directly; always route through this skill. When creating a PR autonomously without an interactive user available to confirm, invoke with `--auto` (creates a draft and skips the chat confirmation). Do NOT use for reviewing existing PRs, merging PRs, or updating PR descriptions."
+description: "Create a GitHub Pull Request with auto-generated title and description. Use when user says 'PR作って', 'create PR', 'プルリクエスト', or wants to push and open a pull request. ALSO use whenever you (the agent) are about to open a pull request as the culmination of a task — never run `gh pr create` directly; always route through this skill. When creating a PR autonomously without an interactive user available to confirm, invoke with `--auto` (creates a draft and skips the chat confirmation). ALSO use when rewriting the description of a PR that already exists ('PRの説明を更新して', 'PR本文が古いので直して', `gh pr edit --body`) — the same template and body rules apply there. Do NOT use for reviewing existing PRs or merging PRs."
 allowed-tools: AskUserQuestion, Bash
 argument-hint: "[base-branch to specify target branch] [--draft to create as draft PR] [--auto for autonomous/non-interactive runs: create as draft and skip chat confirmation]"
 metadata:
@@ -107,6 +107,7 @@ Then continue to Phase 2 with the selected language (do NOT re-run the analysis 
 - If single commit: use that commit message as title
 - If multiple commits: summarize changes into a concise title
 - If Step 6.5 found a required title prefix convention, apply it
+- An identifier that only makes sense inside the code (a column name, a type, a coined term) needs a short parenthetical gloss so a reviewer who did not write the change can read the title: `feat: add consumed_feedback_boundary (どこまでのフィードバックを反映済みか示す境界)`. When the gloss would push the title past ~72 characters, keep the title short and define the identifier in the body's first paragraph instead.
 
 **Step 2: Generate Description**
 Writing style rules:
@@ -114,6 +115,11 @@ Writing style rules:
   - Good: 「認証ロジックを追加した」「エラーハンドリングを改善する」「不要な依存を削除した」
   - Bad: 「認証ロジックを追加しました」「エラーハンドリングを改善します」「不要な依存を削除しました」
 - When writing in English: no special style constraint.
+
+What the body is, and is not:
+- It describes the final diff. It is not a work log: the self-review, the pre-PR check, the review rounds and the approaches abandoned along the way all stay out. The reader is a reviewer who did not write the code, and the only question they need answered is what changes when this ships.
+- Fill each template section by how well the facts support it: write what the diff and the repository establish, put 該当なし / N/A where they establish nothing, and ask the user where the answer is not the kind of thing either can settle. Checklists follow the same rule — `[x]` only where a fact backs it, otherwise leave `[ ]`. Never fill or tick from guesswork.
+- Rewriting an existing description follows every rule above, and re-derives the content from the commits as they stand now rather than patching the old text.
 
 If PR template exists: follow that format
 Otherwise, use default format:
