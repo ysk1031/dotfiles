@@ -1,12 +1,12 @@
-# Weekly Report Schemas
+# Activity Reporter Schemas
 
-JSON Schema definitions for the weekly-report skill agent outputs.
+JSON Schema definitions for the activity-reporter agent output. daily-report owns this file; weekly-report shared it before being retired (see `weekly-report/.sync-ignore`).
 
 See each agent file for inline JSON examples.
 
 ---
 
-## weekly-report-collect-output
+## activity-reporter-output
 
 JSON Schema for activity-reporter agent output.
 
