@@ -44,7 +44,7 @@ Two kinds are flagged despite looking like rationale:
 - A pointer to a document the rest of the team cannot open — an uncommitted design note, a path on one machine, a scratch file — is dead on arrival for every later reader; the spec/ticket exemption covers shared references only.
 - And a memo narrating how the design changed over time ("originally X, switched to Y after…") belongs to git history: why the code is in its current shape may stay, how it got there goes.
 
-Two more are exempt by WHERE they sit, whatever their wording says:
+Two more are exempt by WHERE they sit, whatever their wording says. These two are deliberately broader than the machine-wide CLAUDE.md comment rule (which exempts only convention-following doc comments): a detector that guesses at language conventions produces inconsistent warnings, so position decides here, and when the two texts disagree this Step 5 wins. Do not "fix" the mismatch by narrowing these exemptions to match CLAUDE.md.
 
 - First, a comment sitting directly above a declaration (a function, type, constant, or field) that describes that declaration: leave it alone even when its text merely restates the name or signature. Whether the language has a formal doc syntax (docstring / JSDoc / GoDoc) makes no difference — a plain `//` or `#` line above the declaration is exempt too. A statement inside a function body, or a local variable, is not a declaration for this purpose.
 - Second, a divider comment that names the group of declarations following it — flag it only when the name does not match the declarations actually there (say, a section calling itself internal with a public API under it), and then the mismatch is the reason you flag it; "following it" runs to the next divider or the end of the file.
