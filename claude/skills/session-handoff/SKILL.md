@@ -1,4 +1,5 @@
 ---
+name: session-handoff
 description: >-
   At the end of a work session, generate a handoff doc (a single markdown file) plus a ready-to-paste kickoff message so the next session can resume with zero prior context — preserving the decisions, their rationale, and the gotchas that compaction drops. Fire proactively even when the words "doc" or "引き継ぎ" don't appear, e.g.: 「引き継ぎ／handoff を作って」「別のセッション・別チャットに渡したい／次のセッション用にまとめて」「(会話の)context がいっぱい／そろそろ限界」「/clear・compact する前に今の状態を残したい」「compact すべきか doc に残すべきか迷う」「今日はここまで／作業を中断するので、後で再開する自分が迷わず続けられるよう状態を残して」. Do NOT fire for: code cleanup itself (関数の切り出し・リネーム・リファクタ); general document authoring (PR 説明文・コミットメッセージ・README・設計ドキュメント design doc); work reports / 分報 to Slack and the like; business handover for offboarding or role changes (退職・担当交代の業務引き継ぎ資料); and 「もっとファイルを読んで文脈(context)を把握して直して」, which means code comprehension rather than running out of conversation context.
 ---
