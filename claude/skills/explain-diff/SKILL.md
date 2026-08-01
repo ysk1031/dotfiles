@@ -1,7 +1,7 @@
 ---
 name: explain-diff
 description: >-
-  Generates a self-contained HTML explainer page, written in Japanese, that helps a human deeply understand a code change (a working-tree diff, a branch, a commit range, or a PR). Structure: metadata → background → intuition → code walkthrough → risks and open questions → an interactive comprehension quiz. The explanation is written from scratch by a subagent that receives only the diff, so the implementing session's own assumptions and blind spots don't leak into it. A second subagent then verifies coverage (every changed file is mentioned) and accuracy (claims and quiz answers match the diff). Triggers on: "この変更を解説して", "この PR / diff / ブランチを理解したい", "変更内容の解説ページを作って", "explain this diff/PR", "何が変わったのかちゃんと理解したい", or any request whose goal is understanding a change rather than judging it. Proactively suggest this before a user reviews/approves an AI-implemented change. Do NOT use for: bug-hunting code review (code-review), judging whether review comments are worth acting on (review-triage), writing commit messages or PR descriptions (commit / pr), or a change small enough to explain in a sentence out loud.
+  Generates a self-contained HTML explainer page, written in Japanese, that helps a human deeply understand a code change (a working-tree diff, a branch, a commit range, or a PR). Structure: metadata → background → intuition → code walkthrough → risks and open questions → an interactive comprehension quiz. The explanation is written from scratch by a subagent that receives only the diff, so the implementing session's own assumptions and blind spots don't leak into it. A second subagent then verifies coverage (every changed file is mentioned) and accuracy (claims and quiz answers match the diff). Triggers on: "この変更を解説して", "この PR / diff / ブランチを理解したい", "変更内容の解説ページを作って", "explain this diff/PR", "何が変わったのかちゃんと理解したい", "前に作った解説ページを最新のコミットに合わせて更新して", or any request whose goal is understanding a change rather than judging it. Proactively suggest this before a user reviews/approves an AI-implemented change. Do NOT use for: bug-hunting code review, judging whether review comments are worth acting on (review-triage), writing commit messages or PR descriptions (commit / pr), or a change small enough to explain in a sentence out loud.
 ---
 
 # Explain Diff
@@ -35,6 +35,8 @@ git diff --stat <target>          # changed files and size
 
 This metadata answers "which snapshot of the code does this explanation describe?" A branch keeps moving after the page is generated, so the page silently goes stale without a recorded coordinate — always keep one.
 
+**Update mode.** When the user hands you a page generated earlier — a path to one, or 「前に作った解説を更新して」 — read the commit range out of its metadata block and compare it with the current head of the same target. If they match, say the page is still current and stop; there is nothing to do. If they differ, run Steps 2 and 3 again over the **full** range (old base → new head) and have the subagent write to the **existing file's path**, overwriting it. Do not hand-edit only the part that changed: a later commit can invalidate a claim, a risk, or a quiz answer anywhere on the page, so a partial edit would leave the coverage and accuracy guarantees holding for the new commits only — and editing it yourself in the main session would also throw away the blind-subagent independence Step 2 exists for. If the file is gone (pages live under `/tmp`, which the OS clears), say so and generate a fresh one.
+
 ### Step 2: Generate the explanation (blind subagent)
 
 Have a subagent, launched via the Agent tool, write the explanation. Two reasons:
@@ -67,7 +69,7 @@ Write a code-change explainer page (self-contained HTML), in Japanese.
 
 Follow the "Page structure and style" section of <absolute path to this SKILL.md> for the page's structure and style (follow only that section — ignore the rest of that file's workflow steps).
 
-Read the change's intent and merit yourself, from the diff, the surrounding code, and commit messages. When done, return only the output file's path.
+Read the change's intent and merit yourself, from the diff, the surrounding code, and commit messages. Use the commit messages only to infer intent — never narrate the order of the commits, the detours, or what was tried and abandoned along the way. The page explains the two endpoints, base and head; the journey between them is not part of it. When done, return only the output file's path.
 ```
 
 ### Step 3: Verify (a separate subagent)
@@ -88,6 +90,7 @@ a. Coverage — does every file in `git diff --stat` appear somewhere in the "co
 b. Accuracy — do the claims, diagrams, and code quotes match the diff and the actual code? Any function names that don't exist, or behavior described incorrectly?
 c. Quiz — is the choice marked correct actually correct, given the diff? Are the explanations for the incorrect choices also correct?
 d. Formatting — does every code block's CSS include white-space: pre or pre-wrap so line breaks don't collapse? Do the table-of-contents links work?
+e. Endpoints only — does the page narrate the change's history anywhere (what was implemented first and later replaced, what a review round changed, the sequence of commits)? Every such passage is a defect: the page describes base vs head, nothing in between.
 
 Return a list of issues as "location / problem / suggested fix". If there are none, say so.
 ```

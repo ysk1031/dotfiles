@@ -89,10 +89,9 @@ Claude Code's global configuration files are managed in `claude/`. The following
 
 - `CLAUDE.md` - Global instructions shared across machines
 - `CLAUDE.local.md.example` - Template for machine-specific instructions
-- `settings.json` - Main settings (language, permissions, hooks, plugins)
 - `statusline-command.sh` - Custom status line script
 - `agents/` - Custom subagent definitions
-- `skills/` - Skill definitions (commit, pr, weekly-report)
+- `skills/` - Skill definitions, one directory each. A `.sync-ignore` marker means the skill is retired and deliberately not linked into `~/.claude/skills/`
 - `docs/` - Reference documentation for skills
 
 To set up the symlinks:
@@ -100,7 +99,6 @@ To set up the symlinks:
 ```bash
 # Create symlinks for files
 ln -sf /path/to/dotfiles/claude/CLAUDE.md ~/.claude/CLAUDE.md
-ln -sf /path/to/dotfiles/claude/settings.json ~/.claude/settings.json
 ln -sf /path/to/dotfiles/claude/statusline-command.sh ~/.claude/statusline-command.sh
 
 # Create per-item symlinks for skills/agents
