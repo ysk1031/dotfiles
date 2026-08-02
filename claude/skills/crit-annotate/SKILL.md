@@ -20,7 +20,7 @@ What is trustworthy is the single line the server prints when it starts:
 Started crit daemon at http://localhost:61725 (session 4d69fed0dc82, PID 30029)
 ```
 
-That one line carries everything the rest of the skill needs: the **URL** to hand over in Step 5, the **session id** — which is also the review's directory name, `~/.crit/reviews/<session>/review.json` — to verify against in Step 4, and the **PID**. Capture it in Step 2 and keep it.
+That one line carries everything the rest of the skill needs: the **URL** to hand over in Step 5, the **session id** — which is also the review's directory name, `~/.crit/reviews/<session>/review.json` — to verify against in Step 4, and the **PID** (only on a cold start; see Step 2 for the reconnect wording). Capture it in Step 2 and keep it.
 
 ## Step 1: Pick the diff scope
 
@@ -37,20 +37,28 @@ Get the matching diff with the same coordinates (`git diff`, `git diff <base>..H
 
 **Two dots, not three.** `--range` is a two-dot range, and crit shows exactly what `git diff <base>..HEAD` shows. Once the base branch has moved on, a three-dot diff is a different set of files: measured with `main` one commit ahead, crit listed the main-only file as DELETED while `git diff main...HEAD` omitted it entirely — so you would write comments for a page you had never looked at.
 
-## Step 2: Start the session in the background, and keep the startup line
+## Step 2: Start the session as a background task, and keep the startup line
 
-**`crit … --no-open` does not return.** `--no-open` suppresses the browser, not the server: the command runs in the foreground and waits until the review is finished, so calling it plainly just blocks until your tool times out. Run it in the background and wait for the startup line:
+**`crit … --no-open` does not return.** `--no-open` suppresses the browser, not the server: the command runs in the foreground and waits until the review is finished, so calling it plainly just blocks until your tool times out.
+
+Start it with the Bash tool's own `run_in_background`, not with a `&` inside the command:
 
 ```bash
-LOG=$(mktemp -t crit-start)
-crit --range <base>..HEAD --no-open > "$LOG" 2>&1 &
-for _ in $(seq 1 60); do grep -q "Started crit daemon" "$LOG" && break; sleep 0.5; done
-cat "$LOG"
+crit --range <base>..HEAD --no-open
 ```
 
-Give the log its own path with `mktemp`, and bound the wait. A fixed name like `/tmp/crit-start.log` is shared: two reviews started around the same time overwrite each other's startup line, and you read someone else's session id. The bounded loop matters because a start that fails never prints the line — an unbounded `until` would spin until the tool times out, while `cat "$LOG"` after 30 seconds shows you the actual error.
+`&` inside the shell orphans the process, and then nobody is left holding its exit — which is the whole signal Step 6 runs on. `run_in_background` keeps it: the tool result names an output file that collects both streams, and the harness re-invokes you when the process ends. Read that file right away; the startup line is there within a fraction of a second.
 
-Read the session id and the URL out of that line and hold on to both. Everything below refers to them.
+Do not redirect to a log file of your own. Measured: crit prints the startup line on stderr and the harness's output file already carries it, so a `mktemp` log only adds a path you have to thread through later calls (shell state does not survive between Bash calls, so `LOG=$(mktemp)` cannot even reach the next one).
+
+Read the session id and the URL out of the startup line and hold on to both. Everything below refers to them. **The wording differs between a cold start and a reconnect**, so do not match on `Started` alone:
+
+```
+Started crit daemon at http://localhost:49632 (session 404d2a41d8d2, PID 4729)
+Connected to crit daemon at http://localhost:49632 (session 404d2a41d8d2)
+```
+
+The second form is what later rounds print — the daemon is already up, so there is no PID.
 
 **Start the session before writing any comment.** `crit comment` writes into whichever review is active at that moment; run it with no session up and crit makes a *separate* review, the comments land there, `crit comments` reads them back happily, and the page the user eventually opens shows none of them.
 
@@ -116,17 +124,72 @@ Check two things: the count matches what you sent, and each `anchor` — crit st
 
 ## Step 5: Hand the page over
 
-Give the user the URL from the Step 2 startup line. Tell them the scope you used, the number of comments attached, and that replies to individual comments come back to you.
+Give the user the URL from the Step 2 startup line, the scope you used, and the number of comments attached. Then tell them the one thing they have to do for the loop to work: **read and reply, and press Finish Review when they are done for now — that press is what wakes you.** Individual replies alone do not reach you. Say it plainly, because a reviewer who expects each reply to be picked up will sit there waiting.
 
-## Step 6: After the user replies
+(crit can dispatch on each individual comment instead, via the "Send now" button, but that needs `agent_cmd` in `~/.crit.config.json` and it spawns a *separate* headless `claude -p` with none of this conversation's context. It is not this loop, and this skill does not set it up.)
 
-Read the replies with `crit comments --json` while the daemon is still up. Answer each one where an answer is enough; for the ones asking for a change, make the change, then reply and resolve:
+## Step 6: When the background task ends, work the round
 
-```bash
-crit comment --author claude --reply-to <id> --resolve "…"
+You do not wait for the user to tell you anything. The Step 2 background task ends the moment they press Finish Review, and the harness re-invokes you. Everything you need is already in that task's output file:
+
+```
+approved: false
+The review finished with 2 unresolved comments.
+
+[{"scope":"line","path":"README.md","id":"c_0f1e84", … ,"author":"claude","replies":[{ … ,"author":"Yusuke Aono", … }]}, … ]
+
+Address each comment. For each one, reply explaining what you did using `crit comment --reply-to <comment-id> --author <your-name> "<explanation>"`.
+
+When you're done, run:
+
+  crit --session 404d2a41d8d2
 ```
 
-**`--author` does not carry over from Step 3** — every `crit comment` call needs its own, and without one crit signs the reply with the repository's `git config user.name`, which is the user. Their own thread then comes back to them apparently written by themselves, and the point of setting an author at all is lost. Resolve only what you actually changed; leave a question you merely answered unresolved so the user can push back.
+Read the file rather than re-deriving any of it. `crit comments --json` is only the fallback for when the output is gone.
+
+**Ignore the `crit --session <id>` line it hands you.** That is the form the "Stopping and reopening" section below explains you must not use — it drops the scope. Re-run the Step 2 command instead.
+
+### Pick out what is actually addressed to you
+
+Every explanation comment you wrote in Step 3 is still unresolved, so crit counts all of them and the prompt says "address each comment". It is wrong about that: 22 explanations plus one real reply arrives as "23 unresolved comments". crit cannot create a comment already resolved (`--resolve` only applies to replies), so this is not something Step 3 can avoid.
+
+Select on **who spoke last in the thread**: the newest entry is the last element of `replies`, or the comment itself when it has none. A thread is addressed to you when that last speaker is not `claude`. That leaves out your untouched explanations, and it leaves out threads you already answered, while catching both the user's brand-new comments and their replies to your explanations.
+
+Do not select on `review_round` instead. Measured: comments created through `crit comment` carry no `review_round` at all, while replies typed in the browser carry one — so the field is about where an entry came from, not which round it belongs to. `resolved` is likewise absent rather than `false` on an unresolved comment, so treat a missing field as unresolved.
+
+### Answer, change, reply
+
+Answer where an answer is enough. Where the reply asks for a change, make the change first, then reply saying what you did.
+
+**Do not pass `--resolve`.** Resolving is the reviewer's call, and the loop does not need it: the last-speaker rule already keeps an answered thread out of the next round.
+
+**`--author` does not carry over from Step 3** — every `crit comment` call needs its own, and without one crit signs the reply with the repository's `git config user.name`, which is the user. Their own thread then comes back to them apparently written by themselves, and the point of setting an author at all is lost.
+
+Send a reply through a quoted heredoc, the same way Step 3 does, whenever the body carries backticks:
+
+```bash
+BODY=$(cat <<'EOF'
+README から数字を消し、`main.go` の `retryLimit` を見てもらう書き方に変えました。
+EOF
+)
+crit comment --author claude --reply-to <id> "$BODY"
+```
+
+Inline in double quotes, zsh runs the backticks as command substitution: measured, that same sentence reached crit as "README から数字を消し、 の  を見てもらう書き方に変えました。" with both identifiers gone, and `crit comment` still answered `Replied to <id>`. There is no per-reply delete, so the only repair is a second reply that corrects the first.
+
+## Step 7: Open the next round, or stop
+
+Re-run the Step 2 command as a background task again. crit signals the previous round complete — the user's page picks up your edits and shows "Round #2" — and then blocks until the next Finish Review. Then you are back at Step 6.
+
+Stop the loop, and say why in one line, on any of these:
+
+| What the output shows | What it means |
+|---|---|
+| `approved: true` plus "Review approved. All comments are resolved" | The user approved. Move on to committing. |
+| Nothing addressed to you after the last-speaker rule | They pressed Finish with no new feedback. Report that and let them decide. |
+| No `approved:` line at all | crit failed to start or lost the daemon — it exits non-zero on those paths too. Report the output; do not relaunch blindly. |
+
+The user has a one-click way out of the unresolved explanations: pressing Finish Review with nothing new opens crit's own "No changes this round" dialog, whose **Resolve all & approve** closes every thread and returns `approved: true`. Mention it when they ask how to end a review that still shows your 22 comments as open.
 
 When the review is done, commit through the `commit` skill — one topic per commit, and one commit per review finding when the replies asked for several unrelated fixes.
 
@@ -136,12 +199,13 @@ When the review is done, commit through the `commit` skill — one topic per com
 
 **Reopen by re-running the Step 2 command, not with `--session`.** The same target yields the same session, so the comments come back either way — but `--session <id>` restores only the review file, not the scope. The daemon comes up as `crit _serve --session-key <id>`, with no `--pr` or `--range`, so crit falls back to auto-detecting the working tree and the page shows whatever happens to be uncommitted right now. Comments on files outside that set stay in the review file with nowhere to appear, which looks to the user like they were lost.
 
+Reopen it exactly the way Step 2 starts it — the same command, again as a `run_in_background` task:
+
 ```bash
-LOG=$(mktemp -t crit-start)
-crit --pr <number> --no-open > "$LOG" 2>&1 &   # whichever Step 2 used, verbatim
-for _ in $(seq 1 60); do grep -qE "Started|Restarted" "$LOG" && break; sleep 0.5; done
-cat "$LOG"                                     # fresh URL, same session id
+crit --pr <number> --no-open   # whichever Step 2 used, verbatim
 ```
+
+The output file carries a fresh URL and the same session id, on a `Started` line after a stop or a `Connected to` line while the daemon is still up.
 
 Confirm the scope survived before handing the URL over — `pgrep -fl "crit _serve"` should show the same flags Step 2 used.
 
