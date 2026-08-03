@@ -1,6 +1,6 @@
 # Activity Reporter Schemas
 
-JSON Schema definitions for the activity-reporter agent output. daily-report owns this file; weekly-report shared it before being retired (see `weekly-report/.sync-ignore`).
+JSON Schema definitions for the activity-reporter agent output. daily-report owns this file, and the activity-reporter agent reads it — plus `../scripts/*.jq` — through the absolute path `~/.claude/skills/daily-report/`, so moving or renaming either breaks the agent.
 
 See each agent file for inline JSON examples.
 

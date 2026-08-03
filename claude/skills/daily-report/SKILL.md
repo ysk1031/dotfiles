@@ -1,6 +1,6 @@
 ---
 name: daily-report
-description: "Aggregate today's Claude Code session logs and GitHub activity into a personal reflection-style daily report (what I did / what I was thinking / what I struggled with). Use whenever the user says '日報', 'daily report', '今日の振り返り', '今日何やった', '今日まとめて', or wants a self-reflective summary of a single day's development work. This is the right skill anytime the scope is a single day — even if the user doesn't say '日報' explicitly. Distinct from [[weekly-report]] (which covers a multi-day business week with aggregate stats); prefer daily-report for single-day scopes. Do NOT use for non-development journaling, sprint planning, or weekly/monthly reviews."
+description: "Aggregate today's Claude Code session logs and GitHub activity into a personal reflection-style daily report (what I did / what I was thinking / what I struggled with). Use whenever the user says '日報', 'daily report', '今日の振り返り', '今日何やった', '今日まとめて', or wants a self-reflective summary of a single day's development work. This is the right skill anytime the scope is a single day — even if the user doesn't say '日報' explicitly. Do NOT use for non-development journaling, sprint planning, or weekly/monthly reviews."
 allowed-tools: Agent, AskUserQuestion, Bash
 argument-hint: "[--repos owner/repo1,repo2 to restrict (default: auto-detect)] [--date YYYY-MM-DD to target a past day instead of today] [--output path to override output file]"
 disable-model-invocation: true
@@ -78,7 +78,7 @@ Show a brief preview — for a daily report, keep this very short, since the use
 
 Note: The `"NO_DATA"` path above still uses AskUserQuestion — that is fine, because no preview text precedes the dialog there (the question itself is the only content).
 
-Note: We do NOT offer "期間を変更" here. Daily reports are scoped to a single day by design — if the user wants a multi-day view, they should use [[weekly-report]] instead.
+Note: We do NOT offer "期間を変更" here. Daily reports are scoped to a single day by design. If the user wants a multi-day view, say plainly that this skill does not cover it — there is no multi-day report skill to hand off to.
 
 ---
 
@@ -172,7 +172,7 @@ After writing:
 
 ## Rules
 
-- **Single-day scope by design** — if the user wants a wider window, route them to [[weekly-report]] instead of expanding here.
+- **Single-day scope by design** — if the user wants a wider window, tell them this skill does not cover it rather than expanding the window here.
 - **Reflective tone, not status-report tone** — this report is for the user themselves. Use phrasing like "〜に悩んでいた様子" or "〜を考えていた" rather than "〜を完了しました". The user is the audience; objectivity matters more than achievement-emphasis.
 - **Don't over-extract from prompts** — Claude Code prompts include a lot of routine task-giving. Only the reflective/uncertain ones belong in the 「考えたこと・悩んだこと」 section. When in doubt, leave it out — the appendix preserves the raw record.
 - **Past-date mode is approximate** — `--date YYYY-MM-DD` translates to `--days N`, which means the activity-reporter scans from JST 00:00 of the target date to *now*, not to 23:59 of that date. This is generally fine for the most-recent day or two, but data from later dates will leak in. Note this in a footer warning when `--date` is used.
