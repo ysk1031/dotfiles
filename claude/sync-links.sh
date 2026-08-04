@@ -12,7 +12,7 @@ shopt -s nullglob
 DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 CLAUDE_DIR="${CLAUDE_CONFIG_DIR:-$HOME/.claude}"
 
-mkdir -p "$CLAUDE_DIR/skills" "$CLAUDE_DIR/agents"
+mkdir -p "$CLAUDE_DIR/skills" "$CLAUDE_DIR/agents" "$CLAUDE_DIR/hooks"
 
 for skill in "$DIR"/skills/*/; do
   name="$(basename "$skill")"
@@ -32,4 +32,12 @@ for agent in "$DIR"/agents/*.md; do
   ln -sf "$agent" "$CLAUDE_DIR/agents/$name"
 done
 
-echo "Synced skills/agents symlinks into $CLAUDE_DIR"
+# settings.json is not version-controlled, so it refers to hook handlers by
+# absolute path. Linking them here means a forgotten `ln` cannot leave that
+# reference pointing at nothing, which fails silently — the hook just stops.
+for hook in "$DIR"/hooks/*.sh; do
+  name="$(basename "$hook")"
+  ln -sf "$hook" "$CLAUDE_DIR/hooks/$name"
+done
+
+echo "Synced skills/agents/hooks symlinks into $CLAUDE_DIR"
