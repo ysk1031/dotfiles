@@ -55,6 +55,8 @@ Extract the inputs deterministically — do not rely on the LLM to enumerate:
 
 ## Phase 3: Parallel blind launch
 
+Before the launch message, print one line naming what is being reviewed and how many reviewers are about to run: base branch, file count, changed-line count, and the reviewer prefixes. The user is about to wait several minutes for work they cannot see — that line is their only chance to catch a wrong base branch or an unexpectedly large diff before the tokens are spent.
+
 Launch ALL selected reviewers in a single message so they run concurrently, each built from the one template at the bottom of this file. Every Agent call is `subagent_type: "general-purpose"` with `model: "opus"` passed explicitly, regardless of which model runs the main agent (even when it is Fable) — read-only is enforced by the prompt text, and pinning opus keeps review quality independent of the main agent's model.
 
 Only five things vary between reviewers: **役割宣言 / 接頭辞 / チェックリスト / 観点固有の追加指示 / 主対象ファイル**. Everything else in the template is identical for all of them, which is what lets Phase 4 merge mechanically.
