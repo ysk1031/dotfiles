@@ -6,3 +6,8 @@
 .claude/**/*~
 claude-config/**/*.md~
 claude-config/**/*~
+
+# Output of claude/skills/trigger-check/scripts/run_trigger_eval.py
+trigger-eval-out/
+
+__pycache__/

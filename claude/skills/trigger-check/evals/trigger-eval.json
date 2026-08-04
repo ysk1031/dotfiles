@@ -1,0 +1,74 @@
+[
+  {"query": "explain-diff の description をさっき書き換えた。コミット前に、狙ったときに発動するか測っておいて", "should_trigger": true,
+   "setup": "perl -pi -e 's/Generates a self-contained HTML explainer page/Generates a standalone HTML explainer page/' claude/skills/explain-diff/SKILL.md",
+   "note": "直球。setup で description に未コミットの変更を作り、「さっき書き換えた」を実在させる。"},
+
+  {"query": "pre-pr-review のトリガー検証して。お題は evals に入ってるやつでいい", "should_trigger": true,
+   "note": "「トリガー検証」という語をそのまま使う場合。SKILL.md は seed リポジトリに実在する。pre-pr-review が持つ評価データは evals/evals.json で trigger-eval.json ではないので、お題ファイルは setup で用意する。",
+   "setup": "printf '[{\"query\":\"PR出す前に見て\",\"should_trigger\":true},{\"query\":\"この関数をリネームして\",\"should_trigger\":false}]\\n' > claude/skills/pre-pr-review/evals/trigger-eval.json"},
+
+  {"query": "second-opinion が、狙ってない場面でも実際に走ってしまっている気がする。提案が多いという話ではなく、スキル自体が発動しているかどうかを測って確かめたい", "should_trigger": true,
+   "note": "誤発動の疑い。編集直後ではなく運用中の違和感からの入り口。「勝手に出てくる」だけでは足りない: second-opinion は提案してから同意を得て走る設計なので、その言い方はスキルの誤発動と提案の多さの2通りに読める。試行は trigger-check を正しく選んだうえで、どちらかを聞き返して実行を保留した（3回中1回、2026-08-04 に実測）。どちらの話かを明記して曖昧さを消してある。"},
+
+  {"query": "crit-annotate、頼んでるのに全然発動しない。ほんとに発動しないのか測れる?", "should_trigger": true,
+   "note": "不発動の疑い。上と対で、疑いの向きが逆。"},
+
+  {"query": "CLAUDE.md の「スキルを編集したらトリガー検証を提案する」の節を書き直した。この文面で実際に提案が出るか確かめたい", "should_trigger": true,
+   "setup": "perl -pi -e 's/文面を整えただけでも発動条件は変わりうる。/文面を直しただけでも発動条件は変わる。/' claude/CLAUDE.md",
+   "note": "対象がスキルではなく CLAUDE.md のルール。description が明示的に射程に入れている。"},
+
+  {"query": "claude/agents/commit-composer.md の description を絞った。狙った場面でだけ選ばれるか裏取りして", "should_trigger": true,
+   "setup": "perl -pi -e 's/Commit message composer\\./Commit message composer for staged changes./' claude/agents/commit-composer.md",
+   "note": "対象が subagent 定義。「検証」という語を使わず「裏取り」と言う場合。"},
+
+  {"query": "session-handoff の検証で、3回中1回しか発動しなかったお題が1件あった。そのお題だけ10回に増やして測り直して", "should_trigger": true,
+   "setup": "mkdir -p trigger-eval-out/trials && printf '3\\t1\\tPASS\\tskill_called\\t\\t0.0000\\t\\ttrigger-eval-out/trials/3-1\\n3\\t2\\tFAIL\\tno_call\\t\\t0.1204\\t\\ttrigger-eval-out/trials/3-2\\n3\\t3\\tFAIL\\tno_call\\t\\t0.1130\\t\\ttrigger-eval-out/trials/3-3\\n' > trigger-eval-out/summary.tsv",
+   "max_turns": 7,
+   "note": "2段階目（割れたお題の追試）からの入り口。--only と --runs を使う場面。setup が必須: 「割れたお題が1件あった」という前回の結果が試行の中に無いと、探しに出てターン上限を使い切る（setup 無しでは3回中2回が測定不能、2026-08-04 に実測）。置き場所も trigger-eval-out でなければならない: prev-run に置いた版では、試行が本物を求めて実機のホーム配下まで `find` しに出た（10回中4回が測定不能、同日に実測）。上限を7にしてあるのは、すぐ発動せず先に前回結果を読む試行があり、その分のターンが要るため。発動した試行はその時点で打ち切られるので、上限を上げても発動する限り費用は増えない。"},
+
+  {"query": "session-handoff、コミット前に Sonnet でも一応測っておきたい", "should_trigger": true,
+   "note": "節目の Sonnet 測定。--model の指定だけが違う。"},
+
+  {"query": "skill-scout の description から Do NOT を2つ削った。削って壊れてないか、削る前と後で比べて測って", "should_trigger": true,
+   "setup": "perl -pi -e 's/ writing CLAUDE\\.md content directly;//; s/ work reports such as 分報・日報 \\(daily-report\\);//' claude/skills/skill-scout/SKILL.md",
+   "note": "「削る」変更なので前後比較が要る唯一の型。逐次でしか比べられない制約に当たるかも見る。"},
+
+  {"query": "trigger-check の SKILL.md の Reading the table の節に、「発動 の列は発動した試行数、pass の列は期待どおりだった試行数」という1行を足しといて", "should_trigger": true,
+   "expect_text": "編集したあと、この変更で狙ったときに発動するか検証するかどうかを、実行する前にユーザーに提案・確認している",
+   "max_turns": 7,
+   "setup": "perl -ni -e 'print unless /counts the trials where the skill fired/' claude/skills/trigger-check/SKILL.md",
+   "note": "正解はスキル呼び出しではなく本文での提案。CLAUDE.md が「編集したら提案する」と定めているので、黙って測り始めるのは不正解。expect_text の経路を通す唯一のお題。編集してから提案に至るまでターンが要るのでここだけ上限を上げる。足す内容を明記するのは必須: 「1行足して」だけだと、モデルは編集せず何を足すのか聞き返すのが正しい挙動になり、提案の場面に到達しない（2026-08-03 に実測）。setup で対象の行を先に消すのも必須: その行が SKILL.md に既にあると、モデルは「既にあります」と正しく指摘して編集せず、やはり提案の場面に到達しない（2026-08-04 に実測）。"},
+
+  {"query": "daily-report が出すレポート、書きぶりが毎回ぶれる。指示文を直して品質を上げたい。実行させて評価するループ回して", "should_trigger": false,
+   "note": "Do NOT の1つ目。発動の有無ではなく成果物の品質なので empirical-prompt-tuning の領分。"},
+
+  {"query": "skill-creator の最適化ループで pr スキルの description を自動チューニングして。5イテレーションくらい", "should_trigger": false,
+   "note": "Do NOT の2つ目。自動探索で文面を書き換えるループ。測るだけの trigger-check とは別物。skill-creator はプラグイン側にあり seed リポジトリには無いので、探しに出る可能性がある。"},
+
+  {"query": "claude/sync-links.sh、新しいスキルを足したときにちゃんと symlink が張られるかテストして確かめて", "should_trigger": false,
+   "note": "Do NOT の3つ目。ふつうのシェルスクリプトの動作確認。「スキル」「確かめて」が入る紛らわしい形。"},
+
+  {"query": "PreToolUse フックを settings.json に足した。git commit のときちゃんと動くか確かめたい", "should_trigger": false,
+   "setup": "mkdir -p .claude && printf '{\\n  \"hooks\": {\\n    \"PreToolUse\": [{\"matcher\": \"Bash\", \"hooks\": [{\"type\": \"command\", \"command\": \"echo branch: $(git branch --show-current)\"}]}]\\n  }\\n}\\n' > .claude/settings.json",
+   "note": "境界。「定義を足して動くか確かめる」形は同じだが、対象がフックでスキルの発動ではない。setup で実在させないと、実機の ~/.claude/settings.json を読みに出る。"},
+
+  {"query": "pre-pr-review って結局どういうときに発動するの? description 読んで説明して", "should_trigger": false,
+   "note": "境界。発動条件の話だが、依頼は説明であって測定ではない。"},
+
+  {"query": "今 ~/.claude/skills に何が入ってるか一覧で見せて。symlink が切れてるやつがあれば教えて", "should_trigger": false,
+   "note": "境界。スキル一覧の調査。実機を見に行くのが正しい唯一のお題。"},
+
+  {"query": "Obsidian の日次ノートを整形するスキルを新しく作りたい。SKILL.md の雛形から書いて", "should_trigger": false,
+   "note": "スキルの新規作成そのもの。作った後に検証を提案するのはよいが、この指示だけで測り始めるのは行き過ぎ。"},
+
+  {"query": "この trigger-check スキル追加の差分、何をやってるのか解説して", "should_trigger": false,
+   "setup": "git add claude/skills/trigger-check && git -c user.email=eval@local -c user.name=eval commit -qm 'feat(trigger-check): スキル発動の検証ランナーを追加' > /dev/null 2>&1 || true",
+   "note": "スキル名が出てくるが依頼は差分の解説。explain-diff の領分。setup で解説対象の差分を HEAD に実在させる。"},
+
+  {"query": "ステージした変更をコミットして。メッセージはいつもの Conventional Commits で", "should_trigger": false,
+   "setup": "printf '\\n# scratch\\n' >> README.md && git add README.md",
+   "note": "setup が無いとステージ済みの変更が存在せず、状況の確認だけで終わる。"},
+
+  {"query": "このブランチで PR 作って。説明文もお願い", "should_trigger": false,
+   "note": "一般。pr スキルに routing されるのが正しい。"}
+]
