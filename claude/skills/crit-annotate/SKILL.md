@@ -195,7 +195,9 @@ When the review is done, commit through the `commit` skill — one topic per com
 
 ## Stopping and reopening
 
-`crit stop` shuts the daemon down; `crit stop --all` gets every one of them. The review file survives, but `crit status` and `crit comments` stop pointing at it the moment the daemon is gone, so keep the session id if the review is not finished.
+`crit stop` shuts the daemon down; `crit stop --all` gets every one of them. On its own this does not touch the review file — `crit status` and `crit comments` just stop pointing at it the moment the daemon is gone, so keep the session id if the review is not finished.
+
+**Approving the review deletes its file, not just stopping the daemon.** The button in the page reads "Finish Review" while comments are still unresolved, and pressing it there ends the round but keeps `review.json` — that is the ordinary reopen case above. Once every comment is resolved the same button relabels to "Approve", and pressing *that* one sends `approved: true`, deletes `~/.crit/reviews/<session>/review.json`, and stops the server itself. Measured 2026-08-04: a fully-resolved review's file was gone within moments of the Approve click, while `crit stop --all` alone left an identical file untouched. There is no `--session` to reopen after that — the review is over, not paused.
 
 **Reopen by re-running the Step 2 command, not with `--session`.** The same target yields the same session, so the comments come back either way — but `--session <id>` restores only the review file, not the scope. The daemon comes up as `crit _serve --session-key <id>`, with no `--pr` or `--range`, so crit falls back to auto-detecting the working tree and the page shows whatever happens to be uncommitted right now. Comments on files outside that set stay in the review file with nowhere to appear, which looks to the user like they were lost.
 
