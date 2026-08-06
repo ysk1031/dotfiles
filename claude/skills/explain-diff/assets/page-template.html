@@ -1,0 +1,280 @@
+<!doctype html>
+<!-- SCAFFOLD
+  Explainer page scaffold. Copy this file to the output path, then replace every
+  block marked FILL. Do not rewrite the CSS or the script: the diff-stat bars and
+  the quiz are driven from the numbers and the data- attributes you supply, so
+  they stay consistent without being drawn by hand. The quiz shuffles its own
+  choices, so mark the right one and don't think about where it sits.
+
+  Never type a code quote. Leave an empty element naming the file and the lines,
+  and scripts/embed_quotes.py fills it from the source, computing the elision
+  markers and the skipped-line counts:
+
+    <pre data-quote="path/from/repo/root.sh" data-lines="25-26,33-34"></pre>
+
+  Add data-rev="<sha>" when the lines must come from a revision rather than the
+  working tree.
+-->
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>FILL: 変更のタイトル</title>
+<!-- SCAFFOLD Machine-readable coordinate: update-mode reads this to decide staleness. -->
+<meta name="diff-range" content="FILL: base...head">
+<style>
+:root {
+  --bg: #fff; --fg: #1a1a1a; --muted: #666; --line: #e2e2e2;
+  --accent: #2563eb; --add: #16a34a; --del: #dc2626;
+  --box: #f6f8fa; --warn-bg: #fff8e1; --warn-line: #f0c000;
+  --ok-bg: #eaf7ee; --ok-line: #16a34a;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #16181c; --fg: #e6e6e6; --muted: #9aa0a6; --line: #2e3238;
+    --accent: #6ea8fe; --add: #4ade80; --del: #f87171;
+    --box: #1e2126; --warn-bg: #2a2410; --warn-line: #8a6d00;
+    --ok-bg: #14261a; --ok-line: #2f7d43;
+  }
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0 auto; padding: 24px 20px 80px; max-width: 860px;
+  background: var(--bg); color: var(--fg);
+  font-family: -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Noto Sans JP", sans-serif;
+  line-height: 1.85; font-size: 16px;
+}
+h1 { font-size: 1.7rem; line-height: 1.4; margin: 0 0 4px; }
+h2 {
+  font-size: 1.3rem; margin: 48px 0 12px; padding-bottom: 6px;
+  border-bottom: 2px solid var(--line);
+}
+h3 { font-size: 1.08rem; margin: 28px 0 8px; }
+p, li { overflow-wrap: anywhere; }
+a { color: var(--accent); }
+code {
+  background: var(--box); padding: 1px 5px; border-radius: 4px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 0.9em;
+}
+/* Every code block scrolls rather than collapsing its line breaks. */
+pre {
+  background: var(--box); border: 1px solid var(--line); border-radius: 8px;
+  padding: 12px 14px; overflow-x: auto; white-space: pre; line-height: 1.6;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 0.85rem;
+}
+pre .add { color: var(--add); display: block; }
+pre .del { color: var(--del); display: block; }
+pre .cmt { color: var(--muted); display: block; }
+
+/* Metadata block */
+.meta {
+  background: var(--box); border: 1px solid var(--line); border-radius: 8px;
+  padding: 14px 16px; margin: 20px 0 8px; font-size: 0.9rem;
+}
+.meta dl { display: grid; grid-template-columns: max-content 1fr; gap: 4px 14px; margin: 0; }
+.meta dt { color: var(--muted); }
+.meta dd { margin: 0; overflow-wrap: anywhere; }
+table.stat { width: 100%; border-collapse: collapse; margin-top: 12px; font-size: 0.85rem; }
+table.stat td { padding: 3px 8px 3px 0; vertical-align: middle; }
+table.stat td.n { text-align: right; color: var(--muted); width: 3.5em; }
+table.stat td.bar { width: 55%; }
+.bar span { display: inline-block; height: 9px; border-radius: 2px; vertical-align: middle; }
+.bar .p { background: var(--add); }
+.bar .m { background: var(--del); }
+
+/* Callouts */
+.note, .warn, .ok {
+  border-left: 4px solid var(--accent); background: var(--box);
+  padding: 12px 16px; border-radius: 0 8px 8px 0; margin: 18px 0;
+}
+.warn { border-left-color: var(--warn-line); background: var(--warn-bg); }
+.ok { border-left-color: var(--ok-line); background: var(--ok-bg); }
+.note .label, .warn .label, .ok .label {
+  display: block; font-weight: 700; font-size: 0.85rem; margin-bottom: 4px;
+}
+/* Marks a statement as the writer's reading rather than something the change states. */
+.infer { border-left-color: var(--muted); }
+.infer .label::after { content: " — コードには書かれていない推測"; font-weight: 400; color: var(--muted); }
+
+/* Table of contents */
+nav.toc { background: var(--box); border-radius: 8px; padding: 12px 16px 12px 34px; margin: 20px 0; }
+nav.toc ol { margin: 0; padding-left: 0; }
+nav.toc li { margin: 2px 0; }
+
+details { margin: 16px 0; border: 1px solid var(--line); border-radius: 8px; padding: 10px 14px; }
+details summary { cursor: pointer; font-weight: 600; }
+details[open] summary { margin-bottom: 8px; }
+
+/* Diagram families: reuse these, don't invent new shapes per case. */
+.flow { display: flex; flex-wrap: wrap; align-items: stretch; gap: 10px; margin: 18px 0; }
+.flow .node {
+  flex: 1 1 150px; background: var(--box); border: 1px solid var(--line);
+  border-radius: 8px; padding: 10px 12px; font-size: 0.85rem;
+}
+.flow .node b { display: block; margin-bottom: 4px; }
+.flow .ex {
+  display: block; margin-top: 6px; padding: 6px 8px; background: var(--bg);
+  border-radius: 4px; white-space: pre-wrap; font-size: 0.78rem;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace; color: var(--muted);
+}
+.flow .arrow { align-self: center; color: var(--muted); flex: 0 0 auto; }
+.screen { border: 2px solid var(--line); border-radius: 10px; overflow: hidden; margin: 18px 0; }
+.screen .bar { background: var(--box); padding: 5px 10px; font-size: 0.78rem; color: var(--muted); }
+.screen .body { padding: 12px 14px; white-space: pre-wrap; font-size: 0.85rem;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+
+/* Quiz */
+.q { border: 1px solid var(--line); border-radius: 10px; padding: 16px 18px; margin: 18px 0; }
+.q .stem { font-weight: 600; margin: 0 0 12px; }
+.q button {
+  display: block; width: 100%; text-align: left; margin: 6px 0; padding: 10px 12px;
+  background: var(--bg); color: var(--fg); border: 1px solid var(--line);
+  border-radius: 8px; cursor: pointer; font: inherit; font-size: 0.94rem; line-height: 1.6;
+}
+.q button:hover:not([disabled]) { border-color: var(--accent); }
+.q button.correct { border-color: var(--ok-line); background: var(--ok-bg); }
+.q button.wrong { border-color: var(--del); opacity: 0.85; }
+.q .exp {
+  display: none; margin: 2px 0 10px 12px; padding-left: 12px;
+  border-left: 2px solid var(--line); font-size: 0.88rem; color: var(--muted);
+}
+.q .exp.shown { display: block; }
+.q .verdict { font-weight: 700; margin-right: 6px; }
+.q .verdict.o { color: var(--ok-line); }
+.q .verdict.x { color: var(--del); }
+footer { margin-top: 60px; padding-top: 16px; border-top: 1px solid var(--line);
+  color: var(--muted); font-size: 0.82rem; }
+</style>
+</head>
+<body>
+
+<h1>FILL: 変更のタイトル</h1>
+
+<section class="meta">
+  <dl>
+    <dt>作成日</dt><dd>FILL: YYYY-MM-DD</dd>
+    <dt>ブランチ</dt><dd><code>FILL</code></dd>
+    <dt>コミット範囲</dt><dd><code>FILL: base...head</code></dd>
+  </dl>
+  <!-- SCAFFOLD Put the real numbers in data-add / data-del. The bars are drawn from them. -->
+  <table class="stat">
+    <tr data-add="0" data-del="0"><td><code>FILL: path</code></td><td class="n"></td><td class="bar"></td></tr>
+  </table>
+  <p style="margin:10px 0 0;font-size:0.82rem;color:var(--muted)" id="stat-total"></p>
+</section>
+
+<nav class="toc">
+  <ol>
+    <li><a href="#bg">背景</a></li>
+    <li><a href="#idea">この変更の考え方</a></li>
+    <li><a href="#code">コードを読む</a></li>
+    <li><a href="#risk">リスクと確認したいこと</a></li>
+    <li><a href="#quiz">理解度クイズ</a></li>
+  </ol>
+</nav>
+
+<h2 id="bg">1. 背景 — 変更前のしくみ</h2>
+<details>
+  <summary>前提から知りたい人向け</summary>
+  <p>FILL: 予備知識のない読み手向けの深い背景。</p>
+</details>
+<p>FILL: この変更に直接関係する範囲の背景。</p>
+
+<h2 id="idea">2. この変更の考え方</h2>
+<p>FILL: 中心にある考えを、細部ではなく本質として。小さな具体例と図で。</p>
+
+<h2 id="code">3. コードを読む</h2>
+<p>FILL: 読みやすい順に組み替えて解説する。変更された全ファイルがどこかに現れること。</p>
+
+<h2 id="risk">4. リスクと確認したいこと</h2>
+<p>FILL: 置いている仮定、試されていない経路、挙動が変わる境界、レビューで見るべき点。</p>
+
+<h2 id="quiz">5. 理解度クイズ</h2>
+<!-- SCAFFOLD
+  One .q block per question, 5 in total. Mark the correct button with
+  data-correct="true". Every button needs its own .exp explanation, wrong ones
+  included. The script wires the behaviour; do not add click handlers by hand.
+-->
+<div class="q">
+  <p class="stem">FILL: 設問</p>
+  <button data-correct="false">FILL: 選択肢</button>
+  <div class="exp">FILL: なぜ違うのか</div>
+  <button data-correct="true">FILL: 選択肢</button>
+  <div class="exp">FILL: なぜ正しいのか</div>
+</div>
+
+<!-- SCAFFOLD  A quoted excerpt: leave it empty, embed_quotes.py fills it.
+<pre data-quote="claude/hooks/before-git.sh" data-lines="25-26,33-34"></pre>
+-->
+
+<footer>FILL: base...head の差分から生成。読み終えたらクイズで確認してからレビューへ。</footer>
+
+<script>
+// Diff-stat bars, scaled from the numbers so every row shares one scale.
+(function () {
+  var rows = Array.prototype.slice.call(document.querySelectorAll('table.stat tr'));
+  var totals = rows.map(function (r) {
+    return (+r.dataset.add || 0) + (+r.dataset.del || 0);
+  });
+  var max = Math.max.apply(null, totals.concat([1]));
+  var width = 60; // characters-worth of bar for the largest row
+  var sumA = 0, sumD = 0;
+  rows.forEach(function (r, i) {
+    var a = +r.dataset.add || 0, d = +r.dataset.del || 0;
+    sumA += a; sumD += d;
+    var scale = width / max;
+    // A row with any change keeps at least a sliver, so "small" never reads as "none".
+    var pa = a ? Math.max(2, Math.round(a * scale)) : 0;
+    var pd = d ? Math.max(2, Math.round(d * scale)) : 0;
+    r.querySelector('td.n').textContent = totals[i];
+    var bar = r.querySelector('td.bar');
+    bar.innerHTML = '';
+    if (pa) { var s = document.createElement('span'); s.className = 'p'; s.style.width = pa + 'px'; bar.appendChild(s); }
+    if (pd) { var t = document.createElement('span'); t.className = 'm'; t.style.width = pd + 'px'; bar.appendChild(t); }
+  });
+  var el = document.getElementById('stat-total');
+  if (el) el.textContent = rows.length + ' files changed, ' + sumA + ' insertions(+), ' + sumD + ' deletions(-)';
+})();
+
+document.querySelectorAll('.q').forEach(function (q) {
+  // Shuffle each choice together with its explanation. Left to the writer the
+  // correct answer lands in the same slot every time — one measured page had it
+  // second in all five questions, which is full marks without reading a word.
+  var pairs = [];
+  q.querySelectorAll('button').forEach(function (b) {
+    var next = b.nextElementSibling;
+    pairs.push([b, next && next.classList.contains('exp') ? next : null]);
+  });
+  for (var i = pairs.length - 1; i > 0; i--) {
+    var j = Math.floor(Math.random() * (i + 1));
+    var swap = pairs[i]; pairs[i] = pairs[j]; pairs[j] = swap;
+  }
+  pairs.forEach(function (pair) {
+    q.appendChild(pair[0]);
+    if (pair[1]) q.appendChild(pair[1]);
+  });
+
+  var buttons = q.querySelectorAll('button');
+  buttons.forEach(function (b) {
+    b.addEventListener('click', function () {
+      if (q.dataset.answered) return;
+      q.dataset.answered = '1';
+      buttons.forEach(function (other) {
+        var right = other.dataset.correct === 'true';
+        other.classList.add(right ? 'correct' : 'wrong');
+        other.disabled = true;
+        var exp = other.nextElementSibling;
+        if (exp && exp.classList.contains('exp')) {
+          exp.classList.add('shown');
+          var v = document.createElement('span');
+          v.className = 'verdict ' + (right ? 'o' : 'x');
+          v.textContent = right ? '正解' : '不正解';
+          exp.insertBefore(v, exp.firstChild);
+        }
+      });
+    });
+  });
+});
+</script>
+</body>
+</html>

@@ -8,16 +8,18 @@ description: >-
 
 ## Purpose
 
-AI can write code faster than a human can understand it, so understanding — not code generation — is the bottleneck now. This skill produces an explainer page a reader can actually read and check their understanding against, so the user reviews or merges a change only after genuinely understanding it. It's not a summary: it builds background, then intuition, then closes with a quiz, specifically to prevent the feeling of having understood without the substance of it.
+This skill produces an explainer page a reader can check their understanding against, so the user reviews or merges a change only after genuinely understanding it. It is not a summary: it builds background, then intuition, then closes with a quiz, specifically to prevent the feeling of having understood without the substance of it.
 
 ## Overview
 
-1. Identify the target diff and record its metadata
-2. Generate the explainer HTML — written by a **subagent that receives only the diff**
-3. Verify — a second subagent checks coverage, accuracy, and the quiz
-4. Fix and hand off
+1. Identify the target diff, record its metadata, and decide whether the change is trusted
+2. Generate the explainer HTML — written by a subagent that sees only the diff
+3. Verify — the `diff-verifier` subagent checks the page against the change
+4. Revise through the writer, re-check once, then hand off
 
-### Step 1: Identify the target diff and record metadata
+What the page must contain lives in `references/page-contract.md` and the scaffold in `assets/page-template.html`, both read by the writer, not by you. The writer agents pin `model: opus` in their own frontmatter, so the explanation's quality doesn't depend on which model runs the main agent.
+
+### Step 1: Identify the target diff, record metadata, decide trust
 
 If the target isn't stated, infer it in this order:
 
@@ -25,103 +27,63 @@ If the target isn't stated, infer it in this order:
 - working tree is clean → diff between the current branch and main (or the repo's default branch)
 - a PR number or URL was given → fetch with `gh pr diff <number>` / `gh pr view <number>`
 
-Once decided, gather the metadata that goes at the top of the page:
+Then record the branch name, the base and head short hashes, and the `git diff --stat` and `--numstat` output. This metadata answers "which snapshot of the code does this explanation describe?" A branch keeps moving after the page is generated, so the page silently goes stale without a recorded coordinate — always keep one.
 
-```bash
-git branch --show-current
-git rev-parse --short HEAD        # for a commit range, both base and head hashes
-git diff --stat <target>          # changed files and size
+**Note who wrote the change, because it decides where the work happens.** The writer runs the changed code to find out how it really behaves, which is where the page's best material comes from — and that is worth having most on code the user did not write, since those are the behaviours they cannot simulate in their head.
+
+For a PR, settle authorship mechanically rather than by guessing:
+
+```
+gh pr view <number-or-url> --json author,headRepositoryOwner
+gh api user --jq .login
 ```
 
-This metadata answers "which snapshot of the code does this explanation describe?" A branch keeps moving after the page is generated, so the page silently goes stale without a recorded coordinate — always keep one.
+**When the change is not the user's own**, keep it away from their working tree:
 
-**Update mode.** When the user hands you a page generated earlier — a path to one, or 「前に作った解説を更新して」 — read the commit range out of its metadata block and compare it with the current head of the same target. If they match, say the page is still current and stop; there is nothing to do. If they differ, run Steps 2 and 3 again over the **full** range (old base → new head) and have the subagent write to the **existing file's path**, overwriting it. Do not hand-edit only the part that changed: a later commit can invalidate a claim, a risk, or a quiz answer anywhere on the page, so a partial edit would leave the coverage and accuracy guarantees holding for the new commits only — and editing it yourself in the main session would also throw away the blind-subagent independence Step 2 exists for. If the file is gone (pages live under `/tmp`, which the OS clears), say so and generate a fresh one.
+- Materialise it: `gh pr diff <number-or-url>` and the commit messages (`gh pr view <number-or-url> --json commits`) into files under the scratch directory.
+- Give the writer a checkout of its own — `git worktree add --detach <scratch-path> <ref>` — and tell it to do all of its running and scratch-writing there. Its own working tree stays untouched.
+- **After Steps 2–4 finish, run `git status --porcelain` in the real repository.** Anything unexpected is the finding that matters: a change can plant a git hook, a `Makefile`, or an `.envrc` that fires later outside any sandbox, and that write path — not autonomous execution — is the risk worth watching for. Report anything it prints instead of quietly cleaning it up.
+
+**A PR from someone outside the user's own team or company is different in kind, and rare enough to be worth a sentence.** Say plainly that explaining it well means running a stranger's code on this machine, and let the user choose between that and a reading-only explanation. If they choose reading-only, tell the writer not to run anything and make sure the page says so (the page contract requires it either way).
+
+**Update mode.** When the user hands you a page generated earlier — a path to one, or 「前に作った解説を更新して」 — read the commit range out of its `diff-range` meta tag and compare it with the current head of the same target. If they match, say the page is still current and stop. If they differ, run Steps 2–4 again over the **full** range (old base → new head) and have the writer overwrite the existing file's path. Do not hand-edit only the part that changed: a later commit can invalidate a claim, a risk, or a quiz answer anywhere on the page, and editing it yourself in the main session throws away the blind independence Step 2 exists for. If the file is gone (pages live in temporary directories the OS clears), say so and generate a fresh one.
 
 ### Step 2: Generate the explanation (blind subagent)
 
-Have a subagent, launched via the Agent tool, write the explanation. Two reasons:
+**Do not put your own summary of the change, its intent, or the conversation history into the writer's prompt.** Doing so destroys the independence this step exists for, and the delegation becomes pointless. If the current session is the one that implemented this change, writing the explanation in the same context would carry over its blind spots unchanged; the writer reads intent for itself from the diff, the surrounding code, and the commit messages.
 
-- **Cutting off inherited assumptions**: if the current session is the one that implemented this change, writing the explanation in the same context carries over its blind spots and assumptions unchanged. Having a subagent write from the diff and the repo alone makes it an independent reader's account instead.
-- **Keeping the main context clean**: the explainer HTML is large. Delegating keeps it out of the main conversation even when you didn't implement the change yourself.
+Launch the writer chosen in Step 1 via the Agent tool, passing only these mechanically-obtained facts:
 
-**Do not put your own summary of the change, its intent, or the conversation history into the subagent's prompt.** Doing so destroys the independence this step exists for, and the delegation becomes pointless. Only pass facts mechanically obtained from git (branch name, hashes, how to get the diff). The subagent reads intent for itself from the diff, the surrounding code, and commit messages.
+- Where the code is: the repository path for the user's own changes, or the materialised diff, commit messages, and detached checkout for someone else's
+- How to obtain the diff, e.g. `git diff main...feature-x` / `gh pr diff 123`
+- Metadata to embed: generation date, branch name, commit range, per-file insertion and deletion counts
 
-```
-Agent(
-  subagent_type: "general-purpose",
-  model: "opus",
-  description: "Generate diff explainer page",
-  prompt: <template below>
-)
-```
+**Pass nothing about what happened after the head commit.** Mentioning that a later commit reverted a file, or that the approach was since abandoned, reads to the writer as licence to discuss it — measured on this skill, that is exactly what happened, and the page narrated events past its own endpoint. If the writer needs a file the working tree no longer has, say only how to read it at that revision (`git show <rev>:<path>`), not why it is missing.
+- Output path: `<YYYY-MM-DD>-explanation-<short-english-slug>.html`, outside the repository — in the session's scratchpad directory when the harness gives you one, otherwise `/tmp`
+- Absolute paths to `references/page-contract.md` and `assets/page-template.html` in this skill's directory
 
-Pass `model: "opus"` explicitly, regardless of which model is running the main agent (e.g. even when the main agent itself is Fable), so the explanation's quality doesn't depend on the main agent's model.
+### Step 2.5: Fill the quotes
 
-Prompt template:
+Run `scripts/embed_quotes.py <page> --root <repo-or-checkout>` (add `--rev <sha>` when the change's files are not in the working tree). It fills every quote element the writer left from the source files, computing the elision markers and skipped-line counts. You run it, not the writer, so the untrusted path gets the same guarantee without a shell.
 
-```
-Write a code-change explainer page (self-contained HTML), in Japanese.
+A non-zero exit means a quote names a file, revision, or line range that does not exist — send it back to the writer rather than editing the marker yourself.
 
-- Repository: <absolute path>
-- Target change: <how to get the diff, e.g. `git diff main...feature-x` / `gh pr diff 123`>
-- Metadata to embed at the top of the page: generated on <YYYY-MM-DD> / branch <name> / commit range <base...head hashes> / diff --stat summary
-- Output path: /tmp/<YYYY-MM-DD>-explanation-<short-english-slug>.html
+### Step 3: Verify
 
-Follow the "Page structure and style" section of <absolute path to this SKILL.md> for the page's structure and style (follow only that section — ignore the rest of that file's workflow steps).
+Launch `diff-verifier` with the generated HTML path and the same inputs the writer received. Don't skip this step. For someone else's change, point it at the same detached checkout rather than the user's working tree.
 
-Read the change's intent and merit yourself, from the diff, the surrounding code, and commit messages. Use the commit messages only to infer intent — never narrate the order of the commits, the detours, or what was tried and abandoned along the way. The page explains the two endpoints, base and head; the journey between them is not part of it. When done, return only the output file's path.
-```
+### Step 4: Revise through the writer, then hand off
 
-### Step 3: Verify (a separate subagent)
+**Send the issue list back to the writer that produced the page** — reply to that same agent so it keeps its investigation context — and have it fix the file. Don't apply the fixes yourself: you are the one participant who never read the change closely, and several kinds of fix (re-running a command to get its real output, deciding whether a claim should be softened or dropped) need what the writer knows.
 
-Have a second subagent (Agent tool, `subagent_type: "general-purpose"`, `model: "opus"` — pinned regardless of the main agent's model, same reason as Step 2) check the generated HTML against the actual diff. Explanations can be "plausible but wrong," and a wrong quiz answer is worse than no quiz — it actively undermines the comprehension check. Don't skip this step.
+**Wait for the writer to finish before checking again.** A revision lands as a series of edits, so the first write to the file is the start of the round, not the end of it — check on that signal and the verifier reads a half-revised page and reports fixes as unfixed. Measured on this skill: two of five issues came back as "reworded, not corrected" when both were in fact already corrected in the finished file. Wait for the agent's own completion, then run the checker over the revised page.
 
-Verification prompt template:
+A second verification pass is not free, so spend it where it pays. Re-verify when the round changed something a reader would act on — a wrong claim, a wrong quiz answer, a rewritten passage — and skip it when every fix was cosmetic, saying so in the handoff. Measured on this skill, the second pass has surfaced defects the first one missed entirely, so treat "the fixes were trivial" as the bar, not "the verifier sounded satisfied".
 
-```
-Verify this code-change explainer HTML against the actual diff.
+Stop after two revision rounds. If issues remain, hand off anyway and list what is still open — an explainer page with three known caveats is more useful than a fourth round. If the page is fundamentally broken instead, throw it away and redo Step 2 with the issue list attached.
 
-- Explainer HTML: <path>
-- Repository: <absolute path>
-- Target change: <how to get the diff — same as Step 2>
-
-Checks:
-a. Coverage — does every file in `git diff --stat` appear somewhere in the "code walkthrough" section? If one is intentionally skipped, is it listed under "minor changes"? Is anything silently missing?
-b. Accuracy — do the claims, diagrams, and code quotes match the diff and the actual code? Any function names that don't exist, or behavior described incorrectly?
-c. Quiz — is the choice marked correct actually correct, given the diff? Are the explanations for the incorrect choices also correct?
-d. Formatting — does every code block's CSS include white-space: pre or pre-wrap so line breaks don't collapse? Do the table-of-contents links work?
-e. Endpoints only — does the page narrate the change's history anywhere (what was implemented first and later replaced, what a review round changed, the sequence of commits)? Every such passage is a defect: the page describes base vs head, nothing in between.
-
-Return a list of issues as "location / problem / suggested fix". If there are none, say so.
-```
-
-When issues come back, the main session fixes the HTML with Edit. If the explanation is fundamentally broken — e.g. riddled with factual errors — redo Step 2's generation, attaching the issue list.
-
-### Step 4: Hand off
+Then:
 
 1. Open the file in a browser (`open <file path>`)
-2. Report to the user: the file path, a metadata summary (target branch, commit range, size of the change), and a summary of anything the verification step fixed
+2. Report the file path, a metadata summary (target branch, commit range, size of the change), which writer ran and therefore whether the behaviour was executed or only read, and anything the verification rounds changed or left open
 3. Encourage taking the quiz to confirm understanding. The intended use is: read the explanation, pass the quiz, then move on to review or merge
-
-## Page structure and style
-
-### Structure (one long page, in this order)
-
-1. **Metadata block** (top): generation date, branch, commit-range hashes, `git diff --stat` summary. States plainly which snapshot this explains.
-2. **Table of contents**: in-page links to each section.
-3. **Background**: explain the existing system relevant to this change, researched by broadly exploring the surrounding code. The reader's prior knowledge is unknown, so use two layers — deep background for beginners (collapsible, so a knowledgeable reader can skip it) and a narrower background directly relevant to the change.
-4. **Intuition**: explain the core idea behind the change as its essence, not its full detail. Lean heavily on small concrete examples (simplified just enough that only the essence is visible) and diagrams. On the page itself, title this section with natural Japanese such as 「この変更の考え方」— do **not** translate "Intuition" literally as 「直感」, which reads awkwardly as a Japanese heading.
-5. **Code walkthrough**: walk through the changes at a high level, regrouped and reordered for readability — not alphabetical by filename, but in whatever order tells the story most naturally. **Every changed file must appear somewhere in this section.** Trivial changes (typo fixes, import reordering) don't need individual explanation and can be grouped under "minor changes," but never silently dropped. The reader's trust that "nothing went unexplained" is the whole basis of this page's value.
-6. **Risks and open questions**: assumptions the implementation is making, untested code paths, boundary conditions where behavior changes, spots a human reviewer should pay special attention to. This section answers "is this actually okay?" — the question that comes after "I understood it." If nothing comes to mind, actually double-check before writing "none."
-7. **Comprehension quiz**: 5 multiple-choice questions, medium difficulty — hard enough that answering requires having understood the substance, but not gotchas. **At least 2 of the 5 should probe an edge case, a spot where behavior changes, or a place bugs tend to hide** (so the quiz doubles as a review nudge, not just a comprehension check). Clicking a choice shows correct/incorrect plus an explanation for every choice. Write the JavaScript inline.
-
-### Style
-
-- A single self-contained HTML file (CSS and JavaScript fully inline). No external resources.
-- One long page with section headings. Don't use tabs for the top-level structure.
-- Basic responsive styling so it's readable on a phone.
-- Body text is in Japanese. Write with clarity and flow, with smooth transitions between sections. Back every abstract claim with a concrete example. Avoid unexplained loanwords/jargon/acronyms; define them briefly on first use if you must use them.
-- Pick a small number of diagram "families" and reuse them throughout, rather than inventing a new diagram shape for every case. Useful families: a heavily simplified sketch of the app's UI (for UI changes), a diagram of data flow between components (always include example data). No ASCII art — draw with HTML and CSS.
-- Use callouts (boxed notes) for key concepts, definitions, and edge cases.
-- Code blocks use `<pre>` tags. If you style a custom div instead, its CSS must include `white-space: pre-wrap` (otherwise the browser collapses line breaks into one line). Check every code block's CSS before saving.
-- Save the file outside the repository, with a filename that always starts with `YYYY-MM-DD-` (keeps files time-sorted and out of version control). Example: `/tmp/2026-07-07-explanation-add-retry-logic.html`
