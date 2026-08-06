@@ -6,19 +6,19 @@ allowed-tools: Bash, Read, Grep, Glob, Edit, Write, Agent, Skill, AskUserQuestio
 argument-hint: "[base-branch (default: auto-detect)]"
 metadata:
   author: ysk1031
-  version: 3.0.0
+  version: 3.2.0
 ---
 
 # Pre-PR Review
 
 Human reviewers on this user's PRs rarely find bugs — tests catch those. What they find is design/convention feedback: "this belongs in the existing DAO", "this constant is domain knowledge, why is it in infra", "this field is int but every other ID is uint", "these types don't share the prefix their siblings use", "this ORDER BY has no consumer". This skill runs that review *before* the PR exists, so the feedback comes from the AI and the user adjudicates it, instead of a teammate finding it later.
 
-**Every reviewer here is the same kind of object**: a catalog entry — role declaration, prefix, 合図 (the grep-able signals that make it worth running), checklist — launched as a blind subagent that answers in one fixed format. Two entries are always-on and cheap (`SIM`, `CNV`, defined at the bottom of this file); the expert entries live in [references/perspectives.md](references/perspectives.md) and join the same run on request. There is no second kind of pass and no mode switch: this skill is the successor of both `pre-pr-check` and `multi-perspective-review`, which reviewed the same diff at the same stage under two names.
+**Every reviewer here is the same kind of object**: a catalog entry — role declaration, prefix, 合図 (the grep-able signals that make it worth running), checklist — launched as a blind subagent that answers in one fixed format. Two entries are always-on and cheap (`SIM`, `CNV`, defined at the bottom of this file); the expert entries live in [references/perspectives.md](references/perspectives.md) and join the same run on request. There is no second kind of reviewer and no mode switch: this skill is the successor of both `pre-pr-check` and `multi-perspective-review`, which reviewed the same diff at the same stage under two names. What reviewers find does not reach the user as-is: every finding must first survive a blind adversarial-verification pass (Phase 3.5) that tries to refute it against the repo, so the table holds only findings that withstood a refutation attempt.
 
 Three hard rules:
 
-1. **Report first, touch nothing.** Every reviewer is read-only. Fixes happen only after the user approves specific findings.
-2. **Blind reviewers.** They see the diff and the repo but NOT this conversation, so the implementer's own rationalizations ("I made a separate DAO because…") don't leak in. A settled-decisions doc may be passed so reviewers don't relitigate what's decided — but only a doc that **already existed before this review** (one committed on the branch qualifies even if this diff added it; one written or edited during this conversation does not), and only as a path they read themselves, never as your summary. Two things are therefore forbidden, because both carry the implementer's framing across the wall by hand: suggesting the user add a rationale they just told you to that doc, and telling the user what the reviewers are about to flag before they have flagged it.
+1. **Report first, touch nothing.** Every reviewer and every verifier is read-only. Fixes happen only after the user approves specific findings.
+2. **Blind reviewers and verifiers.** They see the diff and the repo but NOT this conversation, so the implementer's own rationalizations ("I made a separate DAO because…") don't leak in. A settled-decisions doc may be passed so reviewers don't relitigate what's decided — but only a doc that **already existed before this review** (one committed on the branch qualifies even if this diff added it; one written or edited during this conversation does not), and only as a path they read themselves, never as your summary. Two things are therefore forbidden, because both carry the implementer's framing across the wall by hand: suggesting the user add a rationale they just told you to that doc, and telling the user what the reviewers are about to flag before they have flagged it.
 3. **Approval is permission to apply, not exemption from procedure.** Even when the user says 「直して」, a finding whose fix is behavior-changing, creates a new public type/interface/file, or touches an externally referenced contract (production schema, API, enum) is treated as a fresh implementation request: plan first, then implement. See Phase 5.
 
 ## Phase 0: Scope
@@ -38,7 +38,7 @@ Three hard rules:
   - the domain slot needs its spec paths: find the candidates yourself and put them in that option's description as a proposal (「specs/xxx.md を読ませます」), so agreeing costs no second round trip.
 - **Anything else** (plain 「PR前チェック」, the pr skill's suggestion, a bare slash invocation): `SIM` and `CNV` only, ask nothing.
 - **「観点は絞って」**: cut non-default slots first. A default slot comes out **only** when its own exclusion condition in the catalog is met — never merely because the user wants fewer. State the surviving floor and its combined cost in one line of prose, put only the non-default candidates in the dialog, and never offer "just the defaults is fine" as an option. If the floor already exceeds the budget the user is worried about, say so plainly: the savings can only come from the non-default slots.
-- **Incremental runs** (a table already went out this session): naming a perspective *is* the approval — state the cost in one line and launch, no dialog. Run only the new reviewers, reusing Phase 2's outputs from the earlier run as-is, merge per Phase 4's numbering example, and leave the rows already shown exactly as they are — same numbers, same text, same eight columns.
+- **Incremental runs** (a table already went out this session): naming a perspective *is* the approval — state the cost in one line and launch, no dialog. Run only the new reviewers, reusing Phase 2's outputs from the earlier run as-is; their findings still pass Phase 3.5 (a new finding matching an already-shown row is the 「N番と同じ箇所」 case, and already-shown rows are never re-verified). Merge per Phase 4's numbering example, and leave the rows already shown exactly as they are — same numbers, same text, same eight columns.
 
 ## Phase 2: Mechanical extraction (main agent, read-only)
 
@@ -59,27 +59,45 @@ Before the launch message, print one line naming what is being reviewed and how 
 
 Launch ALL selected reviewers in a single message so they run concurrently, each built from the one template at the bottom of this file. Every Agent call is `subagent_type: "general-purpose"` with `model: "opus"` passed explicitly, regardless of which model runs the main agent (even when it is Fable) — read-only is enforced by the prompt text, and pinning opus keeps review quality independent of the main agent's model.
 
-Only five things vary between reviewers: **役割宣言 / 接頭辞 / チェックリスト / 観点固有の追加指示 / 主対象ファイル**. Everything else in the template is identical for all of them, which is what lets Phase 4 merge mechanically.
+Only five things vary between reviewers: **役割宣言 / 接頭辞 / チェックリスト / 観点固有の追加指示 / 主対象ファイル**. Everything else in the template is identical for all of them, which is what lets Phase 3.5 merge mechanically.
 
 Inputs are fixed per the template, not per-reviewer judgment calls:
 - **Every reviewer, always**: the repo path, the base branch, the instruction to read the diff body itself (not just `--stat`), the 言語/主要ライブラリ line (from Phase 2-4), and the paths of every background doc — the settled-decisions docs AND the convention docs, `SIM` included. **Paths only, never your summary of them** (hard rule 2).
 - **主対象 defaults to the code files the diff touched, minus test files.** An entry's 観点固有の追加指示 may widen or narrow that — `SIM` adds the test files back; `CNV`'s targets are the files holding its item list.
 - **`CNV` only**: Phase 2's item list.
-- Set 最大件数 to 12–15 (small diff → 12; large or many reviewers → 15).
+- Set 最大件数 to 6–8 (small diff → 6; large or many reviewers → 8). The cap is deliberately low: reviewers told to find gaps will fill whatever quota they are given, and every extra plausible-but-marginal finding costs verification budget in Phase 3.5 and adjudication attention in the final table.
+
+## Phase 3.5: Adversarial verification — findings must survive refutation
+
+A reviewer told to find gaps reports something even when the work is sound, and its findings look equally plausible whether they are real or not. So no finding reaches the table on the reviewer's word alone: a verifier tries to refute it against the repo first. This pass is what keeps the table short enough to adjudicate and each row trustworthy enough to adjudicate quickly.
+
+**Step 1 — mechanical drops (main agent, no subagents):**
+
+- Anything whose 確信度 is 低 — reviewers were told not to pad, so a self-declared 低 is the reviewer flagging weak evidence; don't spend verification budget on it.
+- Anything whose target is a file the diff didn't touch. Reviewers do violate that constraint.
+
+Record every drop with a one-line reason; Phase 4 discloses them under the table.
+
+**Step 2 — deduplicate by the underlying issue, not by the line number.** Two reviewers citing a type declaration and the method that uses it have found one issue: one row, noting 「N観点が独立に指摘」 (that convergence drives what the user tackles first). A single reviewer reporting the same issue twice merges the same way, minus the note. When the same statement arrives both as a behavior-preserving fix and as a ⚠️ finding, keep the single finding in the ⚠️ bucket — whatever the user decides there settles whether the simplification still applies. Two adjacent lines with *different* concerns (dropping a temp variable vs. validating what goes into it) stay separate.
+
+**Step 3 — launch the verifiers.** Number the surviving findings V1, V2, … and split them into batches of at most 10; one verifier per batch, all launched in a single message so they run concurrently. Launch parameters are the reviewers': `subagent_type: "general-purpose"`, `model: "opus"`, read-only enforced by the prompt (the verifier template at the bottom of this file). Verifiers are blind the same way reviewers are — diff, repo, background-doc paths, never this conversation — and additionally blind to *who* found each finding and how many reviewers converged on it, so a verifier can't defer to authority or consensus instead of checking. Before launching, print one line with the finding count and batch count only — no contents; hard rule 2 holds until the table.
+
+**Step 4 — apply verdicts:**
+
+- **反証成立** → drop the finding; the disclosure under the table carries the verifier's refutation in one line.
+- **成立** → keep; the table's 根拠 cell carries the evidence the verifier itself checked, not the reviewer's original claim.
+- **修正して成立** (right target, wrong stated evidence — a claimed existing method that turns out not to exist) → keep with the corrected wording; note the correction in the disclosure.
+- **判定不能** → keep, and write 「未検証」 openly at the head of the 根拠 cell so the user adjudicates with eyes open. This should be rare — almost every claim here is checkable in-repo.
+
+The known failure mode of verification agents is lazy approval: a verifier that returns 成立 across the board without per-finding evidence has not verified anything. If a verdict arrives without the evidence lines the template requires, treat that verdict as 判定不能, not 成立.
+
+If nothing survives Steps 1–2, skip the launch and go to Phase 4 with an empty table and the disclosure of what was dropped.
 
 ## Phase 4: One table (main agent) — HARD STOP
 
-Merge every reviewer's output.
+Build the table from the findings that survived Phase 3.5.
 
-**Deduplicate by the underlying issue, not by the line number.** Two reviewers citing a type declaration and the method that uses it have found one issue: one row, noting 「N観点が独立に指摘」 (that convergence drives what the user tackles first). A single reviewer reporting the same issue twice merges the same way, minus the note. When the same statement arrives both as a behavior-preserving fix and as a ⚠️ finding, keep the single row in the ⚠️ table — whatever the user decides there settles whether the simplification still applies. Two adjacent lines with *different* concerns (dropping a temp variable vs. validating what goes into it) stay separate rows.
-
-**Then filter, and say below the table what you dropped and why** — one line, or a short paragraph when a correction needs explaining, and 「除外なし」 when nothing was dropped. An invisible filter reads as "nothing else was found":
-
-- Anything whose 確信度 is 低, unless you verify the evidence yourself.
-- Anything whose target is a file the diff didn't touch. Reviewers do violate that constraint.
-- A finding whose target is right but whose stated evidence is wrong (a claimed existing method that turns out not to exist) is neither dropped nor kept as-is: correct the wording, keep the row, note the correction.
-
-These rules chain rather than compete. An unverified 低 drops. Once you have verified a finding, only the verdict matters: wrong target drops the row; right target with wrong evidence keeps the corrected row.
+**Below the table, disclose what Phase 3.5 dropped and why** — one line per dropped finding (mechanical drops and refutations alike), a short paragraph when a correction needs explaining, and 「除外なし」 when nothing was dropped. An invisible filter reads as "nothing else was found".
 
 **You assign 重要度 and 工数 for every row** — reviewers return 確信度 only, because importance needs the repo-wide view a single reviewer doesn't have. Rate 重要度 by whether a written convention is violated and how far the problem reaches; 工数 by the number of call sites you can count with grep. Where a reviewer argued severity in its finding body (an exploitable path, a spec mismatch), you may adopt that in 重要度. Confidence is not importance. Both scales are three-valued: 重要度 高/中/低, 工数 小/中/大.
 
@@ -191,14 +209,71 @@ base ブランチ: {base}
 - 改善案（具体的に。before/after のコード断片が有効なら短く示す）
 - 挙動不変であることの根拠（1行）
 
-確信度の高い順に並べる。最大{N}件。重要度と工数は付けない（統合側で付ける）。
+確信度の高い順に並べる。最大{N}件。{N}件は上限であって埋めるべき枠ではない——
+自信のない指摘は、出すより出さないほうが歓迎される。重要度と工数は付けない（統合側で付ける）。
 指摘がなければ「指摘なし」とだけ返す（無理に作らない）。
 挙動が変わる発見・仕様との食い違い・運用リスクは、上とは別の「⚠️別枠」節にまとめる
 （この別枠報告は歓迎される。無理に挙動不変の枠へ押し込めない）。
 {観点固有の追加指示}
 ```
 
+## Verifier prompt template
+
+Every Phase 3.5 verifier's prompt is this template with the batch filled in. Like the reviewer template it is written in Japanese. The findings are passed with V-numbers only — no reviewer prefixes, no convergence counts, no 確信度 — so the verifier judges each claim on the repo's evidence alone.
+
+```
+あなたは以下のレビュー指摘を書いた本人ではなく、独立した懐疑的な検証者である。
+リポジトリ {path} のブランチ {branch} の差分に対して出された指摘を「反証」する。
+目的は改善提案ではない。各指摘が実際に成立するかを、リポジトリの実物で確かめることである。
+読み取り専用であり、ファイルの変更も git の状態を変える操作も一切禁止。
+使ってよいのは `git show <ref>:<path>` / `git diff` / `git grep <ref>` / `cat` /
+`ls` / `find` など、参照するだけで何も変えないコマンドのみ。`git checkout` /
+`git switch` / `git restore` / `git stash` は、対象がどのブランチであっても
+——たとえ今のブランチと同じでも、差分がゼロだと分かっていても——実行しない。
+
+## 対象
+base ブランチ: {base}
+`git diff {base}...HEAD` を自分で実行して差分の本体を読む。
+背景資料: {設計資料・規約ドキュメントのパス} — 自分で読むこと。
+確定済みの設計判断とプロジェクトの規約が書かれている。
+
+## 検証する指摘
+{V番号ごとに: 対象 file:line / 指摘の主張 / 改善案 / 指摘者が挙げた根拠}
+
+## ルール
+1. 指摘ごとに、主張の根拠を自分で grep / read して確かめる。指摘者の挙げた根拠を鵜呑みにしない
+2. 反証の観点:
+   - 主張された事実は実在するか（「既存の〜がある」と言われたヘルパー・規約・慣習は本当にあるか）
+   - 「不要・未使用」と言われたコードに、実は消費者・依存元がいないか
+   - 改善案を適用すると本当に挙動が変わらないか
+   - 背景資料で確定済みの判断を蒸し返していないか
+3. 判定は指摘ごとに4値:
+   - 成立（反証を試みたが壊せなかった）
+   - 反証成立（指摘は成立しない）
+   - 修正して成立（対象は正しいが、根拠や文言に誤りがある。指摘が検証可能な部分と
+     検証不能な部分の両方を含み、検証可能な部分だけで指摘の結論が立つ場合もここに
+     含める——検証できなかった部分は根拠から外し、その旨を明記する）
+   - 判定不能（リポジトリ内の証拠では確かめられない。指摘の結論そのものが検証不能な
+     部分に依存している場合に限る。検証可能な部分だけで結論が立つなら 修正して成立 を使う）
+4. **どの判定にも、自分で確認した証拠（file:line と確認した内容）を必ず添える。**
+   証拠のない「成立」は検証の放棄とみなされ、無効になる。全件を安易に成立にしない。
+   「成立」では、どの反証の観点を試みて、どこを確認した結果崩せなかったかを file:line
+   付きで書く——試みた、という宣言だけでは無効
+5. 新しい指摘を追加しない。あなたは検証者であってレビュアーではない
+
+## 出力形式（最終メッセージ。日本語）
+指摘ごとに:
+- **[V番号] 判定: 成立 / 反証成立 / 修正して成立 / 判定不能**
+- 確認した証拠: file:line と、何をどう確認したか。確認した箇所ごとに1行——
+  不在の確認（未使用・重複ヘルパーの不在など）で複数箇所を見た場合は、
+  その箇所分だけ書く。事実を削るために証拠を削らない
+- 反証成立の場合: 成立しない理由（同じく確認した箇所ごとに1行）
+- 修正して成立の場合: 修正後の根拠・文言。検証不能な部分を含んでいた場合は
+  「〜の部分はリポジトリ内では検証不能。根拠から外して読むこと」も明記する
+- 判定不能の場合: 判定不能とした理由と、何が分かればリポジトリ外で判定できるか
+```
+
 ## Notes
 
-- Cost: the two always-on reviewers are a few tens of thousands of tokens and a few minutes on a mid-size diff. Each expert perspective adds ~100k tokens and 4–5 minutes; they run in the same parallel batch, so wall-clock barely moves.
+- Cost: the two always-on reviewers are a few tens of thousands of tokens and a few minutes on a mid-size diff. Each expert perspective adds ~100k tokens and 4–5 minutes; they run in the same parallel batch, so wall-clock barely moves. The Phase 3.5 verification adds one subagent per ~10 deduped findings (typically 1–2 verifiers per run, each reading the diff plus targeted greps) and one sequential wait after the reviewers — the price of removing plausible-but-wrong rows before the user spends attention on them.
 - `CNV` is only as strong as the project's written conventions (the 層 question especially). If findings keep appearing that a convention doc would have prevented, propose adding the rule to the project's CLAUDE.md / agent_docs after Phase 5.
