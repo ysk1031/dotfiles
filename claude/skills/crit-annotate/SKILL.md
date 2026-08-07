@@ -1,7 +1,7 @@
 ---
 name: crit-annotate
 description: >-
-  Opens a diff in crit with your own plain-Japanese explanation already attached as inline comments, so the user reads the change with the walkthrough sitting next to each hunk instead of asking for it afterwards. Picks the diff scope (unstaged only / branch vs base / a PR / vs another PR's branch), writes one explanation comment per meaningful hunk, verifies the comments actually landed, and only then opens crit. Triggers on requests that pair crit with an explanation: 「critでセルフレビューしたいです。あなたのコード解説もつけた状態で開けますか？」「critでPRのdiffを開いて、変更説明もコメントとしてつけておいて」「解説コメント付きでcritを開いて」. Do NOT use for: opening crit with no annotation (that is plain `crit`); a report-only multi-perspective review delivered as a table (pre-pr-review); generating a standalone HTML explainer page (explain-diff); judging findings someone else raised (review-triage).
+  Opens a diff in crit with your own plain-Japanese explanation already attached as inline comments, so the user reads the change with the walkthrough sitting next to each hunk instead of asking for it afterwards. Picks the diff scope (unstaged only / branch vs base / a PR / vs another PR's branch), writes one explanation comment per meaningful hunk, verifies the comments actually landed, and only then opens crit. Triggers on requests that pair crit with an explanation: 「critでセルフレビューしたいです。あなたのコード解説もつけた状態で開けますか？」「critでPRのdiffを開いて、変更説明もコメントとしてつけておいて」「解説コメント付きでcritを開いて」. Do NOT use for: opening crit with no annotation (that is plain `crit`); generating a standalone HTML explainer page (explain-diff); judging findings someone else raised (review-triage).
 ---
 
 # Crit Annotate
