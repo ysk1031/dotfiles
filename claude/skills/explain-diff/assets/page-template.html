@@ -100,6 +100,16 @@ table.stat td.bar { width: 55%; }
 nav.toc { background: var(--box); border-radius: 8px; padding: 12px 16px 12px 34px; margin: 20px 0; }
 nav.toc ol { margin: 0; padding-left: 0; }
 nav.toc li { margin: 2px 0; }
+/* The 補足 sits outside the numbered list: reaching the quiz is a finish line. */
+nav.toc .appendix {
+  margin: 8px 0 0 -18px; padding-top: 8px; border-top: 1px solid var(--line);
+  font-size: 0.9rem;
+}
+nav.toc .appendix span { color: var(--muted); }
+.seam {
+  margin: 40px 0 0; padding: 12px 16px; background: var(--box);
+  border-radius: 8px; font-size: 0.9rem; color: var(--muted);
+}
 
 details { margin: 16px 0; border: 1px solid var(--line); border-radius: 8px; padding: 10px 14px; }
 details summary { cursor: pointer; font-weight: 600; }
@@ -167,10 +177,10 @@ footer { margin-top: 60px; padding-top: 16px; border-top: 1px solid var(--line);
   <ol>
     <li><a href="#bg">背景</a></li>
     <li><a href="#idea">この変更の考え方</a></li>
-    <li><a href="#code">コードを読む</a></li>
     <li><a href="#risk">リスクと確認したいこと</a></li>
     <li><a href="#quiz">理解度クイズ</a></li>
   </ol>
+  <p class="appendix"><a href="#code">補足: コードリーディング</a> <span>— クイズまでで理解は完結します。コードを追いたくなったときに</span></p>
 </nav>
 
 <h2 id="bg">1. 背景 — 変更前のしくみ</h2>
@@ -181,17 +191,14 @@ footer { margin-top: 60px; padding-top: 16px; border-top: 1px solid var(--line);
 <p>FILL: この変更に直接関係する範囲の背景。</p>
 
 <h2 id="idea">2. この変更の考え方</h2>
-<p>FILL: 中心にある考えを、細部ではなく本質として。小さな具体例と図で。</p>
+<p>FILL: 変更をここで説明しきる。同じ場面のビフォー/アフターと図で。数字・設定・驚きどころを補足に取っておかないこと。</p>
 
-<h2 id="code">3. コードを読む</h2>
-<p>FILL: 読みやすい順に組み替えて解説する。変更された全ファイルがどこかに現れること。</p>
+<h2 id="risk">3. リスクと確認したいこと</h2>
+<p>FILL: 置いている仮定、試されていない経路、挙動が変わる境界、レビューで見るべき点。一息で読めるリストとして。</p>
 
-<h2 id="risk">4. リスクと確認したいこと</h2>
-<p>FILL: 置いている仮定、試されていない経路、挙動が変わる境界、レビューで見るべき点。</p>
-
-<h2 id="quiz">5. 理解度クイズ</h2>
+<h2 id="quiz">4. 理解度クイズ</h2>
 <!-- SCAFFOLD
-  One .q block per question, 5 in total. Mark the correct button with
+  One .q block per question, 3 in total. Mark the correct button with
   data-correct="true". Every button needs its own .exp explanation, wrong ones
   included. The script wires the behaviour; do not add click handlers by hand.
 -->
@@ -203,11 +210,16 @@ footer { margin-top: 60px; padding-top: 16px; border-top: 1px solid var(--line);
   <div class="exp">FILL: なぜ正しいのか</div>
 </div>
 
+<p class="seam">ここまでが本論です。以降はコードを追いたくなったとき用で、通して読む必要はありません。</p>
+
+<h2 id="code">補足: コードリーディング</h2>
+<p>FILL: 本論の内容がコードのどこにあるかを示す。読みやすい順に組み替える。挙動が変わるファイルだけを詳しく、それ以外は末尾の「細かい変更」に1行ずつ。全ファイルがここに現れること。ここで理屈を語り直さない。</p>
+
 <!-- SCAFFOLD  A quoted excerpt: leave it empty, embed_quotes.py fills it.
 <pre data-quote="claude/hooks/before-git.sh" data-lines="25-26,33-34"></pre>
 -->
 
-<footer>FILL: base...head の差分から生成。読み終えたらクイズで確認してからレビューへ。</footer>
+<footer>FILL: base...head の差分から生成。クイズまで終えたらレビューへ。</footer>
 
 <script>
 // Diff-stat bars, scaled from the numbers so every row shares one scale.
