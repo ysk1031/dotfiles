@@ -6,21 +6,21 @@ description: >-
 
 # Crit Annotate
 
-## What this is for
-
 The user wants to review a diff themselves, and reads it faster when each hunk carries a short explanation of what it does and why. Writing those comments after the user is already looking at the page means they stare at an unannotated diff first, so the comments go in before the page reaches them.
 
-## The one thing to get right: the startup line is the only source of truth
+Why the steps below insist on things that look paranoid — the startup line, the read-back, the two-dot range — is measured in `references/crit-behavior.md`. Read that only when a rule looks wrong or crit does something the steps do not cover.
 
-`crit status` is not. It reports a review path whenever you ask, including **before any session exists and after the daemon stops** — and the id it names in those moments is a *different* review than the one you are about to create or just used. Measured: `crit status` said `5dd1731679f8` before starting; the session that actually started was `4d69fed0dc82`; after `crit stop` it said `5dd1731679f8` again. `crit comments` has the same problem, because it answers from whatever review is active at that moment.
+## Two things to hold on to
 
-What is trustworthy is the single line the server prints when it starts:
+**The startup line is the only source of truth about the session.** `crit status` and `crit comments` answer from whatever review is active at the moment you ask, including when that is a different review or none at all. What the server prints when it starts does not:
 
 ```
 Started crit daemon at http://localhost:61725 (session 4d69fed0dc82, PID 30029)
 ```
 
-That one line carries everything the rest of the skill needs: the **URL** to hand over in Step 5, the **session id** — which is also the review's directory name, `~/.crit/reviews/<session>/review.json` — to verify against in Step 4, and the **PID** (only on a cold start; see Step 2 for the reconnect wording). Capture it in Step 2 and keep it.
+It carries the **URL** to hand over in Step 5 and the **session id**, which is also the review's directory name `~/.crit/reviews/<session>/review.json`. Later rounds print `Connected to crit daemon at … (session …)` instead, with no PID, so do not match on `Started` alone.
+
+**The Step 1 command, verbatim.** Step 6 and every reopen re-run it as-is, and the startup line does not carry it. Once the conversation is long enough to be compacted, `--pr 123` and `--range main..HEAD` are indistinguishable from memory, and reopening with the wrong one shows the user a page your comments do not belong to.
 
 ## Step 1: Pick the diff scope
 
@@ -33,92 +33,57 @@ Ask only if the request is ambiguous; otherwise infer and state which one you to
 | a pull request | `crit --pr <number-or-url>` |
 | what this branch adds on top of another PR's branch | `crit --range <that-branch>..HEAD` |
 
-Get the matching diff with the same coordinates (`git diff`, `git diff <base>..HEAD`, `gh pr diff <n>`) so the comments you write line up with what crit will show.
+Get the matching diff with the same coordinates (`git diff`, `git diff <base>..HEAD`, `gh pr diff <n>`) so the comments you write line up with what crit will show. **`--range` is two dots, not three** — crit shows what `git diff <base>..HEAD` shows, and a three-dot diff is a different set of files once the base has moved on.
 
-**Two dots, not three.** `--range` is a two-dot range, and crit shows exactly what `git diff <base>..HEAD` shows. Once the base branch has moved on, a three-dot diff is a different set of files: measured with `main` one commit ahead, crit listed the main-only file as DELETED while `git diff main...HEAD` omitted it entirely — so you would write comments for a page you had never looked at.
+## Step 2: Start the session as a background task
 
-## Step 2: Start the session as a background task, and keep the startup line
-
-**`crit … --no-open` does not return.** `--no-open` suppresses the browser, not the server: the command runs in the foreground and waits until the review is finished, so calling it plainly just blocks until your tool times out.
-
-Start it with the Bash tool's own `run_in_background`, not with a `&` inside the command:
+Start the Step 1 command with the Bash tool's own `run_in_background`, not with a `&` inside the command:
 
 ```bash
 crit --range <base>..HEAD --no-open
 ```
 
-`&` inside the shell orphans the process, and then nobody is left holding its exit — which is the whole signal Step 6 runs on. `run_in_background` keeps it: the tool result names an output file that collects both streams, and the harness re-invokes you when the process ends. Read that file right away; the startup line is there within a fraction of a second.
+`--no-open` suppresses the browser, not the server: the command holds the foreground until the review finishes, and that exit is the signal Step 6 runs on. `run_in_background` keeps it — the tool result names an output file collecting both streams, and the harness re-invokes you when the process ends. A `&` inside the shell orphans the process and nobody is left holding its exit. Read the output file right away; the startup line is there within a fraction of a second. Do not redirect to a log file of your own.
 
-Do not redirect to a log file of your own. Measured: crit prints the startup line on stderr and the harness's output file already carries it, so a `mktemp` log only adds a path you have to thread through later calls (shell state does not survive between Bash calls, so `LOG=$(mktemp)` cannot even reach the next one).
+**Start the session before writing any comment.** `crit comment` writes into whichever review is active, so with nothing up the comments land in a separate review that the user's page will never show.
 
-Read the session id and the URL out of the startup line and hold on to both. Everything below refers to them. **The wording differs between a cold start and a reconnect**, so do not match on `Started` alone:
-
-```
-Started crit daemon at http://localhost:49632 (session 404d2a41d8d2, PID 4729)
-Connected to crit daemon at http://localhost:49632 (session 404d2a41d8d2)
-```
-
-The second form is what later rounds print — the daemon is already up, so there is no PID.
-
-**Start the session before writing any comment.** `crit comment` writes into whichever review is active at that moment; run it with no session up and crit makes a *separate* review, the comments land there, `crit comments` reads them back happily, and the page the user eventually opens shows none of them.
-
-Do not run `crit status` to learn the path — see the section above. And note that `~/.crit/reviews/<session>/review.json` does not exist yet at this point; crit creates it when the first comment arrives. Its absence right now is normal and is not a signal of anything.
+`~/.crit/reviews/<session>/review.json` does not exist yet at this point — crit creates it when the first comment arrives, and its absence now signals nothing.
 
 ## Step 3: Write the explanation comments
 
-One comment per hunk worth explaining — not per changed line, and not per file when a file holds several unrelated changes. Skip mechanical hunks (import reordering, formatting); a comment on every hunk buries the ones that matter. A newly added file and a sizable deletion each deserve one, since those are the hunks the reader has the least context for.
+One comment per hunk worth explaining — not per changed line, and not per file when a file holds several unrelated changes. Skip mechanical hunks (import reordering, formatting); a comment on every hunk buries the ones that matter. A newly added file deserves one, since that is the hunk the reader has the least context for. Where a mechanical edit shares a hunk with a real change, comment the real change and leave the mechanical part unmentioned — the reader can see an import moved.
 
 Each comment answers, in plain Japanese: **what this hunk does**, and **why it is this way** when the reason is not visible in the code. These are explanations, not review findings — do not use them to raise problems with your own change. Follow the machine-wide rule on plain language: no coined terms, no identifiers a reader cannot decode, subject stated in every sentence.
 
-crit draws the body as markdown with smart punctuation on, so wrap code, paths and ranges in backticks. Left bare, `main..HEAD` is rendered as `main…HEAD` and a sentence explaining a two-dot range ends up contradicting itself.
+crit draws the body as markdown with smart punctuation on, so wrap code, paths and ranges in backticks. Left bare, `main..HEAD` renders as `main…HEAD` and a sentence explaining a two-dot range ends up contradicting itself.
 
-Write them as JSON and pipe them in one call. `line` takes a single line (`"42"`) or a range (`"88-95"`), and `--author` lets the user tell your explanations apart from their own replies:
+**Write the payload as a JSON file with the Write tool, then send the file.** Never pass a body as a shell argument: under zsh's double-quote rules the backticks you just added run as command substitution, and the identifiers vanish from the text while `crit comment` still reports success. A file written by the harness never passes through shell quoting at all.
 
-```bash
-cat <<'EOF' | crit comment --author claude --json
+```json
 [
   {"path": "app/pkg/usecase/run_batch.go", "line": "42", "body": "…"},
-  {"path": "app/pkg/usecase/run_batch.go", "line": "88-95", "body": "…"}
+  {"path": "app/pkg/usecase/run_batch.go", "line": "88-95", "body": "…"},
+  {"body": "レビュー全体に向けた一言。"}
 ]
-EOF
 ```
-
-A deleted file has no lines on the new side, so it cannot be anchored — and crit will not stop you from trying. `crit comment` on one answers `Added 1 comment`, the file's badge in the sidebar goes up, and only the empty `anchor` in Step 4 gives it away: the comment is stored and counted but never drawn on the page. Put the explanation where it will be read instead — a comment on whatever file records the decision (the README paragraph, the rule that replaced it), naming the removed file there. When the repository holds no such file, a comment with no path attaches to the review itself and appears at the top of the page. Send it through a quoted heredoc rather than inline — the body carries backticks, and inside double quotes zsh runs them as command substitution and silently eats the text:
 
 ```bash
-BODY=$(cat <<'EOF'
-…
-EOF
-)
-crit comment --author claude "$BODY"
+crit comment --author claude --json --file /path/to/payload.json
 ```
+
+`line` takes a single line (`"42"`) or a range (`"88-95"`). An entry with no `path` attaches to the review itself and appears at the top of the page. `--author` lets the user tell your explanations apart from their own replies, and it applies to every entry in the file. Keep the payload file — Step 4 checks against it, and a repair re-sends it.
+
+**A deleted file cannot hold a comment.** It has no line on the new side, so crit stores and counts the comment but never draws it. Put the explanation where it will be read instead: as its own comment on whatever file records the decision (the README paragraph, the rule that replaced it), or as a review-level entry when the repository holds no such file. Open that comment by naming the removed file, because it is sitting on lines that have nothing to do with it — a reader who is not told will read it as a comment about the code under it.
 
 ## Step 4: Verify the comments landed (never skip)
 
-Read them back **out of `~/.crit/reviews/<session>/review.json`, using the session id from the startup line**. Not through `crit comments`, which answers from the active review and therefore cannot tell you the comments went somewhere the user will never look.
-
 ```bash
-python3 - <<PY
-import json
-o = json.load(open("$HOME/.crit/reviews/<session>/review.json"))
-n = 0
-for path, entry in o["files"].items():
-    items = entry.get("comments", []) if isinstance(entry, dict) else entry
-    n += len(items)
-    for c in items:
-        print(path, c.get("start_line"), repr(" ".join(str(c.get("anchor","")).split())[:60]))
-for c in o.get("review_comments", []):
-    n += 1
-    print("(review-level)", repr(" ".join(str(c.get("body","")).split())[:60]))
-print("total", n)
-PY
+~/.claude/skills/crit-annotate/scripts/verify-comments.py <session-id> /path/to/payload.json
 ```
 
-A comment with no path is stored in the top-level `review_comments`, not under `files` — walk both or the count will never match what you sent.
+It reads `~/.crit/reviews/<session>/review.json` directly — not `crit comments`, which cannot tell you the comments went somewhere the user will never look — and fails when an entry is missing from the review file or when a stored comment's anchor is empty. The anchor is crit's record of the source text it attached to, so an empty one is the invisible case: accepted, counted, nowhere to draw.
 
-Check two things: the count matches what you sent, and each `anchor` — crit stores the source text it attached to — is the hunk that comment talks about. A comment sitting on the wrong lines still reports as added, so the anchor is the real check. An **empty** anchor is the invisible case: crit accepted and counted the comment but has nowhere to draw it, so the user will never see it. If the count is short, or an anchor is wrong or empty, fix it and verify again. There is no per-comment delete — `crit comment --clear` empties the whole review file — so the repair is to clear and re-send the corrected set in one go.
-
-**`base_ref` is not a health check.** Its value moves around — a merge-base SHA, a bare branch name, or empty under `--pr` — and none of that tells you where your comments landed. The session id from the startup line is the identity check; `base_ref` is not.
+Repair by fixing the payload file, running `crit comment --clear`, and re-sending the whole set; there is no per-comment delete. Then verify again.
 
 **Do not tell the user crit is ready until this passes.** Report the number ("解説コメントを22件つけました") so a mismatch is visible to them immediately.
 
@@ -128,87 +93,8 @@ Give the user the URL from the Step 2 startup line, the scope you used, and the 
 
 (crit can dispatch on each individual comment instead, via the "Send now" button, but that needs `agent_cmd` in `~/.crit.config.json` and it spawns a *separate* headless `claude -p` with none of this conversation's context. It is not this loop, and this skill does not set it up.)
 
-## Step 6: When the background task ends, work the round
+## Step 6: Work the reply rounds
 
-You do not wait for the user to tell you anything. The Step 2 background task ends the moment they press Finish Review, and the harness re-invokes you. Everything you need is already in that task's output file:
+You do not wait for the user to tell you anything. The Step 2 background task ends the moment they press Finish Review, and the harness re-invokes you with the whole round in that task's output file. **Read `references/round-loop.md` then** — how to tell the user's feedback apart from your own explanations (which crit still counts as unresolved), how to reply, and when to stop are all there.
 
-```
-approved: false
-The review finished with 2 unresolved comments.
-
-[{"scope":"line","path":"README.md","id":"c_0f1e84", … ,"author":"claude","replies":[{ … ,"author":"Yusuke Aono", … }]}, … ]
-
-Address each comment. For each one, reply explaining what you did using `crit comment --reply-to <comment-id> --author <your-name> "<explanation>"`.
-
-When you're done, run:
-
-  crit --session 404d2a41d8d2
-```
-
-Read the file rather than re-deriving any of it. `crit comments --json` is only the fallback for when the output is gone.
-
-**Ignore the `crit --session <id>` line it hands you.** That is the form the "Stopping and reopening" section below explains you must not use — it drops the scope. Re-run the Step 2 command instead.
-
-### Pick out what is actually addressed to you
-
-Every explanation comment you wrote in Step 3 is still unresolved, so crit counts all of them and the prompt says "address each comment". It is wrong about that: 22 explanations plus one real reply arrives as "23 unresolved comments". crit cannot create a comment already resolved (`--resolve` only applies to replies), so this is not something Step 3 can avoid.
-
-Select on **who spoke last in the thread**: the newest entry is the last element of `replies`, or the comment itself when it has none. A thread is addressed to you when that last speaker is not `claude`. That leaves out your untouched explanations, and it leaves out threads you already answered, while catching both the user's brand-new comments and their replies to your explanations.
-
-Do not select on `review_round` instead. Measured: comments created through `crit comment` carry no `review_round` at all, while replies typed in the browser carry one — so the field is about where an entry came from, not which round it belongs to. `resolved` is likewise absent rather than `false` on an unresolved comment, so treat a missing field as unresolved.
-
-### Answer, change, reply
-
-Answer where an answer is enough. Where the reply asks for a change, make the change first, then reply saying what you did.
-
-**Do not pass `--resolve`.** Resolving is the reviewer's call, and the loop does not need it: the last-speaker rule already keeps an answered thread out of the next round.
-
-**`--author` does not carry over from Step 3** — every `crit comment` call needs its own, and without one crit signs the reply with the repository's `git config user.name`, which is the user. Their own thread then comes back to them apparently written by themselves, and the point of setting an author at all is lost.
-
-Send a reply through a quoted heredoc, the same way Step 3 does, whenever the body carries backticks:
-
-```bash
-BODY=$(cat <<'EOF'
-README から数字を消し、`main.go` の `retryLimit` を見てもらう書き方に変えました。
-EOF
-)
-crit comment --author claude --reply-to <id> "$BODY"
-```
-
-Inline in double quotes, zsh runs the backticks as command substitution: measured, that same sentence reached crit as "README から数字を消し、 の  を見てもらう書き方に変えました。" with both identifiers gone, and `crit comment` still answered `Replied to <id>`. There is no per-reply delete, so the only repair is a second reply that corrects the first.
-
-## Step 7: Open the next round, or stop
-
-Re-run the Step 2 command as a background task again. crit signals the previous round complete — the user's page picks up your edits and shows "Round #2" — and then blocks until the next Finish Review. Then you are back at Step 6.
-
-Stop the loop, and say why in one line, on any of these:
-
-| What the output shows | What it means |
-|---|---|
-| `approved: true` plus "Review approved. All comments are resolved" | The user approved. Move on to committing. |
-| Nothing addressed to you after the last-speaker rule | They pressed Finish with no new feedback. Report that and let them decide. |
-| No `approved:` line at all | crit failed to start or lost the daemon — it exits non-zero on those paths too. Report the output; do not relaunch blindly. |
-
-The user has a one-click way out of the unresolved explanations: pressing Finish Review with nothing new opens crit's own "No changes this round" dialog, whose **Resolve all & approve** closes every thread and returns `approved: true`. Mention it when they ask how to end a review that still shows your 22 comments as open.
-
-When the review is done, commit through the `commit` skill — one topic per commit, and one commit per review finding when the replies asked for several unrelated fixes.
-
-## Stopping and reopening
-
-`crit stop` shuts the daemon down; `crit stop --all` gets every one of them. On its own this does not touch the review file — `crit status` and `crit comments` just stop pointing at it the moment the daemon is gone, so keep the session id if the review is not finished.
-
-**Approving the review deletes its file, not just stopping the daemon.** The button in the page reads "Finish Review" while comments are still unresolved, and pressing it there ends the round but keeps `review.json` — that is the ordinary reopen case above. Once every comment is resolved the same button relabels to "Approve", and pressing *that* one sends `approved: true`, deletes `~/.crit/reviews/<session>/review.json`, and stops the server itself. Measured 2026-08-04: a fully-resolved review's file was gone within moments of the Approve click, while `crit stop --all` alone left an identical file untouched. There is no `--session` to reopen after that — the review is over, not paused.
-
-**Reopen by re-running the Step 2 command, not with `--session`.** The same target yields the same session, so the comments come back either way — but `--session <id>` restores only the review file, not the scope. The daemon comes up as `crit _serve --session-key <id>`, with no `--pr` or `--range`, so crit falls back to auto-detecting the working tree and the page shows whatever happens to be uncommitted right now. Comments on files outside that set stay in the review file with nowhere to appear, which looks to the user like they were lost.
-
-Reopen it exactly the way Step 2 starts it — the same command, again as a `run_in_background` task:
-
-```bash
-crit --pr <number> --no-open   # whichever Step 2 used, verbatim
-```
-
-The output file carries a fresh URL and the same session id, on a `Started` line after a stop or a `Connected to` line while the daemon is still up.
-
-Confirm the scope survived before handing the URL over — `pgrep -fl "crit _serve"` should show the same flags Step 2 used.
-
-`crit` has no `url` subcommand. Invoking one that does not exist starts another daemon and then errors, leaving a stray server behind.
+One thing not to do on waking: the output file ends with a `crit --session <id>` line. Ignore it. It restores the review file but not the scope, and the page comes up showing whatever happens to be uncommitted right now. Every reopen is the Step 1 command, verbatim, as a background task again.
