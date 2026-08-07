@@ -4,7 +4,7 @@ What every explainer page must be, whichever writer produces it. Read this befor
 
 ## The scaffold does the drawing
 
-Copy `assets/page-template.html` (its path is in your prompt) to the output path, then replace each `FILL` block. Do not rewrite its CSS or its script: the diff-stat bars are computed from the `data-add` / `data-del` numbers you put on each row, and the quiz behaviour is wired from `data-correct`. Hand-drawing either of those is how they end up inconsistent with the numbers they claim to show. Add styles only for something the scaffold genuinely lacks.
+Copy `assets/page-template.html` (its path is in your prompt) to the output path, then replace each `FILL` block. Copy the file — never reproduce it by writing the page from scratch, or its CSS and script come back from memory slightly wrong. Do not rewrite its CSS or its script: the diff-stat bars are computed from the `data-add` / `data-del` numbers you put on each row, and the quiz behaviour is wired from `data-correct`. Hand-drawing either of those is how they end up inconsistent with the numbers they claim to show. Add styles only for something the scaffold genuinely lacks.
 
 ## Provenance — the rule that matters most
 
