@@ -32,4 +32,23 @@ for agent in "$DIR"/agents/*.md; do
   ln -sf "$agent" "$CLAUDE_DIR/agents/$name"
 done
 
+# Deleting a skill or agent from this repo leaves its symlink behind, because
+# the loops above only visit what still exists. Only links pointing into this
+# repo are considered: ~/.claude also holds entries added by external tools and
+# links into other repos (e.g. ~/.agents/skills), which are not ours to remove.
+prune_stale() {
+  local kind="$1" link target
+  for link in "$CLAUDE_DIR/$kind"/*; do
+    [[ -L "$link" ]] || continue
+    target="$(readlink "$link")"
+    [[ "$target" == "$DIR/$kind/"* ]] || continue
+    [[ -e "$target" ]] && continue
+    rm -f "$link"
+    echo "Removing stale link: $kind/$(basename "$link")"
+  done
+}
+
+prune_stale skills
+prune_stale agents
+
 echo "Synced skills/agents symlinks into $CLAUDE_DIR"
