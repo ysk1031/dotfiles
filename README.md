@@ -119,6 +119,9 @@ cp /path/to/dotfiles/claude/CLAUDE.local.md.example ~/.claude/CLAUDE.local.md
 `~/.claude/skills`/`~/.claude/agents` as whole directories. This keeps them as
 real directories on disk, so tools like `pnpm dlx skills add` can add their
 own entries there without writing into this repo. Re-run the script after
-adding a new skill or agent here.
+adding a new skill or agent here — and after deleting one, since the script
+also removes links that point at entries this repo no longer has. Links
+pointing elsewhere (other repos, or entries added by external tools) are left
+alone.
 
 After creating the symlinks, restart Claude Code to apply the configuration.

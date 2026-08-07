@@ -3,9 +3,9 @@
    "setup": "perl -pi -e 's/Generates a self-contained HTML explainer page/Generates a standalone HTML explainer page/' claude/skills/explain-diff/SKILL.md",
    "note": "直球。setup で description に未コミットの変更を作り、「さっき書き換えた」を実在させる。"},
 
-  {"query": "pre-pr-review のトリガー検証して。お題は evals に入ってるやつでいい", "should_trigger": true,
-   "note": "「トリガー検証」という語をそのまま使う場合。SKILL.md は seed リポジトリに実在する。pre-pr-review が持つ評価データは evals/evals.json で trigger-eval.json ではないので、お題ファイルは setup で用意する。",
-   "setup": "printf '[{\"query\":\"PR出す前に見て\",\"should_trigger\":true},{\"query\":\"この関数をリネームして\",\"should_trigger\":false}]\\n' > claude/skills/pre-pr-review/evals/trigger-eval.json"},
+  {"query": "review-triage のトリガー検証して。お題は evals に入ってるやつでいい", "should_trigger": true,
+   "note": "「トリガー検証」という語をそのまま使う場合。SKILL.md は seed リポジトリに実在する。review-triage は evals ディレクトリを持たないので、「evals に入ってるやつ」が実在するよう、お題ファイルは setup で用意する。",
+   "setup": "mkdir -p claude/skills/review-triage/evals && printf '[{\"query\":\"このレビュー指摘、対応すべき?\",\"should_trigger\":true},{\"query\":\"この関数をリネームして\",\"should_trigger\":false}]\\n' > claude/skills/review-triage/evals/trigger-eval.json"},
 
   {"query": "second-opinion が、狙ってない場面でも実際に走ってしまっている気がする。提案が多いという話ではなく、スキル自体が発動しているかどうかを測って確かめたい", "should_trigger": true,
    "note": "誤発動の疑い。編集直後ではなく運用中の違和感からの入り口。「勝手に出てくる」だけでは足りない: second-opinion は提案してから同意を得て走る設計なので、その言い方はスキルの誤発動と提案の多さの2通りに読める。試行は trigger-check を正しく選んだうえで、どちらかを聞き返して実行を保留した（3回中1回、2026-08-04 に実測）。どちらの話かを明記して曖昧さを消してある。"},
@@ -52,7 +52,7 @@
    "setup": "mkdir -p .claude && printf '{\\n  \"hooks\": {\\n    \"PreToolUse\": [{\"matcher\": \"Bash\", \"hooks\": [{\"type\": \"command\", \"command\": \"echo branch: $(git branch --show-current)\"}]}]\\n  }\\n}\\n' > .claude/settings.json",
    "note": "境界。「定義を足して動くか確かめる」形は同じだが、対象がフックでスキルの発動ではない。setup で実在させないと、実機の ~/.claude/settings.json を読みに出る。"},
 
-  {"query": "pre-pr-review って結局どういうときに発動するの? description 読んで説明して", "should_trigger": false,
+  {"query": "empirical-prompt-tuning って結局どういうときに発動するの? description 読んで説明して", "should_trigger": false,
    "note": "境界。発動条件の話だが、依頼は説明であって測定ではない。"},
 
   {"query": "今 ~/.claude/skills に何が入ってるか一覧で見せて。symlink が切れてるやつがあれば教えて", "should_trigger": false,

@@ -47,10 +47,10 @@ Each skill owns its cases at `claude/skills/<name>/evals/trigger-eval.json` — 
 
 ## Running it
 
-**Running from inside a Claude Code session is allowed again as of 2026-08-04.** Trials inherit the sandbox of whatever launched them. An organisation setting used to deny writes to `~/.claude/session-env`, and every trial's Bash tool then died with `EPERM` on its first call — what you measured after that was a model fighting a broken environment, not a routing decision (measured 2026-08-03: 13 of 20 trials hit it, 11 came back unmeasurable). That setting is off now, confirmed by probing the directory on 2026-08-04. The script still probes before starting and refuses to run when the write fails, so if it ever aborts with that message the restriction is back: hand the user the command to run in an ordinary terminal and read `summary.tsv` from the output directory afterwards. (The old "Bash sometimes disappears" reports were all this, never real work.)
+**It runs from inside a Claude Code session** — call the script by its `~/.claude` path, exactly as below.
 
 ```bash
-claude/skills/trigger-check/scripts/run_trigger_eval.py --skill <name> --seed-repo <repo> [--runs 3] [--only 2,7] [--model opus|sonnet] [--jobs 8] [--dry-run]
+~/.claude/skills/trigger-check/scripts/run_trigger_eval.py --skill <name> --seed-repo <repo> [--runs 3] [--only 2,7] [--model opus|sonnet] [--jobs 8] [--dry-run]
 ```
 
 **Pass `--seed-repo`.** Without it each trial starts in a near-empty directory, and a prompt like "explain the diff" has nothing to refer to — so the trial goes looking, finds the real repository and the real `~/.claude`, and spends its turns there. Measured 2026-08-03: 8 of 20 trials escaped that way, which burns the turn budget and makes the result depend on the state of the machine that day. Seeding copies the working tree and `.git` into each trial, so uncommitted work is present and every trial is self-contained. Point it at the repository the prompts talk about.
