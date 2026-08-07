@@ -355,9 +355,8 @@ def check_sandbox():
 
     When that sandbox denies writes to ~/.claude/session-env, every trial's Bash
     tool dies with EPERM and the model spends its turns fighting a crippled
-    environment instead of deciding whether to fire. An organisation setting
-    caused this until 2026-08-04; the probe stays because the restriction can
-    come back, and a run under it measures nothing.
+    environment instead of deciding whether to fire, so a run under it measures
+    nothing.
     """
     cfg_dir = Path(os.environ.get("CLAUDE_CONFIG_DIR", Path.home() / ".claude"))
     probe = cfg_dir / "session-env" / f".trigger-check-probe.{os.getpid()}"
@@ -367,8 +366,8 @@ def check_sandbox():
     except OSError:
         print(f"中止: {probe.parent} に書き込めません。", file=sys.stderr)
         print("  この環境で走らせると、全試行の Bash が EPERM で壊れ、測定になりません。", file=sys.stderr)
-        print("  Claude Code のセッション内からではなく、ふつうのターミナルから実行してください。",
-              file=sys.stderr)
+        print("  `~/.claude/skills/trigger-check/scripts/run_trigger_eval.py` のパスで"
+              "直接呼べば、サンドボックス外で走ります。", file=sys.stderr)
         sys.exit(3)
 
 
