@@ -108,6 +108,17 @@ Zed's settings are managed in `zed/`, and `mise bootstrap` links them to
 
 ### Claude Code
 
+Claude Code is not managed by mise either. It ships its own updater
+(`claude update`) and keeps versioned builds under
+`~/.local/share/claude/versions/`, so a version pinned here would be fighting
+it. Install it on a fresh machine with the
+[documented one-liner](https://code.claude.com/docs/en/setup), which leaves a
+symlink at `~/.local/bin/claude`:
+
+```bash
+curl -fsSL https://claude.ai/install.sh | bash
+```
+
 Claude Code's global configuration files are managed in `claude/`. The following files/directories are included:
 
 - `CLAUDE.md` - Global instructions shared across machines
