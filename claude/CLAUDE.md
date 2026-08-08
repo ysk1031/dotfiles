@@ -3,7 +3,7 @@
 ## 環境の制約
 
 ### Webページからの情報の取得は `ax` を使う
-- `ax` がインストールされている。使い方は `ax agent-context` を実行して確認する。組み込みの WebFetch よりも優先し、Web ページ取得の用途では curl と場当たり的なスクリプトを使わない（API の疎通確認など、Web ページ取得以外の curl は対象外）。
+- `ax` がインストールされている。使い方は `ax agent-context` を実行して確認する。組み込みの WebFetch よりも優先し、Web ページ取得を場当たり的なスクリプトで代替しない。`curl` と `wget` は settings.json の `permissions.deny` により用途を問わず拒否されるので、API の疎通確認も含めて使わない。
 
 ### `rm` は `trash` に置き換わっている
 - このマシンの `rm` は `trash` の alias。`-r` や `-f` などのオプションを付けると `Un-recognized argument` で失敗する（ディレクトリはオプションなしでそのままゴミ箱に移せる）。
