@@ -21,11 +21,17 @@ lazydocker = "latest"
 lazygit = "latest"
 mkcert = "latest"
 pinact = "latest"
+pnpm = "latest" # a repo with a packageManager field makes pnpm fetch and use
+                # that version instead, so this only sets the bare pnpm
 ripgrep = "latest"
 starship = "latest"
 terragrunt = "latest"
 tfenv = "latest"
 uv = "latest"
+
+# Used to live in PNPM_HOME via `pnpm add -g`. ~/.claude.json's mcpServers
+# refers to it by name, so it has to stay resolvable on PATH.
+"npm:chrome-devtools-mcp" = "latest"
 
 # Packages mise cannot install well yet, so Homebrew still provides them.
 # Re-check as mise's registry grows -- the goal is to empty this section.
