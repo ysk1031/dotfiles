@@ -11,6 +11,7 @@ python = "3.12" # keeps parity with the brew python@3.12 this replaced
 
 aws-vault = "latest"
 awscli = "latest"
+container-use = "latest" # installs it under both names, so `cu` keeps working
 dive = "latest"
 fzf = "latest"
 gh = "latest"
@@ -32,6 +33,9 @@ uv = "latest"
 # Used to live in PNPM_HOME via `pnpm add -g`. ~/.claude.json's mcpServers
 # refers to it by name, so it has to stay resolvable on PATH.
 "npm:chrome-devtools-mcp" = "latest"
+
+# No registry entry, so the GitHub release is referenced directly.
+"ubi:yusukebe/ax" = "latest"
 
 # Packages mise cannot install well yet, so Homebrew still provides them.
 # Re-check as mise's registry grows -- the goal is to empty this section.
