@@ -92,7 +92,7 @@ source ~/.my.zsh
 
 Included settings:
 - **Aliases**: `g`, `gst`, `gd`, `gb`, `gf` (git), `ls`, `ll` (eza), `grep` (rg), `lzd` (lazydocker), `claude` (safety wrapper)
-- **Functions**: `peco_select_history`, `peco-src`, `lg`
+- **Functions**: `fzf_select_history`, `fzf-src`, `lg`
 - **Keybindings**: `Ctrl+r` (history search), `Ctrl+]` (ghq selector), `Ctrl+g` (lazygit)
 
 ### Ghostty Terminal
