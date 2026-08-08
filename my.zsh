@@ -31,6 +31,7 @@ alias ll='eza -l --group-directories-first'
 alias grep='rg'
 alias lzd='lazydocker'
 alias nv='nvim'
+alias tree='eza --tree --level=2 --git-ignore'
 
 # fzf
 export FZF_DEFAULT_OPTS="--height=40% --reverse --border"
