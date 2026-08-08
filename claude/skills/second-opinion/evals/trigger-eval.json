@@ -1,0 +1,139 @@
+[
+  {
+    "query": "この判断、セカンドオピニオンを取ってください",
+    "should_trigger": true,
+    "prior_turn": "claude/sync-links.sh を読んでください。今は symlink を張る方式ですが、実ファイルをコピーする方式に変える案があります。どちらを採るべきか、理由とともに結論を出してください。 なお、ベンチマークや実行はせず、コードを読んだ範囲で1ターン内に結論だけ述べてください。",
+    "max_turns": 6,
+    "note": "明示依頼の基準線。ここが落ちるなら他を読む価値がない。prior_turn で実際に結論を出させてから頼む。"
+  },
+  {
+    "query": "他のモデルにも同じ質問をして、両方の見解を並べてください",
+    "should_trigger": true,
+    "prior_turn": "claude/statusline-command.sh を読んでください。この処理を shell のままにするか Python に書き直すか、どちらを採るべきか結論を出してください。 なお、ベンチマークや実行はせず、コードを読んだ範囲で1ターン内に結論だけ述べてください。",
+    "max_turns": 6,
+    "note": "「セカンドオピニオン」という語を使わない明示依頼。"
+  },
+  {
+    "query": "Fable 5 にも聞いてみて",
+    "should_trigger": true,
+    "prior_turn": "claude/sync-links.sh の symlink 方式について、Windows 環境への移植を考えたときに残すべきか捨てるべきか、結論を出してください。 なお、ベンチマークや実行はせず、コードを読んだ範囲で1ターン内に結論だけ述べてください。",
+    "max_turns": 6,
+    "note": "モデル名の直接指定。最短形。"
+  },
+  {
+    "query": "Get an independent second opinion on this from a different model.",
+    "should_trigger": true,
+    "prior_turn": "Read claude/sync-links.sh and decide: should the script fail hard when a target already exists, or silently overwrite it? Give me your conclusion and reasoning. Do not run or benchmark anything — decide from reading the code alone, and give the conclusion in a single turn.",
+    "max_turns": 6,
+    "note": "英語の明示依頼。description が英語なので、言語による差が出ないかを見る。"
+  },
+  {
+    "query": "私の結論は伏せたまま、別のモデルに同じ問題を判断させてください",
+    "should_trigger": true,
+    "prior_turn": "claude/CLAUDE.md のルールをスキル側へ移すべきか、CLAUDE.md に残すべきか、判断して結論を述べてください。 なお、ベンチマークや実行はせず、コードを読んだ範囲で1ターン内に結論だけ述べてください。",
+    "max_turns": 6,
+    "note": "「ブラインドで」という要件を言い換えた形。スキルの中核概念を指した依頼。"
+  },
+  {
+    "query": "セカンドオピニオン",
+    "should_trigger": true,
+    "prior_turn": "claude/skills 配下のスキルを1ファイルにまとめるか、今のディレクトリ分割のままにするか、どちらが良いか結論を出してください。 なお、ベンチマークや実行はせず、コードを読んだ範囲で1ターン内に結論だけ述べてください。",
+    "max_turns": 6,
+    "note": "語だけの最短形。文脈から補完できるかを見る。"
+  },
+  {
+    "query": "念のため別のモデルにも判断させてください",
+    "should_trigger": true,
+    "prior_turn": "claude/sync-links.sh が既存ファイルを上書きする挙動について、安全側に倒すならどう変えるべきか結論を出してください。 なお、ベンチマークや実行はせず、コードを読んだ範囲で1ターン内に結論だけ述べてください。",
+    "max_turns": 6,
+    "note": "「念のため」は疑いの合図だが、後半が明示依頼なのでオファーではなく実行が正しい。オファー側の case 10 との切り分け。"
+  },
+  {
+    "query": "この設計判断、独立した第三者の視点が欲しいです。別モデルに投げてもらえますか",
+    "should_trigger": true,
+    "prior_turn": "claude/agents 配下の subagent 定義を、スキルごとに分けるか役割ごとに分けるか、どちらを採るべきか結論を出してください。 なお、ベンチマークや実行はせず、コードを読んだ範囲で1ターン内に結論だけ述べてください。",
+    "max_turns": 6,
+    "note": "回りくどい明示依頼。「別モデル」という語が入っていれば拾えるか。"
+  },
+  {
+    "query": "claude/sync-links.sh を読んでください。今の symlink 方式のままにするか、実ファイルをコピーする方式に切り替えるか、どちらを採るべきか判断して、理由とともに結論を述べてください。",
+    "should_trigger": false,
+    "expect_text": "トレードオフのある技術的な結論を述べたうえで、別のモデル（Fable 5 など）にセカンドオピニオンを取るか、という趣旨の提案を一言添えている",
+    "max_turns": 6,
+    "note": "オファーの中核ケース。ユーザーは何も頼んでいないが、重い判断を下した直後なのでオファーが出るのが正しい。スキル呼び出しは失敗（同意なしに実行したことになる）。"
+  },
+  {
+    "query": "本当にそう?",
+    "should_trigger": false,
+    "prior_turn": "claude/statusline-command.sh の処理を shell のままにするか Python に書き直すか、どちらを採るべきか結論を出してください。 なお、ベンチマークや実行はせず、コードを読んだ範囲で1ターン内に結論だけ述べてください。 この時点ではセカンドオピニオンの提案は不要です。結論だけ述べてください。",
+    "expect_text": "自分の結論を説明し直すだけでなく、別のモデルにセカンドオピニオンを取るか、という趣旨の提案をしている",
+    "max_turns": 6,
+    "note": "疑いの合図。description が名指ししている「本当にそう?」そのもの。 turn1 で先にオファーが出ると、続く疑いの言葉が同意と読まれて実行に回るため、turn1 のオファーを明示的に抑止している。"
+  },
+  {
+    "query": "念のため確認したいんですが、その判断で大丈夫ですか",
+    "should_trigger": false,
+    "prior_turn": "claude/sync-links.sh の symlink 方式を、Windows 環境への移植を考えたときに残すべきか捨てるべきか、結論を出してください。 なお、ベンチマークや実行はせず、コードを読んだ範囲で1ターン内に結論だけ述べてください。 この時点ではセカンドオピニオンの提案は不要です。結論だけ述べてください。",
+    "expect_text": "別のモデルにセカンドオピニオンを取るか、という趣旨の提案をしている",
+    "max_turns": 6,
+    "note": "「念のため」単独。case 7 と違い明示依頼が続かないので、実行ではなくオファーが正しい。 turn1 で先にオファーが出ると、続く疑いの言葉が同意と読まれて実行に回るため、turn1 のオファーを明示的に抑止している。"
+  },
+  {
+    "query": "claude/CLAUDE.md の「スキル・CLAUDE.md・subagent を編集したらトリガー検証を提案する」節について、trigger-check スキル側へ移す案と CLAUDE.md に残す案、どちらが良いか私が選びたいので、両案を整理して提示してください。 なお、ベンチマークや実行はせず、コードを読んだ範囲で1ターン内に提示してください。",
+    "should_trigger": false,
+    "expect_text": "両案を整理して提示したうえで、別のモデルにセカンドオピニオンを取るか、という趣旨の提案をしている",
+    "max_turns": 6,
+    "note": "選択肢を並べてユーザーに選ばせる場面。description が「選ばせる直前こそブラインドの読みが効く」と言っている箇所。"
+  },
+  {
+    "query": "いや、いいです。そのまま進めてください",
+    "should_trigger": false,
+    "prior_turn": "claude/sync-links.sh を symlink 方式のままにするか実ファイルのコピーに切り替えるか結論を出したうえで、必要ならセカンドオピニオンの提案もしてください。 なお、ベンチマークや実行はせず、コードを読んだ範囲で1ターン内に結論だけ述べてください。",
+    "expect_text": "セカンドオピニオンを再度提案することなく、断られた判断をそのまま受け入れて次に進んでいる",
+    "max_turns": 6,
+    "note": "断られた後に再オファーしないか。description の「Don't re-offer」を測る唯一のケース。"
+  },
+  {
+    "query": "claude/sync-links.sh は何をするスクリプトですか。3行で説明してください",
+    "should_trigger": false,
+    "max_turns": 5,
+    "note": "単純な調べ物。唯一の正解があり、判断もトレードオフもない。"
+  },
+  {
+    "query": "claude/statusline-command.sh の中で使われているシェル変数のうち、1文字の名前のものを、意味の分かる名前にリネームしてください",
+    "should_trigger": false,
+    "max_turns": 6,
+    "note": "機械的編集。description の Do NOT に名指しされている mechanical edits。"
+  },
+  {
+    "query": "README.md は何行ありますか",
+    "should_trigger": false,
+    "max_turns": 3,
+    "note": "客観的に一意な答えがある質問。"
+  },
+  {
+    "query": "このブランチの差分をレビューしてください",
+    "should_trigger": false,
+    "max_turns": 5,
+    "note": "素のレビュー依頼。description の Do NOT に名指し。別スキル（crit / review）へルーティングされた場合もそこで打ち切られ、second-opinion 不発として正しく数えられる。"
+  },
+  {
+    "query": "この会話の内容を全部見せたうえで、もっと強いモデルに手伝わせたいです",
+    "should_trigger": false,
+    "prior_turn": "claude/sync-links.sh の symlink 方式を残すべきか捨てるべきか、結論を出してください。 なお、ベンチマークや実行はせず、コードを読んだ範囲で1ターン内に結論だけ述べてください。",
+    "max_turns": 6,
+    "note": "/advisor の領域。「別のモデル」に触れているが、求めているのは独立チェックではなく全文脈つきの支援。description の Defer 条項を測る。"
+  },
+  {
+    "query": "README.md の見出しを日本語に訳してください",
+    "should_trigger": false,
+    "max_turns": 5,
+    "note": "翻訳。判断を含まない作業。"
+  },
+  {
+    "query": "claude/sync-links.sh のテストを書いてください",
+    "should_trigger": false,
+    "max_turns": 6,
+    "note": "テスト作成。判断ではなく実装作業。"
+  }
+]
