@@ -1,0 +1,38 @@
+# Machine-wide mise configuration.
+# Symlinked to ~/.config/mise/config.toml so the tools land on PATH everywhere;
+# a repo-local mise.toml would only apply inside this directory.
+
+[tools]
+go = "latest"
+neovim = "latest"
+node = "latest"
+python = "3.12" # keeps parity with the brew python@3.12 this replaced
+
+aws-vault = "latest"
+awscli = "latest"
+dive = "latest"
+fzf = "latest"
+gh = "latest"
+ghq = "latest"
+jq = "latest"
+lazydocker = "latest"
+lazygit = "latest"
+mkcert = "latest"
+pinact = "latest"
+ripgrep = "latest"
+starship = "latest"
+terragrunt = "latest"
+tfenv = "latest"
+
+# Packages mise cannot install well yet, so Homebrew still provides them.
+# Re-check as mise's registry grows -- the goal is to empty this section.
+[bootstrap.packages]
+"brew:blueutil" = "latest"
+"brew:crit" = "latest"                     # distributed via crit.md, no GitHub release to pull from
+"brew:eza" = "latest"                      # mise only offers vfox/cargo, both worse than a prebuilt binary
+"brew:git" = "latest"                      # newer than the Apple Git bundled with Xcode CLT
+"brew:mysql-client@8.0" = "latest"         # mise only offers the conda backend, and defaults to 9.x
+"brew:pkgconf" = "latest"                  # C library, has to be compiled
+"brew:trash" = "latest"                    # backs the `rm` alias in my.zsh
+"brew:tree" = "latest"
+"brew:zsh-syntax-highlighting" = "latest"  # zsh plugin rather than a binary

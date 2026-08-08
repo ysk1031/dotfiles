@@ -2,6 +2,26 @@
 
 ## Setup
 
+### Packages and Tools
+
+`mise/config.toml` is the machine-wide mise config. It declares CLI tools under
+`[tools]` and, under `[bootstrap.packages]`, the handful of packages that mise
+cannot install well yet and that Homebrew still provides.
+
+It has to be symlinked to the global path, since a repo-local `mise.toml` would
+only apply inside this directory:
+
+```bash
+ln -s /path/to/dotfiles/mise/config.toml ~/.config/mise/config.toml
+```
+
+Then install everything:
+
+```bash
+mise bootstrap    # [tools] + [bootstrap.packages]
+brew bundle       # casks; mise cannot install those
+```
+
 ### Git Configuration
 
 This repository uses `.gitconfig.local` to keep personal information (name, email) out of version control.
