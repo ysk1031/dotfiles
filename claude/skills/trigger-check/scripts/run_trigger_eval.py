@@ -266,7 +266,12 @@ def run_trial(cfg, case, idx, run):
 
     if invalid:
         return {**row, "outcome": "INVALID", "reason": invalid}
-    return {**row, "outcome": "PASS" if got == should else "FAIL", "reason": note}
+    # An expect_text case scores the reply, not the routing: `got` already means
+    # "did the thing", so it is compared against True. Comparing it against
+    # should_trigger — false for every such case — inverted the verdict, marking
+    # a correct offer FAIL and a missing one PASS.
+    want = True if expect_text else should
+    return {**row, "outcome": "PASS" if got == want else "FAIL", "reason": note}
 
 
 def case_verdict(trials, passed, invalid):
@@ -516,7 +521,9 @@ def main(argv=None):
         rs = [r for r in results if r["idx"] == i]
         bad = sum(1 for r in rs if r["outcome"] == "INVALID")
         passed = sum(1 for r in rs if r["outcome"] == "PASS")
-        fired = sum(1 for r in rs if r["observed"] in ("skill_called", "text:yes"))
+        # Only an actual Skill call counts here. A judged reply (text:yes) means
+        # the skill deliberately did *not* fire, so folding it in read as firing.
+        fired = sum(1 for r in rs if r["observed"] == "skill_called")
         verdict = case_verdict(len(rs), passed, bad)
         case = cases[i]
         label = ("提案" if case.get("expect_text") else "呼出") + \
