@@ -4,7 +4,7 @@ eval "$(/opt/homebrew/bin/brew shellenv)"
 # Mise
 eval "$("$HOME/.local/bin/mise" activate zsh)"
 
-# claude, uv etc.
+# ax, claude, cu, mise -- the tools that stay outside mise's control
 export PATH="$HOME/.local/bin:$PATH"
 
 # Go

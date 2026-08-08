@@ -25,6 +25,7 @@ ripgrep = "latest"
 starship = "latest"
 terragrunt = "latest"
 tfenv = "latest"
+uv = "0.11.26" # pinned to what the official installer had put in ~/.local/bin
 
 # Packages mise cannot install well yet, so Homebrew still provides them.
 # Re-check as mise's registry grows -- the goal is to empty this section.
