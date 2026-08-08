@@ -10,10 +10,6 @@ export PATH="$HOME/.local/bin:$PATH"
 # Go
 export PATH="$(go env GOPATH)/bin:$PATH"
 
-# bun
-export BUN_INSTALL="$HOME/.bun"
-export PATH="$BUN_INSTALL/bin:$PATH"
-
 # keg-only なので brew shellenv では PATH に乗らない
 export PATH="/opt/homebrew/opt/mysql-client@8.0/bin:$PATH"
 

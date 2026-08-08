@@ -15,6 +15,10 @@ setopt hist_verify            # confirm before executing !! expansions
 # Case-insensitive completion
 zstyle ':completion:*' matcher-list 'm:{a-z}={A-Z} m:{A-Z}={a-z}'
 
+# Completions for mise-managed tools. Requires compinit to have run already,
+# which ~/.zshrc does before sourcing this file.
+eval "$(bun completions)"
+
 # Aliases - Safety
 alias rm='trash'
 

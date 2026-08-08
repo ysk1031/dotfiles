@@ -3,6 +3,7 @@
 # a repo-local mise.toml would only apply inside this directory.
 
 [tools]
+bun = "1.3.14" # pinned to what the official installer had put in ~/.bun
 go = "latest"
 neovim = "latest"
 node = "latest"
