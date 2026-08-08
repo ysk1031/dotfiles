@@ -1,0 +1,61 @@
+# Machine-wide mise configuration.
+# Symlinked to ~/.config/mise/config.toml so the tools land on PATH everywhere;
+# a repo-local mise.toml would only apply inside this directory.
+
+[tools]
+bun = "latest"
+go = "latest"
+neovim = "latest"
+node = "latest"
+python = "3.12" # keeps parity with the brew python@3.12 this replaced
+
+aws-vault = "latest"
+awscli = "latest"
+container-use = "latest" # installs it under both names, so `cu` keeps working
+dive = "latest"
+fzf = "latest"
+gh = "latest"
+ghq = "latest"
+herdr = "latest"
+jq = "latest"
+lazydocker = "latest"
+lazygit = "latest"
+mkcert = "latest"
+pinact = "latest"
+pnpm = "latest" # a repo with a packageManager field makes pnpm fetch and use
+                # that version instead, so this only sets the bare pnpm
+ripgrep = "latest"
+starship = "latest"
+terragrunt = "latest"
+tfenv = "latest"
+uv = "latest"
+
+# Used to live in PNPM_HOME via `pnpm add -g`. ~/.claude.json's mcpServers
+# refers to it by name, so it has to stay resolvable on PATH.
+"npm:chrome-devtools-mcp" = "latest"
+
+# No registry entry, so the GitHub release is referenced directly.
+"ubi:yusukebe/ax" = "latest"
+
+# Packages mise cannot install well yet, so Homebrew still provides them.
+# Re-check as mise's registry grows -- the goal is to empty this section.
+[bootstrap.packages]
+"brew:blueutil" = "latest"
+"brew:crit" = "latest"                     # distributed via crit.md, no GitHub release to pull from
+"brew:eza" = "latest"                      # mise only offers vfox/cargo, both worse than a prebuilt binary
+"brew:git" = "latest"                      # newer than the Apple Git bundled with Xcode CLT
+"brew:mysql-client@8.0" = "latest"         # mise only offers the conda backend, and defaults to 9.x
+"brew:pkgconf" = "latest"                  # C library, has to be compiled
+"brew:trash" = "latest"                    # backs the `rm` alias in my.zsh
+"brew:zsh-syntax-highlighting" = "latest"  # zsh plugin rather than a binary
+
+# Sources are spelled out in full on purpose: a relative source resolves
+# against ~/.config/mise, where this file is symlinked from, not against the
+# repo. (dotfiles.root would fix that, but it only applies to implicit `{}`
+# sources, and none of these targets mirror the repo layout.)
+[dotfiles]
+"~/.zprofile" = "~/src/github.com/ysk1031/dotfiles/.zprofile"
+"~/.gitconfig" = "~/src/github.com/ysk1031/dotfiles/.gitconfig"
+"~/.my.zsh" = "~/src/github.com/ysk1031/dotfiles/my.zsh"
+"~/.config/zed/settings.json" = "~/src/github.com/ysk1031/dotfiles/zed/settings.json"
+"~/Library/Application Support/com.mitchellh.ghostty/config" = "~/src/github.com/ysk1031/dotfiles/ghostty/config"

@@ -2,15 +2,56 @@
 
 ## Setup
 
+### Packages, Tools and Symlinks
+
+`mise/config.toml` is the machine-wide mise config. It declares CLI tools under
+`[tools]`, the handful of packages Homebrew still has to provide under
+`[bootstrap.packages]`, and the symlinks for `.zprofile`, `.gitconfig`,
+`my.zsh`, Zed and Ghostty under `[dotfiles]`.
+
+mise itself is not managed by anything here. Install it on a fresh machine with
+the [documented one-liner](https://mise.jdx.dev/getting-started.html), which
+drops the binary in `~/.local/bin/mise`:
+
+```bash
+curl https://mise.run | sh
+```
+
+Homebrew is a separate prerequisite — nothing to do with installing mise, but
+`[bootstrap.packages]` and `brew bundle` both shell out to it.
+
+The config has to be symlinked to the global path, since a repo-local
+`mise.toml` would only apply inside this directory:
+
+```bash
+ln -s /path/to/dotfiles/mise/config.toml ~/.config/mise/config.toml
+```
+
+Then set the machine up:
+
+```bash
+mise bootstrap    # [tools] + [bootstrap.packages] + [dotfiles]
+brew bundle       # casks; mise cannot install those
+```
+
+Most tools resolve through mise's aqua backend, which reads the GitHub API.
+This runs fine unauthenticated. If it ever starts failing on rate limits, log
+in and re-run with a token — pass it explicitly, because mise reads the token
+out of `~/.config/gh/hosts.yml` and finds nothing there when gh keeps it in the
+macOS keyring:
+
+```bash
+gh auth login
+GITHUB_TOKEN=$(gh auth token) mise bootstrap
+```
+
+Claude Code's symlinks are not covered by `[dotfiles]` and still need
+`claude/sync-links.sh`; see below. The steps in the sections that follow are
+the ones `mise bootstrap` cannot do for you.
+
 ### Git Configuration
 
 This repository uses `.gitconfig.local` to keep personal information (name, email) out of version control.
-
-To set up the symlink:
-
-```bash
-ln -sf /path/to/dotfiles/.gitconfig ~/.gitconfig
-```
 
 After cloning, create `~/.gitconfig.local` based on the example:
 
@@ -35,13 +76,14 @@ git config --list | grep user
 
 ### Zsh
 
-Portable zsh settings (aliases, functions, keybindings) are managed in `my.zsh`. To set up the symlink:
+`.zprofile` holds what a login shell needs — Homebrew and mise activation, PATH
+entries and a few exports — and `mise bootstrap` links it to `~/.zprofile`.
+`~/.zshrc` stays outside this repository: it is where machine-specific and
+centrally managed blocks land.
 
-```bash
-ln -s /path/to/dotfiles/my.zsh ~/.my.zsh
-```
-
-Then add the following line to the end of `~/.zshrc`:
+Portable zsh settings (aliases, functions, keybindings) are managed in `my.zsh`,
+which `mise bootstrap` links to `~/.my.zsh`. Add the following line to the end
+of `~/.zshrc`:
 
 ```zsh
 # Load portable zsh settings from dotfiles
@@ -50,40 +92,32 @@ source ~/.my.zsh
 
 Included settings:
 - **Aliases**: `g`, `gst`, `gd`, `gb`, `gf` (git), `ls`, `ll` (eza), `grep` (rg), `lzd` (lazydocker), `claude` (safety wrapper)
-- **Functions**: `peco_select_history`, `peco-src`, `lg`
+- **Functions**: `fzf_select_history`, `fzf-src`, `lg`
 - **Keybindings**: `Ctrl+r` (history search), `Ctrl+]` (ghq selector), `Ctrl+g` (lazygit)
 
 ### Ghostty Terminal
 
-Ghostty's configuration is managed in this repository. To set up the symlink:
-
-```bash
-# Backup existing config (if not already done)
-mv ~/Library/Application\ Support/com.mitchellh.ghostty/config \
-   ~/Library/Application\ Support/com.mitchellh.ghostty/config.backup
-
-# Create symlink
-ln -s /path/to/dotfiles/ghostty/config \
-      ~/Library/Application\ Support/com.mitchellh.ghostty/config
-```
-
-After creating the symlink, restart Ghostty to apply the configuration.
+Ghostty's configuration is managed in `ghostty/`, and `mise bootstrap` links it
+into `~/Library/Application Support/com.mitchellh.ghostty/`. Back up any config
+already sitting there first, then restart Ghostty to apply the configuration.
 
 ### Zed Editor
 
-Zed's settings are managed in `zed/`. To set up the symlink:
-
-```bash
-# Create config directory if it doesn't exist
-mkdir -p ~/.config/zed
-
-# Create symlink
-ln -sf /path/to/dotfiles/zed/settings.json ~/.config/zed/settings.json
-```
-
-After creating the symlink, restart Zed to apply the configuration.
+Zed's settings are managed in `zed/`, and `mise bootstrap` links them to
+`~/.config/zed/settings.json`. Restart Zed to apply the configuration.
 
 ### Claude Code
+
+Claude Code is not managed by mise either. It ships its own updater
+(`claude update`) and keeps versioned builds under
+`~/.local/share/claude/versions/`, so a version pinned here would be fighting
+it. Install it on a fresh machine with the
+[documented one-liner](https://code.claude.com/docs/en/setup), which leaves a
+symlink at `~/.local/bin/claude`:
+
+```bash
+curl -fsSL https://claude.ai/install.sh | bash
+```
 
 Claude Code's global configuration files are managed in `claude/`. The following files/directories are included:
 
@@ -92,7 +126,6 @@ Claude Code's global configuration files are managed in `claude/`. The following
 - `statusline-command.sh` - Custom status line script
 - `agents/` - Custom subagent definitions
 - `skills/` - Skill definitions, one directory each. A `.sync-ignore` marker means the skill is retired and deliberately not linked into `~/.claude/skills/`
-- `docs/` - Reference documentation for skills
 
 To set up the symlinks:
 

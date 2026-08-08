@@ -15,6 +15,11 @@ setopt hist_verify            # confirm before executing !! expansions
 # Case-insensitive completion
 zstyle ':completion:*' matcher-list 'm:{a-z}={A-Z} m:{A-Z}={a-z}'
 
+# Completions for mise-managed tools. Requires compinit to have run already,
+# which ~/.zshrc does before sourcing this file.
+eval "$(bun completions)"
+eval "$(uv generate-shell-completion zsh)"
+
 # Aliases - Safety
 alias rm='trash'
 
@@ -31,6 +36,7 @@ alias ll='eza -l --group-directories-first'
 alias grep='rg'
 alias lzd='lazydocker'
 alias nv='nvim'
+alias tree='eza --tree --level=2 --git-ignore'
 
 # fzf
 export FZF_DEFAULT_OPTS="--height=40% --reverse --border"
