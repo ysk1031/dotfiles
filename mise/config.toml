@@ -3,7 +3,7 @@
 # a repo-local mise.toml would only apply inside this directory.
 
 [tools]
-bun = "1.3.14" # pinned to what the official installer had put in ~/.bun
+bun = "latest"
 go = "latest"
 neovim = "latest"
 node = "latest"
@@ -15,7 +15,7 @@ dive = "latest"
 fzf = "latest"
 gh = "latest"
 ghq = "latest"
-herdr = "0.8.0" # pinned to what the installer script had put in ~/.local/bin
+herdr = "latest"
 jq = "latest"
 lazydocker = "latest"
 lazygit = "latest"
@@ -25,7 +25,7 @@ ripgrep = "latest"
 starship = "latest"
 terragrunt = "latest"
 tfenv = "latest"
-uv = "0.11.26" # pinned to what the official installer had put in ~/.local/bin
+uv = "latest"
 
 # Packages mise cannot install well yet, so Homebrew still provides them.
 # Re-check as mise's registry grows -- the goal is to empty this section.
