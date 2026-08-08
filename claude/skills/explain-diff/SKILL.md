@@ -13,11 +13,11 @@ This skill produces an explainer page a reader can check their understanding aga
 ## Overview
 
 1. Identify the target diff, record its metadata, and decide whether the change is trusted
-2. Generate the explainer HTML — written by a subagent that sees only the diff
+2. Generate the explainer HTML — written by the `diff-explainer` subagent, which sees only the diff
 3. Verify — the `diff-verifier` subagent checks the page against the change
 4. Revise through the writer, then hand off
 
-What the page must contain lives in `references/page-contract.md` and the scaffold in `assets/page-template.html`, both read by the writer, not by you. The writer agents pin `model: opus` in their own frontmatter, so the explanation's quality doesn't depend on which model runs the main agent.
+What the page must contain lives in `references/page-contract.md` and the scaffold in `assets/page-template.html`, both read by the writer, not by you. Both subagents pin `model: opus` in their own frontmatter, so the explanation's quality doesn't depend on which model runs the main agent.
 
 ### Step 1: Identify the target diff, record metadata, decide trust
 
@@ -52,7 +52,7 @@ gh api user --jq .login
 
 **Do not put your own summary of the change, its intent, or the conversation history into the writer's prompt.** Doing so destroys the independence this step exists for, and the delegation becomes pointless. If the current session is the one that implemented this change, writing the explanation in the same context would carry over its blind spots unchanged; the writer reads intent for itself from the diff, the surrounding code, and the commit messages.
 
-Launch the writer chosen in Step 1 via the Agent tool, passing only these mechanically-obtained facts:
+Launch `diff-explainer` via the Agent tool — pointed at the location Step 1 settled on — passing only these mechanically-obtained facts:
 
 - Where the code is: the repository path for the user's own changes, or the materialised diff, commit messages, and detached checkout for someone else's
 - How to obtain the diff, e.g. `git diff main...feature-x` / `gh pr diff 123`
