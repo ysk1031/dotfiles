@@ -31,8 +31,6 @@ If subagent returns `"status": "NO_CHANGES"` or `"status": "NEEDS_SPLIT"`, displ
 
 If subagent returns `"status": "OK"`, decide whether to auto-commit or confirm.
 
-A non-empty `warnings` array (added comments that only restate the code) never changes that decision and never blocks the commit — it is surfaced as text so the user can drop the comment afterwards. Show it verbatim, one entry per line, under the heading 「コメントの点検」: inside the Step 3b question when confirming, or with the undo hints in Phase 3 when auto-committing.
-
 **Step 1: Gather facts (Bash)**
 - `git diff --staged --numstat` → count changed files and sum insertions+deletions (total changed lines). Binary files show `-`/`-`; count them as files but 0 lines.
 - `git diff --staged --name-only` → the list of changed paths (for the sensitive-path check).
@@ -108,11 +106,7 @@ Then verify: `git status && git log -1`
 ✅ コミットしました（確認スキップ: 小規模・機微パスなし）
 <type>: <description>
 取り消し: git reset --soft HEAD^   ／   文面修正: git commit --amend
-
-コメントの点検（コードの言い換えに見えるコメント）:
-<warnings の各エントリを1行ずつ>
 ```
-Omit the last two lines when `warnings` is empty or absent.
 The confirmed path (Phase 2 Step 3b) does not print these hints — the user already reviewed.
 
 ---
