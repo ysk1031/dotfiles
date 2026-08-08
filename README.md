@@ -9,8 +9,19 @@
 `[bootstrap.packages]`, and the symlinks for `.zprofile`, `.gitconfig`,
 `my.zsh`, Zed and Ghostty under `[dotfiles]`.
 
-It has to be symlinked to the global path, since a repo-local `mise.toml` would
-only apply inside this directory:
+mise itself is not managed by anything here. Install it on a fresh machine with
+the [documented one-liner](https://mise.jdx.dev/getting-started.html), which
+drops the binary in `~/.local/bin/mise`:
+
+```bash
+curl https://mise.run | sh
+```
+
+Homebrew is a separate prerequisite — nothing to do with installing mise, but
+`[bootstrap.packages]` and `brew bundle` both shell out to it.
+
+The config has to be symlinked to the global path, since a repo-local
+`mise.toml` would only apply inside this directory:
 
 ```bash
 ln -s /path/to/dotfiles/mise/config.toml ~/.config/mise/config.toml
@@ -21,6 +32,17 @@ Then set the machine up:
 ```bash
 mise bootstrap    # [tools] + [bootstrap.packages] + [dotfiles]
 brew bundle       # casks; mise cannot install those
+```
+
+Most tools resolve through mise's aqua backend, which reads the GitHub API.
+This runs fine unauthenticated. If it ever starts failing on rate limits, log
+in and re-run with a token — pass it explicitly, because mise reads the token
+out of `~/.config/gh/hosts.yml` and finds nothing there when gh keeps it in the
+macOS keyring:
+
+```bash
+gh auth login
+GITHUB_TOKEN=$(gh auth token) mise bootstrap
 ```
 
 Claude Code's symlinks are not covered by `[dotfiles]` and still need
@@ -93,7 +115,6 @@ Claude Code's global configuration files are managed in `claude/`. The following
 - `statusline-command.sh` - Custom status line script
 - `agents/` - Custom subagent definitions
 - `skills/` - Skill definitions, one directory each. A `.sync-ignore` marker means the skill is retired and deliberately not linked into `~/.claude/skills/`
-- `docs/` - Reference documentation for skills
 
 To set up the symlinks:
 
