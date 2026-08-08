@@ -7,6 +7,8 @@
 // custom settings, run `zed: open default settings` from the
 // command palette (cmd-shift-p / ctrl-shift-p)
 {
+  "buffer_font_size": 14.0,
+  "ui_font_size": 15.0,
   "project_panel": {
     "dock": "left"
   },
@@ -23,8 +25,9 @@
   "diff_view_style": "unified",
   "cli_default_open_behavior": "existing_window",
   "colorize_brackets": true,
-  "buffer_font_family": "JetBrainsMonoNL Nerd Font",
+  "buffer_font_family": "UDEV Gothic NFLG",
   "agent": {
+    "button": false,
     "favorite_models": [],
     "model_parameters": [],
     "enable_feedback": false,
@@ -51,8 +54,8 @@
   "terminal": {
     "dock": "right",
     "button": true,
-    "font_size": 14.0,
-    "font_family": "JetBrainsMono Nerd Font",
+    "font_size": 13.0,
+    "font_family": "UDEV Gothic NFLG",
     "line_height": "comfortable",
   },
   "base_keymap": "VSCode",
@@ -63,7 +66,5 @@
   "show_whitespaces": "all",
   "ensure_final_newline_on_save": true,
   "soft_wrap": "editor_width",
-  "ui_font_size": 16.0,
-  "buffer_font_size": 14.0,
-  "theme": "Gruvbox Dark",
+  "theme": "New Darcula",
 }
