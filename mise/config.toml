@@ -35,3 +35,13 @@ tfenv = "latest"
 "brew:pkgconf" = "latest"                  # C library, has to be compiled
 "brew:trash" = "latest"                    # backs the `rm` alias in my.zsh
 "brew:zsh-syntax-highlighting" = "latest"  # zsh plugin rather than a binary
+
+# Sources are spelled out in full on purpose: a relative source resolves
+# against ~/.config/mise, where this file is symlinked from, not against the
+# repo. (dotfiles.root would fix that, but it only applies to implicit `{}`
+# sources, and none of these targets mirror the repo layout.)
+[dotfiles]
+"~/.gitconfig" = "~/src/github.com/ysk1031/dotfiles/.gitconfig"
+"~/.my.zsh" = "~/src/github.com/ysk1031/dotfiles/my.zsh"
+"~/.config/zed/settings.json" = "~/src/github.com/ysk1031/dotfiles/zed/settings.json"
+"~/Library/Application Support/com.mitchellh.ghostty/config" = "~/src/github.com/ysk1031/dotfiles/ghostty/config"

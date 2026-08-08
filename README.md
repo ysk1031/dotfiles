@@ -2,11 +2,12 @@
 
 ## Setup
 
-### Packages and Tools
+### Packages, Tools and Symlinks
 
 `mise/config.toml` is the machine-wide mise config. It declares CLI tools under
-`[tools]` and, under `[bootstrap.packages]`, the handful of packages that mise
-cannot install well yet and that Homebrew still provides.
+`[tools]`, the handful of packages Homebrew still has to provide under
+`[bootstrap.packages]`, and the symlinks for `.gitconfig`, `my.zsh`, Zed and
+Ghostty under `[dotfiles]`.
 
 It has to be symlinked to the global path, since a repo-local `mise.toml` would
 only apply inside this directory:
@@ -15,22 +16,20 @@ only apply inside this directory:
 ln -s /path/to/dotfiles/mise/config.toml ~/.config/mise/config.toml
 ```
 
-Then install everything:
+Then set the machine up:
 
 ```bash
-mise bootstrap    # [tools] + [bootstrap.packages]
+mise bootstrap    # [tools] + [bootstrap.packages] + [dotfiles]
 brew bundle       # casks; mise cannot install those
 ```
+
+Claude Code's symlinks are not covered by `[dotfiles]` and still need
+`claude/sync-links.sh`; see below. The steps in the sections that follow are
+the ones `mise bootstrap` cannot do for you.
 
 ### Git Configuration
 
 This repository uses `.gitconfig.local` to keep personal information (name, email) out of version control.
-
-To set up the symlink:
-
-```bash
-ln -sf /path/to/dotfiles/.gitconfig ~/.gitconfig
-```
 
 After cloning, create `~/.gitconfig.local` based on the example:
 
@@ -55,13 +54,9 @@ git config --list | grep user
 
 ### Zsh
 
-Portable zsh settings (aliases, functions, keybindings) are managed in `my.zsh`. To set up the symlink:
-
-```bash
-ln -s /path/to/dotfiles/my.zsh ~/.my.zsh
-```
-
-Then add the following line to the end of `~/.zshrc`:
+Portable zsh settings (aliases, functions, keybindings) are managed in `my.zsh`,
+which `mise bootstrap` links to `~/.my.zsh`. Add the following line to the end
+of `~/.zshrc`:
 
 ```zsh
 # Load portable zsh settings from dotfiles
@@ -75,33 +70,14 @@ Included settings:
 
 ### Ghostty Terminal
 
-Ghostty's configuration is managed in this repository. To set up the symlink:
-
-```bash
-# Backup existing config (if not already done)
-mv ~/Library/Application\ Support/com.mitchellh.ghostty/config \
-   ~/Library/Application\ Support/com.mitchellh.ghostty/config.backup
-
-# Create symlink
-ln -s /path/to/dotfiles/ghostty/config \
-      ~/Library/Application\ Support/com.mitchellh.ghostty/config
-```
-
-After creating the symlink, restart Ghostty to apply the configuration.
+Ghostty's configuration is managed in `ghostty/`, and `mise bootstrap` links it
+into `~/Library/Application Support/com.mitchellh.ghostty/`. Back up any config
+already sitting there first, then restart Ghostty to apply the configuration.
 
 ### Zed Editor
 
-Zed's settings are managed in `zed/`. To set up the symlink:
-
-```bash
-# Create config directory if it doesn't exist
-mkdir -p ~/.config/zed
-
-# Create symlink
-ln -sf /path/to/dotfiles/zed/settings.json ~/.config/zed/settings.json
-```
-
-After creating the symlink, restart Zed to apply the configuration.
+Zed's settings are managed in `zed/`, and `mise bootstrap` links them to
+`~/.config/zed/settings.json`. Restart Zed to apply the configuration.
 
 ### Claude Code
 
