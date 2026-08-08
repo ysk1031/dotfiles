@@ -34,5 +34,4 @@ tfenv = "latest"
 "brew:mysql-client@8.0" = "latest"         # mise only offers the conda backend, and defaults to 9.x
 "brew:pkgconf" = "latest"                  # C library, has to be compiled
 "brew:trash" = "latest"                    # backs the `rm` alias in my.zsh
-"brew:tree" = "latest"
 "brew:zsh-syntax-highlighting" = "latest"  # zsh plugin rather than a binary
