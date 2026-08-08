@@ -1,0 +1,27 @@
+# Homebrew
+eval "$(/opt/homebrew/bin/brew shellenv)"
+
+# Mise
+eval "$("$HOME/.local/bin/mise" activate zsh)"
+
+# claude, uv etc.
+export PATH="$HOME/.local/bin:$PATH"
+
+# Go
+export PATH="$(go env GOPATH)/bin:$PATH"
+
+# bun
+export BUN_INSTALL="$HOME/.bun"
+export PATH="$BUN_INSTALL/bin:$PATH"
+
+# keg-only なので brew shellenv では PATH に乗らない
+export PATH="/opt/homebrew/opt/mysql-client@8.0/bin:$PATH"
+
+# Locale
+export LC_ALL=en_US.UTF-8
+
+# Container
+export CONTAINER_DEFAULT_PLATFORM=linux/arm64
+
+# crit
+export CRIT_NO_UPDATE_CHECK=1

@@ -41,6 +41,7 @@ tfenv = "latest"
 # repo. (dotfiles.root would fix that, but it only applies to implicit `{}`
 # sources, and none of these targets mirror the repo layout.)
 [dotfiles]
+"~/.zprofile" = "~/src/github.com/ysk1031/dotfiles/.zprofile"
 "~/.gitconfig" = "~/src/github.com/ysk1031/dotfiles/.gitconfig"
 "~/.my.zsh" = "~/src/github.com/ysk1031/dotfiles/my.zsh"
 "~/.config/zed/settings.json" = "~/src/github.com/ysk1031/dotfiles/zed/settings.json"
