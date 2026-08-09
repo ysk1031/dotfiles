@@ -1,6 +1,6 @@
 # Activity Reporter Schemas
 
-JSON Schema definitions for the activity-reporter agent output. daily-report owns this file, and the activity-reporter agent reads it — plus `../scripts/*.jq` — through the absolute path `~/.claude/skills/daily-report/`, so moving or renaming either breaks the agent.
+JSON Schema definitions for the activity-reporter agent output. daily-report owns this file, and the activity-reporter agent reads it — plus `../scripts/*.jq` — through the `--skill-dir` path daily-report passes it, so renaming either file breaks the agent even though moving the skill as a whole does not.
 
 See each agent file for inline JSON examples.
 

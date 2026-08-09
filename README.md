@@ -127,6 +127,13 @@ Claude Code's global configuration files are managed in `claude/`. The following
 - `agents/` - Custom subagent definitions
 - `skills/` - Skill definitions, one directory each. A `.sync-ignore` marker means the skill is retired and deliberately not linked into `~/.claude/skills/`
 
+Skills and subagents that are only worth having while working on this repository
+live in `.claude/skills/` and `.claude/agents/` at the repository root instead.
+Claude Code picks those up as project-scoped definitions when it runs here, and
+`sync-links.sh` never sees them, so they stay out of every other project's skill
+list. `skill-scout` and `daily-report` (with its `activity-reporter` subagent)
+are there for that reason.
+
 To set up the symlinks:
 
 ```bash

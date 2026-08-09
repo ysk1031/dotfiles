@@ -21,6 +21,7 @@ Enumerate, and record where the real file lives (most of `~/.claude` is symlinks
 
 - `~/.claude/skills/*` — note which resolve into the dotfiles repo and which into `~/.agents/skills`
 - Skills present in the repo but **not** linked (a `.sync-ignore` marker, or a missing symlink) — these are retired or broken, and telling the two apart matters
+- The dotfiles repo's own `.claude/skills/*` and `.claude/agents/*.md` — project-scoped definitions that load only while working in that repo. They are deliberately unlinked and outside `sync-links.sh`'s reach, so their absence from `~/.claude` is the intended state, not retirement. They still take part in every cross-check below: a project-scoped skill can collide with a user-level one just as easily
 - `~/.claude/agents/*.md`
 - `~/.claude/CLAUDE.md` and `~/.claude/CLAUDE.local.md`
 - The `CLAUDE.md` of each repository worked in recently. `~/.claude/projects/*` holds session logs rather than CLAUDE.md files, but its directory names encode repository paths — with `/`, `.`, `_` and any literal `-` all flattened to `-`, so a single `-` is ambiguous and reading it as `/` throughout almost never resolves. Generate the candidates and keep whichever exists on disk (`github-com` wants `.`, `project-green` may want `_`, `--claude` is `/.claude`). Only call a directory dead after `_` and `.` were tried too; skipping them invents deleted repositories that are still there.

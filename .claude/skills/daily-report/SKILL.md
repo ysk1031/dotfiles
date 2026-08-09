@@ -28,7 +28,7 @@ TODAY=$(date +%Y-%m-%d)
 Then call the Agent tool with:
 - subagent_type: "activity-reporter"
 - description: "collect today's dev activity data"
-- prompt: Pass `--days 0 --output ~/Desktop/daily-report-${TODAY}.md` as the arguments. If the user supplied `--repos`, append that. If the user supplied `--date YYYY-MM-DD`, translate it: compute `DAYS_AGO=$(( ($(date +%s) - $(date -j -f "%Y-%m-%d" "$USER_DATE" +%s)) / 86400 ))` and pass `--days $DAYS_AGO --output ~/Desktop/daily-report-${USER_DATE}.md` instead. The activity-reporter then collects data from JST 00:00 of the target date to "now" (which, for a past date, will include time after that date — for typical use cases this is fine because the focus is the target day's activity; if precision is needed, this is a known limitation noted under Rules).
+- prompt: Pass `--days 0 --output ~/Desktop/daily-report-${TODAY}.md --skill-dir <the absolute path of the directory holding this SKILL.md>` as the arguments. The agent has no other way to find this skill's `scripts/*.jq`, and without them it returns an empty session list rather than an error. If the user supplied `--repos`, append that. If the user supplied `--date YYYY-MM-DD`, translate it: compute `DAYS_AGO=$(( ($(date +%s) - $(date -j -f "%Y-%m-%d" "$USER_DATE" +%s)) / 86400 ))` and pass `--days $DAYS_AGO --output ~/Desktop/daily-report-${USER_DATE}.md` instead. The activity-reporter then collects data from JST 00:00 of the target date to "now" (which, for a past date, will include time after that date — for typical use cases this is fine because the focus is the target day's activity; if precision is needed, this is a known limitation noted under Rules).
 
 The subagent returns collected data as JSON (or an error/status). The agent treats `--days 0` as "from today's JST midnight to now" via its existing date-range logic.
 
@@ -52,6 +52,7 @@ For a daily report, "no data today" is a normal outcome (the user might not have
 
 If "昨日分", re-invoke Phase 1 with `--days 1 --output ~/Desktop/daily-report-$(date -v-1d +%Y-%m-%d).md`.
 If "過去3日分", re-invoke with `--days 3 --output ~/Desktop/daily-report-${TODAY}.md`.
+Either way keep passing `--skill-dir` as Phase 1 describes — only the two options above change.
 If "キャンセル", print "レポート生成をキャンセルしました。" and stop.
 
 **`"OK"`**:

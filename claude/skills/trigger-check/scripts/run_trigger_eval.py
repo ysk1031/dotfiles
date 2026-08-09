@@ -314,7 +314,7 @@ def parse_args(argv):
     p = argparse.ArgumentParser(description="Measure whether a skill fires when it should.")
     p.add_argument("--skill", required=True)
     p.add_argument("--evals", type=Path,
-                   help="default: <repo>/claude/skills/<skill>/evals/trigger-eval.json")
+                   help="default: <repo>/{claude,.claude}/skills/<skill>/evals/trigger-eval.json")
     p.add_argument("--runs", type=int, default=3, help="trials per case")
     p.add_argument("--only", help="comma-separated 0-based case indices")
     p.add_argument("--model", default="opus", help="opus (default) | sonnet | full model id")
@@ -419,7 +419,14 @@ def main(argv=None):
     self_dir = Path(__file__).resolve().parent
     repo = self_dir.parents[3]
     if cfg.evals is None:
-        cfg.evals = repo / "claude/skills" / cfg.skill / "evals/trigger-eval.json"
+        # Project-scoped skills (the ones only useful inside this repo) live under
+        # .claude/skills instead of claude/skills.
+        candidates = [repo / root / cfg.skill / "evals/trigger-eval.json"
+                      for root in ("claude/skills", ".claude/skills")]
+        found = next((c for c in candidates if c.is_file()), None)
+        if found is None:
+            sys.exit("eval file not found:\n  " + "\n  ".join(str(c) for c in candidates))
+        cfg.evals = found
     cfg.evals = cfg.evals.resolve()
     if not cfg.evals.is_file():
         sys.exit(f"eval file not found: {cfg.evals}")

@@ -22,6 +22,7 @@ Parse the following options:
 - `--repos`: Comma-separated list of repos (e.g., owner/repo1,owner/repo2). If omitted, auto-detect all repositories with PR activity in the period using GitHub search API.
 - `--days`: Number of days to look back. If omitted, calculate from this week's Monday.
 - `--output`: Suggested output file path to include in the JSON response as `output_path` (default: ~/activity-report-YYYY-MM-DD.md). Do NOT write to this path — just return it in JSON.
+- `--skill-dir`: Absolute path of the daily-report skill directory. The jq scripts this agent runs in Step 6 and the output schema live under it. The caller always passes it; there is no default, because the skill is not at a fixed path.
 
 **Step 2: Prerequisites Check**
 
@@ -100,12 +101,13 @@ Collect from the real session transcripts under `~/.claude/projects/**/*.jsonl`,
 
 **Do NOT read `~/.claude/history.jsonl`.** That file only logs prompts typed in the terminal CLI; the macOS desktop app does NOT write to it, so it silently drops every desktop-app conversation (and undercounts massively). The desktop app's transcripts DO land in `~/.claude/projects/**/*.jsonl` (linked via `cliSessionId`), so scanning the project transcripts captures BOTH terminal-CLI and desktop-app sessions, including git-worktree directories.
 
-Use the jq script files to extract data deterministically. Run the following **exactly as shown** (do NOT construct the jq programs yourself):
+Use the jq script files to extract data deterministically. Run the following **exactly as shown** (do NOT construct the jq programs yourself), substituting the `--skill-dir` value from Step 1 for `SKILL_DIR`:
 
 ```bash
 START_ISO_UTC=$(date -u -r $((START_TS/1000)) +%Y-%m-%dT%H:%M:%SZ)  # JST midnight, expressed in UTC for the transcript timestamps (which are ISO8601 "...Z")
-EXTRACT="$HOME/.claude/skills/daily-report/scripts/collect-claude-sessions.jq"
-GROUP="$HOME/.claude/skills/daily-report/scripts/collect-claude-sessions-group.jq"
+SKILL_DIR="<the --skill-dir value>"
+EXTRACT="$SKILL_DIR/scripts/collect-claude-sessions.jq"
+GROUP="$SKILL_DIR/scripts/collect-claude-sessions-group.jq"
 
 # Target files: modified within the window, excluding subagent sidechain transcripts
 # (double-counts) and the plugin cache (synthetic eval fixtures, not organic usage).
@@ -123,6 +125,8 @@ printf '%s\n' "$CLAUDE_SESSIONS"
 ```
 
 **CRITICAL**: Execute this command as-is without modification or omission. Do NOT reconstruct the jq script content yourself.
+
+**If `CLAUDE_SESSIONS` comes back `[]`, check `ls -l "$EXTRACT" "$GROUP"` before believing it.** The `else` branch cannot tell "no sessions in the window" from "the jq scripts were not where `--skill-dir` said they were" — and the second case drops every Claude Code session from the report silently. When the scripts are missing, say so in `warnings` instead of returning a bare `[]`.
 
 **Use `printf '%s\n'`, never `echo`, to emit `$CLAUDE_SESSIONS`.** The default shell here is zsh, whose `echo` interprets backslash escapes — it turns the `\n` inside JSON prompt strings into raw newlines and corrupts the JSON (you'll see `jq: parse error: Invalid string: control characters ... must be escaped`). `printf '%s\n'` passes the bytes through verbatim.
 
@@ -149,7 +153,7 @@ If no data found, return a `NO_DATA` JSON response per the output schema below.
 
 ## Output Schema: activity-reporter-output
 
-See `~/.claude/skills/daily-report/references/schemas.md#activity-reporter-output` for the full schema.
+See `<--skill-dir>/references/schemas.md#activity-reporter-output` for the full schema.
 
 Return your output as a JSON code block. Escape newlines in JSON strings as `\n`.
 

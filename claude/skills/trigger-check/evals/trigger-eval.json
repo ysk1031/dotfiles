@@ -30,7 +30,7 @@
    "note": "節目の Sonnet 測定。--model の指定だけが違う。"},
 
   {"query": "skill-scout の description から Do NOT を2つ削った。削って壊れてないか、削る前と後で比べて測って", "should_trigger": true,
-   "setup": "perl -pi -e 's/ writing CLAUDE\\.md content directly;//; s/ work reports such as 分報・日報 \\(daily-report\\);//' claude/skills/skill-scout/SKILL.md",
+   "setup": "perl -pi -e 's/ writing CLAUDE\\.md content directly;//; s/ work reports such as 分報・日報 \\(daily-report\\);//' .claude/skills/skill-scout/SKILL.md",
    "note": "「削る」変更なので前後比較が要る唯一の型。逐次でしか比べられない制約に当たるかも見る。"},
 
   {"query": "trigger-check の SKILL.md の Reading the table の節に、「発動 の列は発動した試行数、pass の列は期待どおりだった試行数」という1行を足しといて", "should_trigger": true,

@@ -16,7 +16,7 @@ Verdicts come from `tool_use` events in `--output-format stream-json`, never fro
 
 ## The test prompt file
 
-Each skill owns its cases at `claude/skills/<name>/evals/trigger-eval.json` — a flat JSON array. Twenty is the established size: ten that must fire, ten that must not.
+Each skill owns its cases at `claude/skills/<name>/evals/trigger-eval.json` — or, for a skill scoped to this repository alone, `.claude/skills/<name>/evals/trigger-eval.json`. Either way it is a flat JSON array. Twenty is the established size: ten that must fire, ten that must not.
 
 ```json
 [
@@ -96,6 +96,6 @@ The reported cost excludes trials stopped at the moment of firing; those never r
 
 ## After the run
 
-A new or edited skill is not finished until `claude/sync-links.sh` has been run — **a skill with no symlink in `~/.claude/skills/` is invisible to the skill list, so every trial will correctly report that it did not fire.** Check the symlink before believing a zero.
+A new or edited skill is not finished until `claude/sync-links.sh` has been run — **a skill with no symlink in `~/.claude/skills/` is invisible to the skill list, so every trial will correctly report that it did not fire.** Check the symlink before believing a zero. A skill under `.claude/skills/` has no symlink by design and is instead visible only when the trial runs inside this repository, so for those, check `--seed-repo` before believing a zero.
 
 Report what the trials did, with the counts and the raw transcript path. Deciding whether a `割れ` result is acceptable is the user's call, not the script's.
