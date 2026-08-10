@@ -124,6 +124,7 @@ Claude Code's global configuration files are managed in `claude/`. The following
 - `CLAUDE.md` - Global instructions shared across machines
 - `CLAUDE.local.md.example` - Template for machine-specific instructions
 - `statusline-command.sh` - Custom status line script
+- `usage-cache.sh` - Refreshes the monthly cost estimate shown in the status line. Launched in the background by `statusline-command.sh`; requires `bun` (it runs `ccusage` via `bunx`)
 - `agents/` - Custom subagent definitions
 - `skills/` - Skill definitions, one directory each. A `.sync-ignore` marker means the skill is retired and deliberately not linked into `~/.claude/skills/`
 
@@ -140,6 +141,7 @@ To set up the symlinks:
 # Create symlinks for files
 ln -sf /path/to/dotfiles/claude/CLAUDE.md ~/.claude/CLAUDE.md
 ln -sf /path/to/dotfiles/claude/statusline-command.sh ~/.claude/statusline-command.sh
+ln -sf /path/to/dotfiles/claude/usage-cache.sh ~/.claude/usage-cache.sh
 
 # Create per-item symlinks for skills/agents
 /path/to/dotfiles/claude/sync-links.sh
