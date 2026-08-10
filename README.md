@@ -6,8 +6,8 @@
 
 `mise/config.toml` is the machine-wide mise config. It declares CLI tools under
 `[tools]`, the handful of packages Homebrew still has to provide under
-`[bootstrap.packages]`, and the symlinks for `.zprofile`, `.gitconfig`,
-`my.zsh`, Zed and Ghostty under `[dotfiles]`.
+`[bootstrap.packages]`, and the symlinks for `.gitconfig`, Zsh, Zed and Ghostty
+under `[dotfiles]`.
 
 mise itself is not managed by anything here. Install it on a fresh machine with
 the [documented one-liner](https://mise.jdx.dev/getting-started.html), which
@@ -76,14 +76,14 @@ git config --list | grep user
 
 ### Zsh
 
-`.zprofile` holds what a login shell needs — Homebrew and mise activation, PATH
-entries and a few exports — and `mise bootstrap` links it to `~/.zprofile`.
+`zsh/zprofile` holds what a login shell needs — Homebrew and mise activation,
+PATH entries and a few exports — and `mise bootstrap` links it to `~/.zprofile`.
 `~/.zshrc` stays outside this repository: it is where machine-specific and
 centrally managed blocks land.
 
-Portable zsh settings (aliases, functions, keybindings) are managed in `my.zsh`,
-which `mise bootstrap` links to `~/.my.zsh`. Add the following line to the end
-of `~/.zshrc`:
+Portable zsh settings (aliases, functions, keybindings) are managed in
+`zsh/my.zsh`, which `mise bootstrap` links to `~/.my.zsh`. Add the following
+line to the end of `~/.zshrc`:
 
 ```zsh
 # Load portable zsh settings from dotfiles

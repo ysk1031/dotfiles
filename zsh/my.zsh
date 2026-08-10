@@ -1,6 +1,6 @@
 # my.zsh - Portable zsh configuration
 # Source this file from ~/.zshrc:
-#   source ~/src/github.com/ysk1031/dotfiles/my.zsh
+#   source ~/.my.zsh
 
 # History
 HISTFILE=~/.zsh_history
