@@ -45,6 +45,21 @@ gh auth login
 GITHUB_TOKEN=$(gh auth token) mise bootstrap
 ```
 
+`mise bootstrap` only installs what is missing; it never upgrades what is
+already installed. Updating takes one command per group:
+
+```bash
+mise upgrade                     # [tools]
+mise bootstrap packages upgrade  # [bootstrap.packages] formulae
+gcloud components update         # the gcloud-cli cask
+```
+
+`brew upgrade --cask` does not touch `gcloud-cli`: the cask declares
+`auto_updates true`, so Homebrew stops tracking its version and leaves upgrades
+to the SDK's own updater. `mise upgrade` stays inside the range each tool
+declares, so `python = "3.12"` only moves within 3.12.x and needs a config edit
+to cross into 3.13.
+
 Claude Code's symlinks are not covered by `[dotfiles]` and still need
 `claude/sync-links.sh`; see below. The steps in the sections that follow are
 the ones `mise bootstrap` cannot do for you.
