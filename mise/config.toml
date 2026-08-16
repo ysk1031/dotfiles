@@ -35,7 +35,7 @@ uv = "latest"
 "npm:chrome-devtools-mcp" = "latest"
 
 # No registry entry, so the GitHub release is referenced directly.
-"ubi:yusukebe/ax" = "latest"
+"github:yusukebe/ax" = "latest"
 
 # Packages mise cannot install well yet, so Homebrew still provides them.
 # Re-check as mise's registry grows -- the goal is to empty this section.
