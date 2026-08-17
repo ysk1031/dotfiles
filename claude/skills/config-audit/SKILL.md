@@ -2,16 +2,16 @@
 name: config-audit
 disable-model-invocation: true
 description: >-
-  Cross-artifact health check of this machine's Claude Code configuration: reads every skill, subagent, CLAUDE.md, memory file and settings.json together, and reports duplication, contradiction, dead weight and tangled dependencies as a three-bucket adjudication table (削除推奨 / 要判断 / 要更新). Deletion happens only after the user approves each row. Manual invocation only. Auditing one artifact type alone belongs elsewhere: CLAUDE.md wording → claude-md-improver, memory files → consolidate-memory, mining session history for new candidates → skill-scout.
+  Cross-artifact health check of this machine's Claude Code configuration: reads every skill, subagent, CLAUDE.md, memory file and settings.json together, and reports duplication, contradiction, dead weight and tangled dependencies as a three-bucket adjudication table (削除推奨 / 要判断 / 要更新). Deletion happens only after the user approves each row. Manual invocation only. Mining session history for new skill candidates belongs to skill-scout instead.
 ---
 
 # Config Audit
 
 ## What this is for and what it is not
 
-Each artifact type already has its own auditor. What none of them can see is the space **between** artifacts: two skills claiming the same trigger, a CLAUDE.md rule that contradicts a skill's body, a memory pointing at a document that was deleted, a chain of definitions that all defer to each other. That gap is the whole subject here.
+The subject here is the space **between** artifacts: two skills claiming the same trigger, a CLAUDE.md rule that contradicts a skill's body, a memory pointing at a document that was deleted, a chain of definitions that all defer to each other. Reading one artifact on its own never shows any of that.
 
-So do not re-do the single-artifact audits. If the finding is "this CLAUDE.md sentence is unclear" or "this memory is stale on its own terms", name it and hand it to `claude-md-improver` / `consolidate-memory` rather than fixing it here.
+So do not audit artifacts one at a time. If the finding is "this CLAUDE.md sentence is unclear" or "this memory is stale on its own terms", name it in the report and leave it to a separate pass rather than fixing it here.
 
 **This skill never deletes anything on its own.** It produces a table; the user decides each row; only then do you act.
 
