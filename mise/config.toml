@@ -34,9 +34,6 @@ uv = "latest"
 # refers to it by name, so it has to stay resolvable on PATH.
 "npm:chrome-devtools-mcp" = "latest"
 
-# No registry entry, so the GitHub release is referenced directly.
-"github:yusukebe/ax" = "latest"
-
 # Packages mise cannot install well yet, so Homebrew still provides them.
 # Re-check as mise's registry grows -- the goal is to empty this section.
 [bootstrap.packages]
