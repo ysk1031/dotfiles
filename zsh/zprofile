@@ -1,5 +1,6 @@
 # Homebrew
 eval "$(/opt/homebrew/bin/brew shellenv)"
+typeset -U fpath
 
 # Mise
 eval "$("$HOME/.local/bin/mise" activate zsh)"
