@@ -7,6 +7,7 @@
 // custom settings, run `zed: open default settings` from the
 // command palette (cmd-shift-p / ctrl-shift-p)
 {
+  "format_on_save": "on",
   "buffer_font_size": 14.0,
   "ui_font_size": 15.0,
   "project_panel": {
@@ -66,5 +67,5 @@
   "show_whitespaces": "all",
   "ensure_final_newline_on_save": true,
   "soft_wrap": "editor_width",
-  "theme": "New Darcula",
+  "theme": "Gruvbox Dark",
 }
