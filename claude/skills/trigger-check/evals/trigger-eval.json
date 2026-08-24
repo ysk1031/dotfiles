@@ -10,7 +10,7 @@
   {"query": "second-opinion が、狙ってない場面でも実際に走ってしまっている気がする。提案が多いという話ではなく、スキル自体が発動しているかどうかを測って確かめたい", "should_trigger": true,
    "note": "誤発動の疑い。編集直後ではなく運用中の違和感からの入り口。「勝手に出てくる」だけでは足りない: second-opinion は提案してから同意を得て走る設計なので、その言い方はスキルの誤発動と提案の多さの2通りに読める。試行は trigger-check を正しく選んだうえで、どちらかを聞き返して実行を保留した（3回中1回、2026-08-04 に実測）。どちらの話かを明記して曖昧さを消してある。"},
 
-  {"query": "crit-annotate、頼んでるのに全然発動しない。ほんとに発動しないのか測れる?", "should_trigger": true,
+  {"query": "commit、頼んでるのに全然発動しない。ほんとに発動しないのか測れる?", "should_trigger": true,
    "note": "不発動の疑い。上と対で、疑いの向きが逆。"},
 
   {"query": "CLAUDE.md の「スキルを編集したらトリガー検証を提案する」の節を書き直した。この文面で実際に提案が出るか確かめたい", "should_trigger": true,
@@ -21,12 +21,12 @@
    "setup": "perl -pi -e 's/Commit message composer\\./Commit message composer for staged changes./' claude/agents/commit-composer.md",
    "note": "対象が subagent 定義。「検証」という語を使わず「裏取り」と言う場合。"},
 
-  {"query": "session-handoff の検証で、3回中1回しか発動しなかったお題が1件あった。そのお題だけ10回に増やして測り直して", "should_trigger": true,
+  {"query": "second-opinion の検証で、3回中1回しか発動しなかったお題が1件あった。そのお題だけ10回に増やして測り直して", "should_trigger": true,
    "setup": "mkdir -p trigger-eval-out/trials && printf '3\\t1\\tPASS\\tskill_called\\t\\t0.0000\\t\\ttrigger-eval-out/trials/3-1\\n3\\t2\\tFAIL\\tno_call\\t\\t0.1204\\t\\ttrigger-eval-out/trials/3-2\\n3\\t3\\tFAIL\\tno_call\\t\\t0.1130\\t\\ttrigger-eval-out/trials/3-3\\n' > trigger-eval-out/summary.tsv",
    "max_turns": 7,
    "note": "2段階目（割れたお題の追試）からの入り口。--only と --runs を使う場面。setup が必須: 「割れたお題が1件あった」という前回の結果が試行の中に無いと、探しに出てターン上限を使い切る（setup 無しでは3回中2回が測定不能、2026-08-04 に実測）。置き場所も trigger-eval-out でなければならない: prev-run に置いた版では、試行が本物を求めて実機のホーム配下まで `find` しに出た（10回中4回が測定不能、同日に実測）。上限を7にしてあるのは、すぐ発動せず先に前回結果を読む試行があり、その分のターンが要るため。発動した試行はその時点で打ち切られるので、上限を上げても発動する限り費用は増えない。"},
 
-  {"query": "session-handoff、コミット前に Sonnet でも一応測っておきたい", "should_trigger": true,
+  {"query": "second-opinion、コミット前に Sonnet でも一応測っておきたい", "should_trigger": true,
    "note": "節目の Sonnet 測定。--model の指定だけが違う。"},
 
   {"query": "skill-scout の description から Do NOT を2つ削った。削って壊れてないか、削る前と後で比べて測って", "should_trigger": true,
