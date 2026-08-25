@@ -25,19 +25,23 @@ The subagent will return the proposed commit message (or an error/warning).
 
 ---
 
-### Phase 2: Risk Gate & Confirmation (main agent)
+### Phase 2: Trim, Risk Gate & Confirmation (main agent)
 
 If subagent returns `"status": "NO_CHANGES"` or `"status": "NEEDS_SPLIT"`, display the `message` field and stop.
 
-If subagent returns `"status": "OK"`, decide whether to auto-commit or confirm.
+If subagent returns `"status": "OK"`, first trim the body, then decide whether to auto-commit or confirm.
 
-**Step 1: Gather facts (Bash)**
+**Step 1: Strip any scope, trim the body to 5 lines**
+If the title reads `type(scope): ...`, drop the parenthesized scope — the user has corrected this in multiple repositories, so it applies whatever the repo's history looks like.
+Rewrap the body at 72 columns and count its lines, blank separator lines not counted. Over 5, cut it here and rewrap: keep the problem, why this way rather than a rejected alternative, and one number for the effect, dropping the rest until it fits. This applies to a body you wrote or extended yourself from session context too — that detail is the first to cut, not an exemption.
+
+**Step 2: Gather facts (Bash)**
 - `git diff --staged --numstat` → count changed files and sum insertions+deletions (total changed lines). Binary files show `-`/`-`; count them as files but 0 lines.
 - `git diff --staged --name-only` → the list of changed paths (for the sensitive-path check).
 
-**Step 2: Evaluate confirmation conditions** — confirmation is required if ANY of:
-1. `-r` or `--review` was passed in the arguments.
-2. **Sensitive path**: any changed path matches the sensitive list below (case-insensitive; match the basename unless noted).
+**Step 3: Evaluate confirmation conditions** — confirmation is required if ANY of:
+1. `-r` or `--review` was passed in the arguments. (`-f`/`--force` does not skip this gate — it only skips the granularity check.)
+2. **Sensitive path**: any changed path matches the sensitive list below (case-insensitive; match the basename).
 3. **Large change**: files > 8 **OR** total changed lines > 200.
 
 Sensitive path list (high-precision filename/path patterns only — deliberately NOT matching broad `*key*`/`*token*`, which hit files like `keybindings.json`):
@@ -47,17 +51,16 @@ Sensitive path list (high-precision filename/path patterns only — deliberately
 - `id_rsa*` / `id_ed25519*` / `id_dsa*` / `id_ecdsa*`
 - `.npmrc` / `.pypirc` / `.netrc` / `.git-credentials`
 
-**Step 3a: No conditions met → auto-commit.** Proceed to Phase 3 (auto path). Do NOT call AskUserQuestion.
+**Step 4a: No conditions met → auto-commit.** Proceed to Phase 3 (auto path). Do NOT call AskUserQuestion.
 
-**Step 3b: A condition is met → confirm.** Use AskUserQuestion:
+**Step 4b: A condition is met → confirm.** Use AskUserQuestion:
 - question: Start with a one-line reason for the confirmation, then the proposed message. Reasons:
-  - Sensitive: "機微パス `<matched path>` を含むため確認します。"
+  - Sensitive: "機微パス `<the changed path that matched, in full>` を含むため確認します。"
   - Large: "変更が大きいため（<N> ファイル / <M> 行）確認します。"
   - Forced: "`-r` 指定のため確認します。"
   - If multiple apply, list each reason line.
   Then append the proposal:
-  Example (no body): "<reason>\n\n提案コミットメッセージ:\n\n`<title>`\n\nこのコミットメッセージでよろしいですか？"
-  Example (with body): "<reason>\n\n提案コミットメッセージ:\n\n`<title>`\n\n<body>\n\nこのコミットメッセージでよろしいですか？"
+  Example: "<reason>\n\n提案コミットメッセージ:\n\n`<title>`\n\n<body>\n\nこのコミットメッセージでよろしいですか？"（body がなければその段落ごと省く）
 - header: "Commit"
 - options:
   1. label: "Accept", description: "このままコミットを実行"
@@ -72,22 +75,13 @@ Sensitive path list (high-precision filename/path patterns only — deliberately
 
 ### Phase 3: Execute Commit (main agent with Bash)
 
-**Determine Co-Authored-By name**: Use your own model name for the Co-Authored-By trailer.
-Format: `Co-Authored-By: Claude <model> <noreply@anthropic.com>` where `<model>` is your model name (e.g., "Opus 4.6", "Sonnet 4.5") as stated in your system prompt.
+**Determine Co-Authored-By name**: Never skip the Co-Authored-By trailer — it is what makes AI-generated commits auditable.
+Format: `Co-Authored-By: Claude <model> <noreply@anthropic.com>` where `<model>` is your own model name exactly as your system prompt states it, parenthetical included (e.g. "Opus 5 (1M context)") — read it off the prompt each time rather than reusing a name you have seen in the history.
 
 Execute the commit:
 
-For title only:
-```bash
-git commit -m "$(cat <<'EOF'
-<type>: <description>
+Drop the `<body>` line and the blank line above it when there is no body.
 
-Co-Authored-By: Claude <model> <noreply@anthropic.com>
-EOF
-)"
-```
-
-For title + body:
 ```bash
 git commit -m "$(cat <<'EOF'
 <type>: <description>
@@ -101,77 +95,19 @@ EOF
 
 Then verify: `git status && git log -1`
 
-**Auto path only (Phase 2 Step 3a)**: after committing, print the message and undo hints so the user can review after the fact:
+**Auto path only (Phase 2 Step 4a)**: after committing, print the message and undo hints so the user can review after the fact:
 ```
 ✅ コミットしました（確認スキップ: 小規模・機微パスなし）
 <type>: <description>
 取り消し: git reset --soft HEAD^   ／   文面修正: git commit --amend
 ```
-The confirmed path (Phase 2 Step 3b) does not print these hints — the user already reviewed.
+The confirmed path (Phase 2 Step 4b) does not print these hints — the user already reviewed.
 
 ---
 
 ### Rules
-- NEVER include a scope in the subject: `type: description`, never `type(scope): description`. If commit-composer returns a scoped title, strip the parenthesized scope before the risk gate / AskUserQuestion — the user has corrected this in multiple repositories, so it applies regardless of what the repo's history looks like
 - Auto-commit (no confirmation) when the change is small and touches no sensitive path — local commits are reversible (`git reset --soft HEAD^` / `git commit --amend`), so gating every message costs more friction than it saves
 - ALWAYS confirm when a sensitive path is touched, even with `-f` — committing secrets is the one costly mistake this gate exists to prevent
-- `-f`/`--force` only skips the granularity (NEEDS_SPLIT) check; it does NOT bypass the risk gate. `-r`/`--review` forces confirmation regardless of risk
-- NEVER skip Co-Authored-By (always use your actual model name, never hardcode a specific version) — ensures traceability of AI-generated commits and enables audit of change history
 - NEVER use --amend unless explicitly requested — amend rewrites the previous commit, risking unintended data loss
 - NEVER use --no-verify — pre-commit hooks enforce project quality standards; bypassing them can introduce lint errors and security issues
 - Keep first line under 72 characters — industry-standard convention to prevent truncation in git log and GitHub UI
-- Body should wrap at 72 characters — ensures readability in terminals and git log output
-
----
-
-### Examples
-
-#### Example 1: 小規模な変更（自動コミット）
-User says: "コミットして"（2ファイル・40行、機微パスなし）
-Actions:
-1. commit-composer がステージ済み変更を分析
-2. リスクゲート判定: どの条件にも当たらない → 確認なし
-3. 即コミット実行し、メッセージと取り消し/amend ヒントを表示
-Result: 確認モーダルなしで `docs: update README` のようなコミットが作成される
-
-#### Example 2: 大規模な変更（確認あり）
-User says: "コミットして"（10ファイル・260行）
-Actions:
-1. commit-composer が分析
-2. リスクゲート判定: 大規模（>8ファイル かつ >200行）→ 確認
-3. 「変更が大きいため（10 ファイル / 260 行）確認します。」を添えて AskUserQuestion
-Result: ユーザーが Accept してコミット
-
-#### Example 3: 機微パスを含む（確認あり）
-User says: "コミットして"（`config/.env` を1ファイルだけ変更）
-Actions:
-1. commit-composer が分析
-2. リスクゲート判定: 機微パス一致 → 小規模でも確認
-3. 「機微パス `config/.env` を含むため確認します。」を添えて AskUserQuestion
-Result: 誤コミット防止のため必ず人の目を通す
-
-#### Example 4: --force付きコミット
-User says: "-f でコミット"
-Actions:
-1. 粒度チェック（NEEDS_SPLIT）をスキップ
-2. リスクゲートは通常どおり適用（機微パスがあれば確認、なければ規模で判定）
-Result: 粒度に関わらず単一コミット。機微パスがあれば `-f` でも確認される
-
-#### Example 5: --review付きコミット
-User says: "-r でコミット"（小規模でも）
-Actions:
-1. commit-composer が分析
-2. リスクゲート判定: `-r` 指定 → 強制的に確認
-Result: 旧来どおり毎回確認する挙動に戻せる
-
----
-
-### Troubleshooting
-
-#### "No staged changes"
-Cause: ステージされた変更がない
-Solution: `git add <files>` でファイルをステージングしてから再実行
-
-#### "NEEDS_SPLIT"
-Cause: ステージされた変更が大きすぎて単一コミットに不適切
-Solution: `git add -p` で変更を分割してステージングし、複数コミットに分ける

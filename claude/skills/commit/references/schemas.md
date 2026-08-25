@@ -28,7 +28,8 @@ JSON Schema for commit-composer agent output.
     },
     "body": {
       "type": "string",
-      "description": "Commit message body (explains WHAT and WHY)"
+      "maxLength": 400,
+      "description": "Commit message body: the problem, why this way, numbers behind any improvement claim. At most 5 lines when wrapped at 72 columns, blank separator lines not counted"
     },
     "message": {
       "type": "string",
@@ -44,6 +45,6 @@ JSON Schema for commit-composer agent output.
 ```
 
 ### Status variants
-- `OK`: includes `title` (required), `body` (optional)
+- `OK`: includes `title` (required), `body` (optional, at most 5 lines)
 - `NO_CHANGES`: includes `message` with guidance to stage files
 - `NEEDS_SPLIT`: includes `message`, `suggestions` array of split descriptions
