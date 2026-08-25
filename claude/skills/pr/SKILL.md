@@ -5,116 +5,42 @@ allowed-tools: AskUserQuestion, Bash
 argument-hint: "[base-branch to specify target branch] [--draft to create as draft PR] [--auto for autonomous/non-interactive runs: create as draft and skip chat confirmation]"
 metadata:
   author: ysk1031
-  version: 2.4.0
+  version: 3.0.0
 ---
 
 # Pull Request Creation Skill
 
-Analyze current branch changes, generate a PR title and description, let the user review/edit, then create the PR. All phases run in the main agent — do NOT use subagents (their output is collapsed in the UI and invisible to the user). Draft confirmation happens via a normal chat reply, NOT AskUserQuestion (see Phase 2 Step 3 for why).
+Analyze the branch's changes, draft a title and description, get the user's confirmation, then create the PR. Run every phase in the main agent — a subagent's output is collapsed in the UI, so the user would never see the draft.
 
-**Autonomous mode (`--auto`):** When invoked with `--auto` (agent-initiated PR with no interactive user to confirm), the skill still runs Phase 1 analysis, but skips the Phase 2 Step 3 chat confirmation and forces a **draft** PR. The draft is the asynchronous approval gate: the human reviews it on GitHub and marks it "Ready for review" when satisfied. `--auto` never force-pushes (see Phase 3).
+**`--auto`** (agent-initiated PR with no interactive user): run Phase 1 as usual, skip the Phase 2 confirmation, force `--draft`, and never force push. The GitHub draft is the approval gate the human flips to "Ready for review".
 
-## Instructions
+## Phase 1: Analyze (read-only)
 
-### Phase 1: Analyze Changes (Bash)
+Use only read-only commands (`git`, `gh`, `cat`) here. Never create, modify, or delete a file in this phase.
 
-Use ONLY read-only commands (`git`, `gh`, `cat`) in this phase. NEVER modify, create, or delete any files.
+1. **Branch**: `git branch --show-current`. Empty (detached HEAD) → print 「現在detached HEAD状態です。`git checkout -b <branch-name>` でブランチを作成してください。」 and stop.
+2. **Base branch**: the argument if one was given; otherwise the branch that `git remote show origin 2>/dev/null | grep 'HEAD branch' | awk '{print $NF}'` names. When that output is empty, fall through to whichever of main → master → develop exists (`git show-ref --verify --quiet refs/heads/<name>`). None found → print 「ベースブランチを特定できませんでした。引数でベースブランチを指定してください。」 and stop.
+3. **Diff**: `git log <base>..HEAD --oneline` and `git diff <base>...HEAD --stat`. No commits → 「ベースブランチとの差分コミットがありません。変更をコミットしてから再実行してください。」 and stop. No diff → 「ベースブランチとの差分がありません。」 and stop. Otherwise read `git diff <base>...HEAD`. When the stat shows a very large diff, read per-file diffs for the meaningful source files only and skip generated files (lock files, build output, snapshots). Read past the diff when a section of the body will need it — what calls the function you changed is the usual case, and it is evidence like any other file in the repository.
+4. **Unpushed commits**: `git log @{u}..HEAD --oneline`, run on its own — with no upstream the command exits non-zero, which kills the rest of an `&&` chain. That failure means there is no remote tracking branch and every commit will be pushed.
+5. **PR template**: if `.github/pull_request_template.md` exists, follow its headings and checklist as written — do not replace them with a structure of your own. Only the repository root's template is the one GitHub uses; ignore template-looking files under monorepo subdirectories.
+6. **Project conventions**: read the project's `CLAUDE.md` for PR conventions — a required title prefix (issue number, ticket ID), a default draft state, required sections. Apply what you find in Phase 2.
+7. **Language**: check `git log --oneline -10` and `gh pr list --limit 5 2>/dev/null || true`. Mostly Japanese → write in Japanese; mostly English → English. Genuinely undecidable → AskUserQuestion (question 「PR説明文をどちらの言語で作成しますか？」, header "Language", options 日本語 / English), then continue with the information already gathered — do not re-run the analysis.
 
-**Step 1: Check Current Branch**
-Run: `git branch --show-current`
+## Phase 2: Draft and confirm
 
-If empty (detached HEAD), display the following and stop:
-```
-現在detached HEAD状態です。ブランチを作成してください。
-git checkout -b <branch-name>
-```
+### Title
 
-**Step 2: Determine Base Branch**
-If arguments specify a base branch, use that.
-Otherwise, auto-detect:
-1. Try: `git remote show origin 2>/dev/null | grep 'HEAD branch' | awk '{print $NF}'`
-2. If empty, check existence: main → master → develop
-   - `git show-ref --verify --quiet refs/heads/main && echo main`
-   - `git show-ref --verify --quiet refs/heads/master && echo master`
-   - `git show-ref --verify --quiet refs/heads/develop && echo develop`
+Single commit: reuse its message. Multiple: summarize them. Apply any prefix convention found in step 6, and keep the whole title under ~72 characters so GitHub does not truncate it. An identifier that only carries meaning inside the code (a column name, a type, a coined term) needs a short parenthetical gloss so a reviewer who did not write the change can read the title: `feat: add consumed_feedback_boundary (どこまでのフィードバックを反映済みか示す境界)`. When the gloss would overflow the line, define the identifier in the body's first paragraph instead.
 
-If no base branch found, display "ベースブランチを特定できませんでした。引数でベースブランチを指定してください。" and stop.
+### Body
 
-**Step 3: Check for Commits**
-Run: `git log <base>..HEAD --oneline`
+**Write for a reader who was not in the room.** The reader is a new participant who knows nothing about the conversation that produced this branch — they see the final diff and this text, nothing else. Every sentence must stand on its own for them. That rules out the whole history of how the change was reached: the approaches tried and abandoned, the mid-session change of plan, the review rounds, the self-review, 「当初は〜だったが」「指摘を受けて〜した」. None of it survives into the body, because none of it is needed to answer the only question the reader has: what changes when this ships. Prior *behaviour* is a different thing — when the diff changes how the code already behaves, describing the before/after is part of describing the diff, and belongs in the body. When you cannot tell which side something falls on, ask whether the diff shows it: the base branch's behaviour is visible there, a rename that happened within the branch is not.
 
-If empty, display "ベースブランチとの差分コミットがありません。変更をコミットしてから再実行してください。" and stop.
+Fill each template section by how well the facts support it: write what the diff and the repository establish, and put 該当なし / N/A where they establish nothing — never a placeholder for someone to come back and fill. Where that blank is something the user could fill (an issue to link, a release note to write), the 該当なし stays and the question goes to them alongside the draft. A checkbox is ticked only by evidence the reviewer can see for themselves, such as a test file or a doc change in the diff; your own recollection of having run something is not that evidence. Everything else stays `[ ]` — a Test Plan among them, since it lists checks nobody has run yet.
 
-**Step 4: Check for Changes**
-Run: `git diff <base>...HEAD --stat`
+In Japanese, write in 常体 (だ・である調), never 丁寧語 — that governs the body you write, not the fixed Japanese strings this skill spells out (the confirmation prompt, the push status), which are used verbatim.
 
-If empty, display "ベースブランチとの差分がありません。" and stop.
-
-**Step 5: Gather Information**
-- `git log <base>..HEAD --oneline` (commit list — already obtained in Step 3)
-- `git diff <base>...HEAD --stat` (already obtained in Step 4)
-- `git diff <base>...HEAD` (detailed diff)
-  - If the stat shows a very large diff (e.g. thousands of lines or generated/lock files), do NOT read the full diff. Instead, read per-file diffs for the meaningful source files only and skip generated files (lock files, build output, snapshots).
-
-**Step 5.5: Check Unpushed Commits**
-Check if a remote tracking branch exists and count unpushed commits:
-```bash
-REMOTE_BRANCH=$(git rev-parse --abbrev-ref --symbolic-full-name @{u} 2>/dev/null)
-if [ -n "$REMOTE_BRANCH" ]; then
-  git log ${REMOTE_BRANCH}..HEAD --oneline
-else
-  echo "(リモートブランチ未設定 — 全コミットがpushされます)"
-fi
-```
-
-**Step 6: Check PR Template**
-Check if `.github/pull_request_template.md` exists:
-- If exists, read its content for format reference — follow its headings and checklist as-is. Do NOT invent your own structure (a `Summary / Changes / Test Plan` layout written over a template that asks for something else has been rejected before). Keep sections that don't apply, filled with 該当なし / N/A or left as unchecked `[ ]`
-- Only the repository root's `.github/` (or root / `docs/`) template is the one GitHub uses. In a monorepo, ignore template-looking files under subdirectories
-
-**Step 6.5: Check Project Conventions**
-Read the project's `CLAUDE.md` (if present) for PR-related conventions — e.g. a required title prefix (issue number, ticket ID), a default draft state, or required sections. Apply anything found there in Phase 2.
-
-**Step 7: Detect Language**
-Check recent commits and existing PRs:
-- `git log --oneline -10`
-- `gh pr list --limit 5 2>/dev/null || true`
-
-If majority contain Japanese text → use Japanese
-If majority contain English text → use English
-If unclear (mixed or cannot determine), use AskUserQuestion:
-- question: "PR説明文をどちらの言語で作成しますか？"
-- header: "Language"
-- options:
-  1. label: "日本語", description: "日本語でPR説明文を作成"
-  2. label: "English", description: "Create PR description in English"
-
-Then continue to Phase 2 with the selected language (do NOT re-run the analysis — reuse the information already gathered).
-
----
-
-### Phase 2: Draft & User Confirmation
-
-**Step 1: Generate Title**
-- If single commit: use that commit message as title
-- If multiple commits: summarize changes into a concise title
-- If Step 6.5 found a required title prefix convention, apply it
-- An identifier that only makes sense inside the code (a column name, a type, a coined term) needs a short parenthetical gloss so a reviewer who did not write the change can read the title: `feat: add consumed_feedback_boundary (どこまでのフィードバックを反映済みか示す境界)`. When the gloss would push the title past ~72 characters, keep the title short and define the identifier in the body's first paragraph instead.
-
-**Step 2: Generate Description**
-Writing style rules:
-- When writing in Japanese: ALWAYS use 常体 (plain form / だ・である調). NEVER use 丁寧語 (polite form / です・ます調).
-  - Good: 「認証ロジックを追加した」「エラーハンドリングを改善する」「不要な依存を削除した」
-  - Bad: 「認証ロジックを追加しました」「エラーハンドリングを改善します」「不要な依存を削除しました」
-- When writing in English: no special style constraint.
-
-What the body is, and is not:
-- It describes the final diff. It is not a work log: the self-review, the pre-PR check, the review rounds and the approaches abandoned along the way all stay out. The reader is a reviewer who did not write the code, and the only question they need answered is what changes when this ships.
-- Fill each template section by how well the facts support it: write what the diff and the repository establish, put 該当なし / N/A where they establish nothing, and ask the user where the answer is not the kind of thing either can settle. Checklists follow the same rule — `[x]` only where a fact backs it, otherwise leave `[ ]`. Never fill or tick from guesswork.
-- Rewriting an existing description follows every rule above, and re-derives the content from the commits as they stand now rather than patching the old text.
-
-If PR template exists: follow that format
-Otherwise, use default format:
+With no PR template in the repository, use:
 
 ```markdown
 ## Summary
@@ -123,68 +49,44 @@ Otherwise, use default format:
 ## Changes
 - [Change 1]
 - [Change 2]
-- [Change 3]
 
 ## Test Plan
 - [ ] [How to verify this change]
 ```
 
-**Step 3: Display Draft and END THE TURN — do NOT use AskUserQuestion for confirmation**
+### Confirmation — display the draft and END THE TURN
 
-**If `--auto` was passed:** skip this entire step (no draft display, no turn end, no confirmation). Proceed directly to Phase 3 with `--draft` forced. The GitHub draft is the approval gate instead.
+Skip this whole step under `--auto` and go to Phase 3 with `--draft` forced.
 
-**Why no AskUserQuestion here:** text output in the same turn is only guaranteed visible to the user when it is the FINAL message of the turn with NO tool calls after it. Calling AskUserQuestion after displaying the draft causes the dialog to redraw the terminal and hide the draft text — this has repeatedly broken in the past. Confirmation MUST happen via the user's next chat message instead.
+Text output is only guaranteed visible to the user when it is the final message of the turn with no tool call after it. An AskUserQuestion dialog after the draft redraws the terminal and hides it — this has broken repeatedly. So confirmation happens through the user's next chat message, never through AskUserQuestion.
 
-1. Output the following as the final response text of this turn:
-   ```
-   **Base:** <base>
+Output as the final response text of the turn:
 
-   # <title>
+```
+**Base:** <base>
 
-   <body — full text, never summarized or truncated>
-   ```
-   Followed by unpushed commit information:
-   - If there are unpushed commits: "リモートにpushされていないコミットが {count} 件あります:\n{commit list}"
-   - If no remote tracking branch: "リモートブランチが未設定のため、全コミットがpushされます。"
+# <title>
 
-   Followed by the confirmation prompt:
-   "この内容でPRを作成してよければ「OK」と返信してください。修正したい場合は修正内容を、中止する場合は「キャンセル」と返信してください。"
-
-2. **END THE TURN immediately after this message.** Do NOT call any tool (Bash, AskUserQuestion, anything) after displaying the draft. The draft must be the last thing in the turn.
-
-3. Handle the user's reply:
-   - **Approval** ("OK", "いいよ", "作成して", etc.): Proceed to Phase 3
-   - **Edit request** (correction instructions or replacement text): Revise the title/body accordingly, then repeat this Step 3 (re-display the full revised draft and end the turn again)
-   - **Cancel** ("キャンセル", "やめる", etc.): Print "PRの作成をキャンセルしました。" and stop
-
----
-
-### Phase 3: Create PR (Bash)
-
-1. Push to remote:
-
-First, check if the remote branch exists and compare history:
-```bash
-git fetch origin
+<body — full text, never summarized or truncated>
 ```
 
-- If the remote branch does NOT exist (new branch): proceed with `git push -u origin HEAD`
-- If the remote branch exists: run `git status` to check ahead/behind status
-  - If local is ahead only (fast-forward possible): proceed with `git push -u origin HEAD`
-  - If local has diverged or is behind (history rewritten by rebase/amend/etc.):
-    **If `--auto` was passed:** do NOT force push (no interactive user to authorize a destructive operation). Print "リモートブランチと履歴が分岐しているため、自律モードではpushを中止した。手動で確認してほしい。" and stop.
-    Otherwise, use AskUserQuestion:
-    - question: "リモートブランチとローカルブランチの履歴が分岐しています（rebase/amendなどによる可能性があります）。Force pushしますか？"
-    - header: "Push"
-    - options:
-      1. label: "Force push", description: "git push --force-with-lease で強制pushします"
-      2. label: "キャンセル", description: "PRの作成を中止します"
-    - If "Force push": run `git push --force-with-lease -u origin HEAD`
-    - If "キャンセル": Print "PRの作成をキャンセルしました。" and stop
+Then the unpushed-commit status — either 「リモートにpushされていないコミットが {count} 件あります:\n{commit list}」 or 「リモートブランチが未設定のため、全コミットがpushされます。」 — then any questions the body left for the user, in the same 常体 as the body, and omitted entirely when there are none. Last:
 
-If push fails for any other reason, display the error message and stop.
+「この内容でPRを作成してよければ「OK」と返信してください。修正したい場合は修正内容を、中止する場合は「キャンセル」と返信してください。」
 
-2. Create PR:
+**End the turn immediately.** Call no tool after the draft. Then handle the reply: approval → Phase 3; edit request → revise and re-display the full draft, ending the turn again; cancel → print 「PRの作成をキャンセルしました。」 and stop.
+
+## Phase 3: Create the PR
+
+**Push.** Run `git fetch origin`, then:
+
+- Remote branch does not exist, or local is ahead only → `git push -u origin HEAD`
+- Local has diverged or is behind (history rewritten by rebase/amend) → under `--auto`, do not force push: print 「リモートブランチと履歴が分岐しているため、自律モードではpushを中止した。手動で確認してほしい。」 and stop. Otherwise ask with AskUserQuestion (question 「リモートブランチとローカルブランチの履歴が分岐しています（rebase/amendなどによる可能性があります）。Force pushしますか？」, header "Push", options: Force push / キャンセル). On approval run `git push --force-with-lease -u origin HEAD`; on cancel print 「PRの作成をキャンセルしました。」 and stop.
+
+Any other push failure: show the error and stop.
+
+**Create.**
+
 ```bash
 gh pr create --base <base from Phase 1> --title "<confirmed title>" --body "$(cat <<'EOF'
 <confirmed body>
@@ -192,65 +94,23 @@ gh pr create --base <base from Phase 1> --title "<confirmed title>" --body "$(ca
 ---
 🤖 Generated with [Claude Code](https://claude.com/claude-code)
 EOF
-)" [--draft if specified, OR always --draft when --auto]
+)" [--draft if requested, or always under --auto]
 ```
 
-3. Display the PR URL from the command output
-   - If `--auto` was used: also print "自律作成のためdraftで作成した。レビューして問題なければ GitHub で Ready for review に切り替えてほしい。"
+Show the PR URL from the output. Under `--auto`, add 「自律作成のためdraftで作成した。レビューして問題なければ GitHub で Ready for review に切り替えてほしい。」 and any questions the body left open — with the confirmation step skipped, this report is the only place the human sees them.
 
----
+## Rewriting the description of an existing PR
 
-### Rules
-- ALWAYS add footer: `🤖 Generated with [Claude Code](https://claude.com/claude-code)` — ensures traceability of PR origin
-- Push to remote without additional confirmation (required for PR creation) — pushing is a prerequisite for PR creation; confirming each time adds unnecessary friction
-- Use HEREDOC for body to ensure proper formatting — regular strings don't properly handle markdown line breaks and special characters
-- Keep title concise (under 72 characters if possible) — prevents truncation in GitHub UI and maintains readability in PR lists
-- If --draft flag is in arguments, add --draft to gh pr create — accurately reflects the user's intent in the GitHub API call
-- If --auto flag is in arguments, always create as draft and skip the Phase 2 Step 3 chat confirmation — autonomous runs have no interactive user, so the draft PR serves as the asynchronous approval gate the human flips to "Ready for review"
-- Under --auto, NEVER force push — abort on diverged history instead — force push is destructive and there is no interactive user to authorize it
-- ALWAYS use the `base` value detected in Phase 1 Step 2 for `--base` — do NOT substitute the system prompt's "Main branch" value, as it may be inaccurate
-- NEVER use `--force` for push — always use `--force-with-lease` to prevent overwriting others' commits — `--force` unconditionally overwrites the remote, while `--force-with-lease` fails if the remote has been updated by someone else since your last fetch
-- ALWAYS confirm with user before force pushing — force push is destructive and irreversible; silent force push can destroy teammates' work
+Everything above holds, with these differences:
 
----
+- Read the current state with `gh pr view --json number,title,body,baseRefName`, and use the PR's own base rather than re-detecting one.
+- Rebuild the body from the commits as they stand now, writing it before you look at the old one — an old body carries the framing of whoever wrote it, including the process narrative the Body rules exclude, and reading it first pulls the new text toward it. Read it afterwards, only to catch claims it makes that the code no longer supports. Its headings carry no weight either: the structure comes from the repository's template, or the default format when there is none. Replace the title too when it covers only part of what the commits now do.
+- Confirm exactly as in Phase 2, ending the turn on the draft, with 「この内容でPR本文を更新してよければ「OK」と返信してください。修正したい場合は修正内容を、中止する場合は「キャンセル」と返信してください。」 Show the unpushed-commit status too: a body describing commits the remote does not have yet would not match the PR.
+- After approval, push whatever is unpushed, then `gh pr edit <number> --body` with the same HEREDOC and footer. Do not open a second PR.
 
-### Examples
+## Rules
 
-#### Example 1: 通常のPR作成
-User says: "PR作って"
-Actions:
-1. ブランチの差分を分析
-2. PRタイトルと説明文を提案
-3. ユーザー確認後、push → PR作成
-Result: GitHub上にPRが作成され、URLが表示される
-
-#### Example 2: ドラフトPR
-User says: "--draft でPR作って"
-Actions:
-1. 通常と同じ分析・提案フロー
-2. `--draft` フラグ付きでPR作成
-Result: ドラフト状態のPRが作成される
-
-#### Example 3: 自律作成（--auto）
-Context: エージェントがタスクの締めくくりとして、対話ユーザーの確認を取れないまま PR を作る
-Actions:
-1. Phase 1 の分析は通常どおり実行
-2. Phase 2 Step 3 のチャット確認をスキップ
-3. `--draft` を強制して `gh pr create`
-Result: draft PR が作成され、URL と「Ready for review に切り替えてほしい」旨を報告。承認権は GitHub の draft ゲートに残る
-
----
-
-### Troubleshooting
-
-#### Detached HEAD
-Cause: detached HEAD状態でブランチに属していない
-Solution: `git checkout -b <branch-name>` でブランチを作成
-
-#### 差分コミットなし
-Cause: ベースブランチとの差分コミットがない
-Solution: 変更をコミットしてから再実行
-
-#### Push失敗
-Cause: リモートの認証が切れている、またはpermission不足
-Solution: `gh auth login` で再認証
+- Always append the footer `🤖 Generated with [Claude Code](https://claude.com/claude-code)` — it keeps the origin of the PR traceable.
+- Always pass the `base` detected in Phase 1 to `--base`. Do not substitute the "Main branch" value from the system prompt; it can be wrong.
+- Pass the body through a HEREDOC. A plain string mangles markdown line breaks and special characters.
+- Push without asking — it is a prerequisite for creating the PR. Force push is the exception: it is destructive, so it always needs the user's approval, always uses `--force-with-lease` (never `--force`, which overwrites a remote someone else may have updated), and never happens under `--auto`.
