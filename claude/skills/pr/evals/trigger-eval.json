@@ -1,0 +1,116 @@
+[
+  {
+    "query": "PRを作成してください",
+    "should_trigger": true,
+    "setup": "git config user.email eval@local && git config user.name eval && git remote add origin https://github.com/ysk1031/dotfiles-trigger-eval-nonexistent.git && git add -A && git commit -qm 'chore: baseline' --allow-empty && git switch -q -c docs/readme-setup-notes && printf '\\n## トラブルシュート\\n\\nmise のシムが効かないときは `mise reshim` を実行する。\\n' >> README.md && printf '\\n[alias]\\n\\tst = status -sb\\n' >> .gitconfig && git commit -aqm 'docs: add a troubleshooting note and a git st alias'",
+    "note": "単独の依頼。基準となるケース"
+  },
+  {
+    "query": "では適度な粒度でコミットしてpush、mainブランチに向けて PRを作成してください",
+    "should_trigger": true,
+    "max_turns": 12,
+    "setup": "git config user.email eval@local && git config user.name eval && git remote add origin https://github.com/ysk1031/dotfiles-trigger-eval-nonexistent.git && git add -A && git commit -qm 'chore: baseline' --allow-empty && git switch -q -c refactor/statusline-cleanup && printf '\\n## トラブルシュート\\n\\nmise のシムが効かないときは `mise reshim` を実行する。\\n' >> README.md && printf '\\n[alias]\\n\\tst = status -sb\\n' >> .gitconfig",
+    "note": "2026-08 に skill-ontology-engine で実際に発動しなかった文面そのまま。commit → push → PR の複合指示"
+  },
+  {
+    "query": "ドラフトでPR作ってください",
+    "should_trigger": true,
+    "setup": "git config user.email eval@local && git config user.name eval && git remote add origin https://github.com/ysk1031/dotfiles-trigger-eval-nonexistent.git && git add -A && git commit -qm 'chore: baseline' --allow-empty && git switch -q -c docs/readme-setup-notes && printf '\\n## トラブルシュート\\n\\nmise のシムが効かないときは `mise reshim` を実行する。\\n' >> README.md && printf '\\n[alias]\\n\\tst = status -sb\\n' >> .gitconfig && git commit -aqm 'docs: add a troubleshooting note and a git st alias'"
+  },
+  {
+    "query": "push してPR作って",
+    "should_trigger": true,
+    "setup": "git config user.email eval@local && git config user.name eval && git remote add origin https://github.com/ysk1031/dotfiles-trigger-eval-nonexistent.git && git add -A && git commit -qm 'chore: baseline' --allow-empty && git switch -q -c docs/readme-setup-notes && printf '\\n## トラブルシュート\\n\\nmise のシムが効かないときは `mise reshim` を実行する。\\n' >> README.md && printf '\\n[alias]\\n\\tst = status -sb\\n' >> .gitconfig && git commit -aqm 'docs: add a troubleshooting note and a git st alias'"
+  },
+  {
+    "query": "Create a pull request for this branch against main.",
+    "should_trigger": true,
+    "setup": "git config user.email eval@local && git config user.name eval && git remote add origin https://github.com/ysk1031/dotfiles-trigger-eval-nonexistent.git && git add -A && git commit -qm 'chore: baseline' --allow-empty && git switch -q -c docs/readme-setup-notes && printf '\\n## トラブルシュート\\n\\nmise のシムが効かないときは `mise reshim` を実行する。\\n' >> README.md && printf '\\n[alias]\\n\\tst = status -sb\\n' >> .gitconfig && git commit -aqm 'docs: add a troubleshooting note and a git st alias'"
+  },
+  {
+    "query": "プルリクエスト出しておいてください",
+    "should_trigger": true,
+    "setup": "git config user.email eval@local && git config user.name eval && git remote add origin https://github.com/ysk1031/dotfiles-trigger-eval-nonexistent.git && git add -A && git commit -qm 'chore: baseline' --allow-empty && git switch -q -c docs/readme-setup-notes && printf '\\n## トラブルシュート\\n\\nmise のシムが効かないときは `mise reshim` を実行する。\\n' >> README.md && printf '\\n[alias]\\n\\tst = status -sb\\n' >> .gitconfig && git commit -aqm 'docs: add a troubleshooting note and a git st alias'"
+  },
+  {
+    "query": "変更をコミットしてから、この差分の PR を出してほしい",
+    "should_trigger": true,
+    "max_turns": 12,
+    "setup": "git config user.email eval@local && git config user.name eval && git remote add origin https://github.com/ysk1031/dotfiles-trigger-eval-nonexistent.git && git add -A && git commit -qm 'chore: baseline' --allow-empty && git switch -q -c refactor/statusline-cleanup && printf '\\n## トラブルシュート\\n\\nmise のシムが効かないときは `mise reshim` を実行する。\\n' >> README.md && printf '\\n[alias]\\n\\tst = status -sb\\n' >> .gitconfig",
+    "note": "push を含まない複合指示。commit の後に PR へ渡るか"
+  },
+  {
+    "query": "PR本文が実装と合っていないので、いまのコミットに合わせて書き直してほしい",
+    "should_trigger": true,
+    "max_turns": 6,
+    "setup": "git config user.email eval@local && git config user.name eval && git remote add origin https://github.com/ysk1031/dotfiles-trigger-eval-nonexistent.git && git add -A && git commit -qm 'chore: baseline' --allow-empty && git switch -q -c docs/readme-setup-notes && printf '\\n## トラブルシュート\\n\\nmise のシムが効かないときは `mise reshim` を実行する。\\n' >> README.md && printf '\\n[alias]\\n\\tst = status -sb\\n' >> .gitconfig && git commit -aqm 'docs: add a troubleshooting note and a git st alias'",
+    "note": "既存 PR の本文書き換え経路。description 後半に書かれている分岐"
+  },
+  {
+    "query": "この変更、main に向けて PR 出してほしい",
+    "should_trigger": true,
+    "setup": "git config user.email eval@local && git config user.name eval && git remote add origin https://github.com/ysk1031/dotfiles-trigger-eval-nonexistent.git && git add -A && git commit -qm 'chore: baseline' --allow-empty && git switch -q -c docs/readme-setup-notes && printf '\\n## トラブルシュート\\n\\nmise のシムが効かないときは `mise reshim` を実行する。\\n' >> README.md && printf '\\n[alias]\\n\\tst = status -sb\\n' >> .gitconfig && git commit -aqm 'docs: add a troubleshooting note and a git st alias'"
+  },
+  {
+    "query": "ブランチ切って、コミットして、PRまで作っておいてください",
+    "should_trigger": true,
+    "max_turns": 12,
+    "setup": "git config user.email eval@local && git config user.name eval && git remote add origin https://github.com/ysk1031/dotfiles-trigger-eval-nonexistent.git && git add -A && git commit -qm 'chore: baseline' --allow-empty && printf '\\n## トラブルシュート\\n\\nmise のシムが効かないときは `mise reshim` を実行する。\\n' >> README.md && printf '\\n[alias]\\n\\tst = status -sb\\n' >> .gitconfig",
+    "note": "ブランチ作成から始まる複合指示。main の上に未コミットの変更がある状態"
+  },
+  {
+    "query": "レビューで「README の記述が実態と合っていない」と指摘された。これは対応すべきか判断してほしい",
+    "should_trigger": false,
+    "note": "review-triage の領域"
+  },
+  {
+    "query": "#12 のPRをマージしてください",
+    "should_trigger": false,
+    "note": "description の Do NOT: merging PRs"
+  },
+  {
+    "query": "このブランチの差分をレビューして、バグがないか見てほしい",
+    "should_trigger": false,
+    "setup": "git config user.email eval@local && git config user.name eval && git remote add origin https://github.com/ysk1031/dotfiles-trigger-eval-nonexistent.git && git add -A && git commit -qm 'chore: baseline' --allow-empty && git switch -q -c docs/readme-setup-notes && printf '\\n## トラブルシュート\\n\\nmise のシムが効かないときは `mise reshim` を実行する。\\n' >> README.md && printf '\\n[alias]\\n\\tst = status -sb\\n' >> .gitconfig && git commit -aqm 'docs: add a troubleshooting note and a git st alias'",
+    "note": "code-review の領域"
+  },
+  {
+    "query": "PRを作成したいのですが、pushの前にコミットログを整えたいです。リファクタで増えてしまったので、案を出してもらえますか？",
+    "should_trigger": false,
+    "max_turns": 8,
+    "setup": "git config user.email eval@local && git config user.name eval && git remote add origin https://github.com/ysk1031/dotfiles-trigger-eval-nonexistent.git && git add -A && git commit -qm 'chore: baseline' --allow-empty && git switch -q -c refactor/statusline-cleanup && printf '\\n## トラブルシュート\\n\\n' >> README.md && git commit -aqm wip && printf 'mise のシムが効かないときは `mise reshim` を実行する。\\n' >> README.md && git commit -aqm 'fix typo' && printf '\\n[alias]\\n\\tst = status -sb\\n' >> .gitconfig && git commit -aqm 'refactor: tweak the alias' && printf '\\n<!-- 追記 -->\\n' >> README.md && git commit -aqm wip2",
+    "note": "2026-08 に green-api で実際に正しく不発だった文面。PR は目的だが、依頼はコミットログの整理案"
+  },
+  {
+    "query": "PR を作るときの手順を README にドキュメントとして残しておいてください",
+    "should_trigger": false,
+    "note": "PR を作るのではなく手順を書く依頼"
+  },
+  {
+    "query": "この変更をコミットしてください",
+    "should_trigger": false,
+    "setup": "git config user.email eval@local && git config user.name eval && git remote add origin https://github.com/ysk1031/dotfiles-trigger-eval-nonexistent.git && git add -A && git commit -qm 'chore: baseline' --allow-empty && git switch -q -c refactor/statusline-cleanup && printf '\\n## トラブルシュート\\n\\nmise のシムが効かないときは `mise reshim` を実行する。\\n' >> README.md",
+    "note": "commit スキルの領域。PR まで進めてはいけない"
+  },
+  {
+    "query": "いま開いている PR の一覧を見せてください",
+    "should_trigger": false,
+    "note": "参照のみ"
+  },
+  {
+    "query": "このリポジトリの PR テンプレートはどこにありますか？",
+    "should_trigger": false,
+    "note": "質問。PR を作る依頼ではない"
+  },
+  {
+    "query": "main との差分を解説してほしい",
+    "should_trigger": false,
+    "setup": "git config user.email eval@local && git config user.name eval && git remote add origin https://github.com/ysk1031/dotfiles-trigger-eval-nonexistent.git && git add -A && git commit -qm 'chore: baseline' --allow-empty && git switch -q -c docs/readme-setup-notes && printf '\\n## トラブルシュート\\n\\nmise のシムが効かないときは `mise reshim` を実行する。\\n' >> README.md && printf '\\n[alias]\\n\\tst = status -sb\\n' >> .gitconfig && git commit -aqm 'docs: add a troubleshooting note and a git st alias'",
+    "note": "explain-diff の領域"
+  },
+  {
+    "query": "pr スキルの description が長いので、短くしてもらえますか？",
+    "should_trigger": false,
+    "note": "スキル定義の編集依頼"
+  }
+]
