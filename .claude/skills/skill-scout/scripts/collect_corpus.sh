@@ -23,12 +23,14 @@ PROJECTS="${CLAUDE_PROJECTS_DIR:-$HOME/.claude/projects}"
 mkdir -p "$OUTDIR"
 
 LIST="$OUTDIR/target_sessions.txt"
-# Human-facing sessions only: skip subagent transcripts (double-counts) and the
-# skill-creator plugin cache (synthetic eval fixtures, not organic usage).
+# Human-facing sessions only: skip subagent transcripts (double-counts) and
+# synthetic sessions (plugin eval caches, trigger-check and scratchpad runs).
 find "$PROJECTS" -name '*.jsonl' -mtime -"$DAYS" \
   -not -path '*/subagents/*' \
   -not -path '*plugins-cache*' \
   -not -path '*plugins/cache*' \
+  -not -path '*trigger-check-work*' \
+  -not -path '*scratchpad*' \
   | sort > "$LIST"
 
 COUNT=$(wc -l < "$LIST" | tr -d ' ')
