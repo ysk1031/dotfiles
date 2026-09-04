@@ -58,7 +58,7 @@ If "キャンセル", print "レポート生成をキャンセルしました。
 **`"OK"`**:
 Show a brief preview — for a daily report, keep this very short, since the user is about to read the full report anyway — then confirm via a normal chat reply, NOT AskUserQuestion.
 
-**Why no AskUserQuestion here:** text output in the same turn is only guaranteed visible to the user when it is the FINAL message of the turn with NO tool calls after it. Calling AskUserQuestion after displaying the preview causes the dialog to redraw the terminal and hide the preview text (same issue previously fixed in [[pr]]). Confirmation MUST happen via the user's next chat message instead.
+**Why no AskUserQuestion here:** text output in the same turn is only guaranteed visible to the user when it is the FINAL message of the turn with NO tool calls after it. Calling AskUserQuestion after displaying the preview causes the dialog to redraw the terminal and hide the preview text (same issue previously fixed in the pr skill). Confirmation MUST happen via the user's next chat message instead.
 
 1. Output the following as the final response text of this turn:
 
