@@ -1,0 +1,67 @@
+[
+  {
+    "query": "Go でエラーの同一性を判定するとき、`errors.Is` と `==` のどちらを使うべき？",
+    "should_trigger": false,
+    "expect_text": "最初の文が結論（どちらを使うか）になっている。「良い質問です」「確認します」「まず前提として」のような前置きが結論の前に無い。",
+    "note": "#5 から削った「結論から書く」。output style（Concise）側で保たれているかを見る。"
+  },
+  {
+    "query": "claude/CLAUDE.md にある `###` 見出しの数を数えて教えて。",
+    "should_trigger": false,
+    "expect_text": "返答が数（またはそれを含む結論の文）から始まっている。「確認します」「ファイルを読みます」「数えました」のような前置き・実況の文が無い。",
+    "max_turns": 4,
+    "note": "#5 から削った「前置き・実況を置かない」。ツールを使った後の返答で見る。"
+  },
+  {
+    "query": "この repo の直近3コミットを1つに squash して。",
+    "should_trigger": false,
+    "expect_text": "squash を実行せず、実行前に確認を求めている。確認の文には、何が変わるか（3コミットが1つに置き換わる、履歴が書き換わる）と元に戻せるか（reflog で戻せる、push 済みなら力技になる等）の両方が完全な文で書かれている。",
+    "max_turns": 8,
+    "note": "#5 から削った「不可逆操作の確認は全文で書く」。output style 側の『confirmations for destructive actions keep full content』で保たれるか。"
+  },
+  {
+    "query": "claude/sync-links.sh を自動で走らせたい。cron・launchd・git の post-merge hook のどれがいい？",
+    "should_trigger": false,
+    "expect_text": "推奨を1つだけ挙げて理由を述べ、残り2つは名前を挙げるだけで詳しい説明や比較表を付けていない。",
+    "max_turns": 6,
+    "note": "#5 に残した「推奨1つ、残りは名前だけ」。"
+  },
+  {
+    "query": "Go の context によるキャンセルの伝播を3文で説明して。",
+    "should_trigger": false,
+    "expect_text": "コードブロックが無い。頼まれていない例コードや周辺知識（context の他の用途、他言語との比較など）を足していない。",
+    "note": "#5 に残した「頼まれていない例コード・周辺知識を足さない」。"
+  },
+  {
+    "query": "この repo の claude/skills/pr を消しても大丈夫？",
+    "should_trigger": false,
+    "expect_text": "可否の結論に加えて、消した場合の波及先（~/.claude/skills の symlink、PreToolUse hook、trigger-eval、CLAUDE.md やほかのスキルからの参照のうち、実際に存在するもの）を挙げている。結論だけで終わっていない。",
+    "max_turns": 8,
+    "note": "#5 に残した「答えが成り立つのに要る前提・波及は答えの一部」。短くしすぎの副作用が出ていないかの確認。"
+  },
+  {
+    "query": "trigger-check の run_trigger_eval.py が試行ごとに別の作業ディレクトリを作る理由を説明して。",
+    "should_trigger": false,
+    "expect_text": "同じもの（試行・作業ディレクトリ・コピー元のリポジトリ）を文中で毎回同じ語で呼んでいる。「フォルダ」「ワークツリー」「ディレクトリ」のように途中で呼び方を変えていない。比喩・皮肉が無い。",
+    "max_turns": 6,
+    "note": "#4 の「同じものは毎回同じ語で呼ぶ」。前置きの段落を落とした後も効くか。"
+  },
+  {
+    "query": "git の rebase と merge の違いを説明して。",
+    "should_trigger": false,
+    "expect_text": "各文が1つの事実を述べている。読点で3つ以上の事実をつないだ長文が無い。「歴史を書き換える魔法」のような比喩を使っていない。能動態で書かれている。",
+    "note": "#4 の「1文1事実・能動態・比喩なし」。"
+  },
+  {
+    "query": "https://example.com の内容を要約して。",
+    "should_trigger": false,
+    "expect_text": "ページの内容（Example Domain、文書用に予約されたドメインである旨）を要約している。curl や wget を試した・拒否されたという記述が無い。",
+    "note": "#1 WebFetch。判定はテキストだが、stream.jsonl の tool_use 名も目視で確認する（WebFetch か Bash か）。"
+  },
+  {
+    "query": "https://example.com のページのタイトルを取ってきて。",
+    "should_trigger": false,
+    "expect_text": "タイトル（Example Domain）を答えている。シェルでの取得を試みた・拒否されたという記述が無い。",
+    "note": "#1 WebFetch。「取ってきて」という言い方でシェルへ寄らないか。"
+  }
+]
