@@ -4,7 +4,7 @@
 The writer never types a quote. It leaves an empty element naming a file and the
 line ranges it wants:
 
-    <pre data-quote="claude/hooks/before-git.sh" data-lines="25-26,33-34"></pre>
+    <pre data-quote="path/from/repo/root.sh" data-lines="25-26,33-34"></pre>
 
 and this script fills in the exact lines, HTML-escaped, inserting an elision
 marker carrying the real count of the lines it skipped. Quoting is therefore a

@@ -13,7 +13,7 @@ Every factual statement on the page is one of three things, and the reader must 
 1. **Read in the diff or the surrounding code.** Never type a code quote. Name the file and the line ranges in an empty element and let the embedder fill it:
 
    ```
-   <pre data-quote="claude/hooks/before-git.sh" data-lines="25-26,33-34"></pre>
+   <pre data-quote="path/from/repo/root.sh" data-lines="25-26,33-34"></pre>
    ```
 
    Add `data-rev="<sha>"` when the lines must come from a revision rather than the working tree. The elision marker between ranges and its skipped-line count are computed for you. This exists because you cannot copy: every quote you write out is regenerated from context, and regeneration silently merges non-contiguous lines and drops what sat between them — measured twice on this skill, in independent runs. A quote you did not type cannot drift from the file.
