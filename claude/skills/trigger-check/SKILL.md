@@ -18,6 +18,8 @@ Verdicts come from `tool_use` events in `--output-format stream-json`, never fro
 
 Each skill owns its cases at `claude/skills/<name>/evals/trigger-eval.json` — or, for a skill scoped to this repository alone, `.claude/skills/<name>/evals/trigger-eval.json`. Either way it is a flat JSON array. Twenty is the established size: ten that must fire, ten that must not.
 
+A CLAUDE.md rule has no skill directory to live under, so its cases go in `claude/evals/claude-md/<topic>.json` — one file per rule or per closely-related group, named after what it measures. Nothing finds these by convention; pass the path with `--evals`. The size convention does not carry over: what a rule needs is coverage of the behaviour it asks for, so the count follows the rule.
+
 ```json
 [
   {"query": "…", "should_trigger": true},
