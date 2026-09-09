@@ -11,7 +11,7 @@ description: >-
 
 The subject here is the space **between** artifacts: two skills claiming the same trigger, a CLAUDE.md rule that contradicts a skill's body, a memory pointing at a document that was deleted, a chain of definitions that all defer to each other. Reading one artifact on its own never shows any of that.
 
-So do not audit artifacts one at a time. If the finding is "this CLAUDE.md sentence is unclear" or "this memory is stale on its own terms", name it in the report and leave it to a separate pass rather than fixing it here.
+So do not audit artifacts one at a time. If the finding is "this CLAUDE.md sentence is unclear" or "this memory is stale on its own terms", name it in the report and leave it to a separate pass rather than fixing it here. For a memory that is stale on its own terms, that pass is `consolidate-memory`; say so in the row so the hand-off has a destination.
 
 **This skill never deletes anything on its own.** It produces a table; the user decides each row; only then do you act.
 
