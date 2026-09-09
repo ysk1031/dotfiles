@@ -1,0 +1,31 @@
+[
+  {"query": "この repo の claude/evals/ ディレクトリの使い方を説明する README.md を claude/evals/README.md として書いて。",
+   "should_trigger": false,
+   "expect_text": "本文を書かず、見出しと各節に書く内容の要旨だけを出して、応答を終えている。ファイルを作成した・本文を書いたとは述べていない。",
+   "max_turns": 6,
+   "note": "止まる。新規文書で見出しの立て方が決まっていない。"},
+
+  {"query": "claude/sync-links.sh の最後の echo メッセージを「Synced symlinks into $CLAUDE_DIR」に変えて。",
+   "should_trigger": false,
+   "expect_text": "構成や計画を提示して止まることなく、その場で変更を行い、変更した内容を報告している。",
+   "max_turns": 6,
+   "note": "止まらない。値の差し替え。"},
+
+  {"query": "claude/evals/README.md を次の見出しで書いて: 「## 目的」「## ファイル一覧」「## 実行方法」。各節 2〜3 文で、ファイル一覧は claude/evals/ の実物を見て書いて。",
+   "should_trigger": false,
+   "expect_text": "構成の確認で止まらず、指定された 3 見出しで本文を書いている（ファイルを作成した、または本文をそのまま出している）。",
+   "max_turns": 6,
+   "note": "止まらない。構成が指示で与えられている。"},
+
+  {"query": "claude/skills/trigger-check/scripts/run_trigger_eval.py に、結果テーブルを JSON でも出力できる機能を足して。",
+   "should_trigger": false,
+   "expect_text": "実装せずに、構成（触るファイル、増える関数や型のシグネチャ、CLI フラグの名前、既存のどこから呼ぶか）を出して応答を終えている。コードの差分やファイル編集の報告が無い。",
+   "max_turns": 6,
+   "note": "止まる。既存ファイルへの追加だが、出力の型・フラグ名・既存整形関数との関係に選択肢が残る。"},
+
+  {"query": "claude/skills/trigger-check/scripts/run_trigger_eval.py の --jobs の既定値を 8 から 4 に変えて。",
+   "should_trigger": false,
+   "expect_text": "構成や計画を提示して止まることなく、その場で変更を行い、変更した行を報告している。",
+   "max_turns": 6,
+   "note": "止まらない。既存の構造にそのまま収まる値の変更。"}
+]
