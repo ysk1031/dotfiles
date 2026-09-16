@@ -1,7 +1,7 @@
 ---
 name: second-opinion
 description: >-
-  Blind cross-check of a technical conclusion: a second model (Fable 5) answers the same question without seeing your answer, and the user judges both reads side by side. Offer it in one line after any judgment with real trade-offs (design call, root-cause diagnosis, "which approach" recommendation) — including when you lay out competing options for the user to pick between — or when the user signals doubt (「本当にそう?」「念のため」), and run it only once they agree — unless they asked for another model outright, in which case just run it. Don't re-offer for a conclusion the user already declined. Skip lookups, mechanical edits, one-right-answer questions, and plain PR review. Defer to `/advisor` when the user wants a stronger model assisting with full context rather than an independent check.
+  Blind cross-check of a technical conclusion: a second model (Fable 5) answers the same question without seeing your answer, and the user judges both reads side by side. Offer it in one line after any judgment with real trade-offs (design call, root-cause diagnosis, "which approach" recommendation) — including when you lay out competing options for the user to pick between — or when the user signals doubt (「本当にそう?」「念のため」), and run it only once they agree — unless they asked for another model outright, in which case just run it. A standing permission given earlier in the task (「迷ったら Fable に聞いて」「途中で Fable 使ってくれて良い」) is that agreement for every later judgment call: run it there without offering again. Don't re-offer for a conclusion the user already declined. Skip lookups, mechanical edits, one-right-answer questions, and plain PR review. Defer to `/advisor` when the user wants a stronger model assisting with full context rather than an independent check.
 ---
 
 # Second Opinion
@@ -13,6 +13,10 @@ Left to your own devices you will tend to *defend* a conclusion you just reached
 The value is entirely in bias removal. A second model that can see your answer anchors to it and rubber-stamps it. Everything below protects that independence.
 
 This is also the one thing `/advisor` structurally cannot do: the advisor receives the full conversation including your conclusion, and folds its guidance back into your answer. Here the second model is blind and the human arbitrates.
+
+## Standing permission
+
+「迷ったら Fable に聞いて」 said once covers the whole task, including judgment calls that come up turns later. At each of them, run the check and present both reads in the same reply; do not ask again, and do not decide that the call was too easy to need it — the user delegated that decision when they gave the permission. It lapses when the task ends or the user withdraws it.
 
 ## Strip your bias before asking
 
