@@ -1,0 +1,145 @@
+[
+  {
+    "query": "PR に Codex のレビューが付きました。これ対応した方がいいですか？\n\n1. claude/usage-cache.sh: `stat -f %m` は BSD/macOS 専用です。Linux では `stat -c %Y` が必要で、このままでは stale ロックが永久に消えません。\n2. claude/usage-cache.sh: stale ロックを消してから `mkdir` でロックを取るまでに隙間があり、2 つのプロセスが同時に stale と判定すると両方がロックを取得できます。\n3. claude/usage-cache.sh: `[ \"$unpriced\" = \"0\" ] || exit 0` のため、価格表が古い間はキャッシュが一度も更新されず、statusline は黙って古い金額を出し続けます。",
+    "should_trigger": true,
+    "note": "基準線。AI レビューの貼り付け ＋ 「対応した方がいい？」。ここが落ちるなら他を読む価値がない。指摘3件のうち 1 は正しく、2 は判断による、3 は意図的な設計なので、トリアージの中身も分かれる。"
+  },
+  {
+    "query": "GitHub の AI review が以下をコメントしてきました。対応の是非を判断してください。\n\n- claude/sync-links.sh: skills のループは `ln -sfn`、agents のループは `ln -sf` と不統一です。agents 側もディレクトリになった場合に壊れます。\n- claude/sync-links.sh: `.sync-ignore` がある場合に `rm -f` を使っていますが、対象が実ディレクトリだと削除に失敗したまま黙って進みます。",
+    "should_trigger": true,
+    "note": "description が名指ししている「対応の是非を判断して」。レビュアーは GitHub の AI review。"
+  },
+  {
+    "query": "https://github.com/ysk1031/dotfiles-trigger-eval-nonexistent/pull/12 にレビューコメントが付いています。どれを直すべきか教えてください。",
+    "should_trigger": true,
+    "setup": "git config user.email eval@local && git config user.name eval && git remote add origin https://github.com/ysk1031/dotfiles-trigger-eval-nonexistent.git",
+    "max_turns": 6,
+    "note": "指摘の貼り付けではなく PR URL を渡す経路。存在しないリポジトリの URL にしてあるのは、実在の PR を読みに行かせないため。取得は失敗するが、発動した時点で試行は打ち切られるので判定には影響しない。"
+  },
+  {
+    "query": "チームの先輩からレビューでこう言われました。どう思いますか？\n\n「claude/usage-cache.sh、`set -uo pipefail` だけで `-e` が無いのは意図的ですか？ 途中のコマンドが失敗しても進んでしまうので、事故の原因になりそうです」",
+    "should_trigger": true,
+    "note": "人間のレビュアー ＋ 「どう思う？」。AI レビュー以外の入力でも発動するかを見る。"
+  },
+  {
+    "query": "Codex left these comments on my PR. Which ones are actually worth fixing?\n\n1. claude/sync-links.sh: `prune_stale` resolves the symlink with `readlink`, which follows only one level. A chained link into this repo will not be pruned.\n2. claude/sync-links.sh: under `set -e`, the loop body's last statement `[[ -e \"$target\" ]] && continue` makes the function exit with status 1 when the last link is stale.\n3. claude/usage-cache.sh: hardcoding `bunx` makes the script unusable for anyone without bun installed.",
+    "should_trigger": true,
+    "note": "英語の依頼。description は英語なので、言語で差が出ないかを見る。"
+  },
+  {
+    "query": "Codex のレビューが 12 件出ました。数が多いので、本当に対応すべきものだけに絞ってください。\n\n1. claude/usage-cache.sh: `stat -f %m` が BSD 専用。\n2. claude/usage-cache.sh: stale ロック削除とロック取得の間に競合の余地がある。\n3. claude/usage-cache.sh: `bunx` がハードコードされている。\n4. claude/usage-cache.sh: `mktemp` の失敗時に理由がログに残らない。\n5. claude/usage-cache.sh: `jq` の存在確認をしていない。\n6. claude/sync-links.sh: `ln -sfn` と `ln -sf` が不統一。\n7. claude/sync-links.sh: `.sync-ignore` の分岐で `rm -f` がディレクトリに効かない。\n8. claude/sync-links.sh: `readlink` が 1 段しか辿らない。\n9. claude/sync-links.sh: `prune_stale` の終了ステータスが最後の判定に引きずられる。\n10. claude/hooks/gh-pr-guard.sh: `tail -n 500` の 500 が magic number。\n11. claude/hooks/gh-pr-guard.sh: `grep -qE` の正規表現が長く、コメント無しでは読めない。\n12. claude/hooks/gh-pr-guard.sh: deny の理由文が日本語固定で、英語環境の利用者に伝わらない。",
+    "should_trigger": true,
+    "max_turns": 5,
+    "note": "量の上端。スキル本体が >10 件のグルーピングに言及している側。下端は単発1件のケースと対にしてあり、両端とも発動するのが正しい。"
+  },
+  {
+    "query": "Codex がこれだけ言ってきました。対応いりますか？\n\n「claude/hooks/gh-pr-guard.sh の `tail -n 500` は magic number です。定数に切り出すべきです」",
+    "should_trigger": true,
+    "note": "量の下端。指摘 1 件・数行だけでも発動するかを見る。スキルには件数の下限が無いので true が正しい。上端の 12 件ケースと対。"
+  },
+  {
+    "query": "レビューが来たので目を通してほしいのですが、意見だけまずください。\n\n- claude/statusline-command.sh: キャッシュファイルが無いときの表示が未定義で、初回起動時に空欄になります。\n- claude/usage-cache.sh: `exit 0` が多用されていて、失敗が一切表に出ません。少なくともログには残すべきです。",
+    "should_trigger": true,
+    "note": "description が名指ししている「意見だけまずください」。修正着手を明示的に止めている言い方。"
+  },
+  {
+    "query": "別のセッションの Claude に claude/sync-links.sh をレビューさせたら、以下が出てきました。妥当か見てもらえますか。\n\n- `CLAUDE_DIR` が `$HOME/.claude` の場合、`mkdir -p` が既存のシンボリックリンクを黙って辿るため、意図しない場所に skills/ を作る可能性があります。\n- 削除済みスキルの stale link 掃除は、リポジトリ外を指すリンクを見ていないので取りこぼします。",
+    "should_trigger": true,
+    "note": "別 AI セッションのレビュー。description が挙げている入力元のうち、Codex・GitHub・人間以外の 1 つ。2 件目は仕様どおり（外部リンクは意図的に対象外）なので、コードを読めば「誤り」に倒れる。"
+  },
+  {
+    "query": "Codex の指摘と、あなた自身が気づいた点も総合して、対応すべきか整理してください。\n\n- claude/usage-cache.sh: 価格表が古い間キャッシュが更新されないので、statusline の金額が無言で古くなります。\n- claude/usage-cache.sh: `stale_lock_seconds=600` の根拠が不明です。",
+    "should_trigger": true,
+    "note": "スキル本体の Notes「総合して」の経路。外部指摘に自分の観察を足す形でも発動するかを見る。"
+  },
+  {
+    "query": "レビュー指摘が来たのですが、全部正しいのか自信がありません。対応の可否を判断してください。\n\n1. claude/usage-cache.sh: エラー時に `rm -rf \"$cache_dir\"` が走るので、他のキャッシュも消えてしまいます。\n2. claude/usage-cache.sh: 一時ファイルから `mv` していますが、`mv` は同一ボリューム内でも atomic ではないので、書き込み途中のキャッシュが読まれます。\n3. claude/usage-cache.sh: `stat -f %m` が macOS 専用です。",
+    "should_trigger": true,
+    "note": "指摘の種類の一端: 1 は存在しないコードについての誤り（レビュアーの hallucination）、2 は事実誤認、3 は正しい。スキルが想定する「claims, not facts」が最も効く形。"
+  },
+  {
+    "query": "対応するかどうかは私が決めるので、各指摘の妥当性だけ整理してください。修正はまだしないでください。\n\n- claude/sync-links.sh: `shopt -s nullglob` があるので skills/ が空のときに何も起きませんが、警告も出ないため設定ミスに気づけません。\n- claude/hooks/gh-pr-guard.sh: transcript が見つからない場合に無条件で deny するのは厳しすぎます。",
+    "should_trigger": true,
+    "note": "判断の主体がユーザーであることを明言し、修正を止めている形。Phase 1 で止まるスキルの前提そのままの依頼。"
+  },
+  {
+    "query": "このブランチの差分をレビューして、問題があれば指摘してください。",
+    "should_trigger": false,
+    "setup": "git config user.email eval@local && git config user.name eval && git remote add origin https://github.com/ysk1031/dotfiles-trigger-eval-nonexistent.git && git add -A && git commit -qm 'chore: baseline' --allow-empty && git switch -q -c fix/usage-cache-lock && printf '\\nstale_lock_seconds=900\\n' >> claude/usage-cache.sh && git commit -aqm 'raise stale lock window'",
+    "max_turns": 6,
+    "note": "Do NOT の 1 つ目「新規のコードレビューそのもの」。外部の指摘が存在しない。別のレビュー系スキルへルーティングされた場合もそこで打ち切られ、review-triage 不発として正しく数えられる。"
+  },
+  {
+    "query": "claude/usage-cache.sh を読んで、バグがないか見てもらえますか。",
+    "should_trigger": false,
+    "max_turns": 6,
+    "note": "Do NOT の 1 つ目の別形。ファイル 1 つに対する素のレビュー依頼。「見て」という語は近いが、判断対象の指摘が無い。"
+  },
+  {
+    "query": "その結論、私には出したままで構わないので、別のモデルにも同じ問題をブラインドで判断させて、両方の読みを並べてください。",
+    "should_trigger": false,
+    "prior_turn": "claude/usage-cache.sh を読んで、stale ロックの判定を 600 秒にしているのは妥当か、コードを読んだ範囲で 1 ターン内に結論だけ述べてください。実行やベンチマークはしないでください。",
+    "max_turns": 6,
+    "note": "Do NOT の 2 つ目「second-opinion による盲目的な裏取り」。turn 1 は外部の指摘を一切含まない自前の判断依頼なので、review-triage を発動させない。second-opinion が発動した場合は別スキルとして試行が打ち切られ、review-triage 不発として正しく数えられる。そのため expect_text は付けない（打ち切られた試行には判定対象の応答が無い）。"
+  },
+  {
+    "query": "念のため Fable にも同じ問いを投げて、独立に確認してください。",
+    "should_trigger": false,
+    "prior_turn": "claude/sync-links.sh の `prune_stale` を残すべきか捨てるべきか、コードを読んだ範囲で 1 ターン内に結論だけ述べてください。実行はしないでください。",
+    "max_turns": 6,
+    "note": "Do NOT の 2 つ目の別形。モデル名の直接指定。turn 1 は自前の判断依頼で、外部の指摘は無い。"
+  },
+  {
+    "query": "Codex にこう言われました。\n\n「claude/usage-cache.sh の `stat -f %m` は BSD 専用なので、Linux では `stat -c %Y` にフォールバックしてください」\n\n読んで納得したので、この通り直してください。",
+    "should_trigger": false,
+    "expect_text": "指摘の妥当性を判断する表を出して承認を待つのではなく、指摘された修正そのものに取りかかっている（修正を適用したか、適用する差分を示している）",
+    "max_turns": 6,
+    "note": "Do NOT の 3 つ目「ユーザーが既に『直して』と決めている場合」。呼び出しの有無だけで採点すると、迷って聞き返しただけの試行も不発＝合格になってしまう。Do NOT が要求しているのは「そのまま直す」ことなので、正しさは応答の中身にしか現れない。よって expect_text で判定する。スキルが発動した場合は失敗（ユーザーの決定を無視してトリアージに戻したことになる）。"
+  },
+  {
+    "query": "レビューで言われた通り、claude/sync-links.sh の agents のループも `ln -sfn` に揃えてください。判断はもう済んでいるので直すだけでいいです。",
+    "should_trigger": false,
+    "expect_text": "指摘の妥当性を判断する表を出して承認を待つのではなく、`ln -sfn` に揃える修正そのものに取りかかっている（修正を適用したか、適用する差分を示している）",
+    "max_turns": 6,
+    "note": "Do NOT の 3 つ目の別形。指摘の引用が短く、決定済みの宣言が明示されている。expect_text を使う理由は 1 つ前のケースと同じ。"
+  },
+  {
+    "query": "PR に付いたコメントはこれだけです。「LGTM、特に問題なし」「助かりました」。何か対応が必要ですか？",
+    "should_trigger": false,
+    "max_turns": 4,
+    "note": "量の下端のさらに外側。スキル本体が「純粋な approval は対象外」と書いているので、判断すべき指摘が 0 件。単発 1 件のケースが下端の内側、これが外側。ここで発動が割れた場合は description の文面の情報であって、必ずしも欠陥ではない。"
+  },
+  {
+    "query": "この PR をレビューして、気になったところをインラインコメントで付けてください。",
+    "should_trigger": false,
+    "setup": "git config user.email eval@local && git config user.name eval && git remote add origin https://github.com/ysk1031/dotfiles-trigger-eval-nonexistent.git && git add -A && git commit -qm 'chore: baseline' --allow-empty && git switch -q -c fix/usage-cache-lock && printf '\\nstale_lock_seconds=900\\n' >> claude/usage-cache.sh && git commit -aqm 'raise stale lock window'",
+    "max_turns": 6,
+    "note": "Do NOT の 1 つ目と PR という語の組み合わせ。PR に触るが、指摘を受ける側ではなく出す側。"
+  },
+  {
+    "query": "この PR の変更内容を解説してください。レビューはまだ誰もしていません。",
+    "should_trigger": false,
+    "setup": "git config user.email eval@local && git config user.name eval && git remote add origin https://github.com/ysk1031/dotfiles-trigger-eval-nonexistent.git && git add -A && git commit -qm 'chore: baseline' --allow-empty && git switch -q -c fix/usage-cache-lock && printf '\\nstale_lock_seconds=900\\n' >> claude/usage-cache.sh && git commit -aqm 'raise stale lock window'",
+    "max_turns": 6,
+    "note": "explain-diff の領分。PR という語があるだけで発動しないかを見る近接ケース。"
+  },
+  {
+    "query": "shellcheck が claude/usage-cache.sh に対してこう出しています。「SC2086: Double quote to prevent globbing and word splitting」。直すべきか見てください。",
+    "should_trigger": false,
+    "max_turns": 5,
+    "note": "指摘の種類の境界。linter の機械出力はレビュアーの主張ではないので false に置いた。ただしスキル本文は入力元を「AI レビュアー・別セッション・人間」と列挙するだけで linter に言及していないため、ここが割れたら文面で切り分けるべき箇所。"
+  },
+  {
+    "query": "レビュー指摘への対応方針を、チームの docs に書いておいてください。",
+    "should_trigger": false,
+    "max_turns": 5,
+    "note": "レビューという語を含むが、指摘を判断するのではなく方針を文書化する依頼。"
+  },
+  {
+    "query": "PR のレビューコメントに返信して、対応済みだと伝えてください。",
+    "should_trigger": false,
+    "setup": "git config user.email eval@local && git config user.name eval && git remote add origin https://github.com/ysk1031/dotfiles-trigger-eval-nonexistent.git",
+    "max_turns": 5,
+    "note": "判断も修正も済んだ後の作業。スキル本体も Phase 2 で「頼まれない限り GitHub のコメントに返信しない」と書いている側。"
+  }
+]
