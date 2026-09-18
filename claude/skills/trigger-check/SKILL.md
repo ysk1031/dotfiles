@@ -10,13 +10,13 @@ description: >-
 
 One question only: **given this prompt, does the skill fire?** Not whether the output was good, not whether the skill did the right thing afterwards — just whether the routing decision landed where it should. Quality of the produced work belongs to `empirical-prompt-tuning`; keep the two apart.
 
-The answer must come from **fresh `claude -p` processes**, not from the current session. The reason is asymmetric loading: the skill list (name + description) reflects edits immediately, but **CLAUDE.md is snapshotted when a session starts and never re-read** — subagents spawned from this session inherit that stale copy. So a subagent asked to test a CLAUDE.md change holds *the old rules plus the new skill* and behaves correctly without ever needing the skill. That is not a measurement.
+The answer must come from **fresh `claude -p` processes**, not from a subagent of this session. The skill list reflects edits immediately, but **CLAUDE.md is snapshotted at session start and never re-read**, so a subagent testing a CLAUDE.md change holds the old rules plus the new skill and behaves correctly without ever needing it.
 
 Verdicts come from `tool_use` events in `--output-format stream-json`, never from the model saying it used something.
 
 ## The test prompt file
 
-Each skill owns its cases at `claude/skills/<name>/evals/trigger-eval.json` — or, for a skill scoped to this repository alone, `.claude/skills/<name>/evals/trigger-eval.json`. Either way it is a flat JSON array. Twenty is the established size: ten that must fire, ten that must not.
+Each skill owns its cases at `claude/skills/<name>/evals/trigger-eval.json` — or, for a skill scoped to this repository alone, `.claude/skills/<name>/evals/trigger-eval.json`. Either way it is a flat JSON array. Ten of each is the floor — ten that must fire, ten that must not. Add more where the boundary is busy (`pr` has 24, `second-opinion` 25).
 
 A CLAUDE.md rule has no skill directory to live under, so its cases go in `claude/evals/claude-md/<topic>.json` — one file per rule or per closely-related group, named after what it measures. Nothing finds these by convention; pass the path with `--evals`. The size convention does not carry over: what a rule needs is coverage of the behaviour it asks for, so the count follows the rule.
 
@@ -38,16 +38,10 @@ A CLAUDE.md rule has no skill directory to live under, so its cases go in `claud
 | `setup` | no | shell run in the trial's working directory first, to create the situation the case assumes |
 | `prior_turn` | no | a first turn used only to make the model reach a conclusion; `query` then arrives as turn 2 |
 | `expect_text` | no | switches judging from "was the skill called" to "does the reply do this" — see below |
-| `max_turns` | no | raises the turn cap for this case alone; a case that has to *do* the task before the behaviour appears needs it, and raising the flag would pay for it on all twenty |
+| `max_turns` | no | raises the turn cap for this case alone. Set it on the cases that have to read code or do the task before the behaviour appears, and leave the rest on the default — raising the flag pays for it on every case |
 | `note` | no | free text for the human |
 
-**`expect_text` exists because for some skills, calling the skill is the wrong answer.** `second-opinion` says to offer first and run only on consent, so when the user signals doubt the correct behaviour is a sentence — *「別のモデルにも聞いてみますか?」* — and no skill call at all. Scoring those cases by call-or-not marks correct behaviour as failure. With `expect_text` set, a cheap Haiku judge reads the final reply and decides whether it did that thing; wording is free, meaning is what counts. A skill call in such a case is a failure, because the skill acted without asking.
-
-**A case with an `expect_text` has to make the model actually reach the moment being measured.** Written as "add a line to that section", the trial correctly asked which line instead of editing — following the rule that vague instructions get a question, not a guess — and the offer that was supposed to follow the edit never came up. Spell out enough that the work happens.
-
-**A `prior_turn` must not itself fire the skill under test.** Once the skill has been called in turn 1 its body is in context, and turn 2 follows the procedure without calling the Skill tool again — the transcript shows the work being done and the verdict reads `no_call`. Measured 2026-09-16 on `second-opinion`: a consent case whose turn 1 also asked for a judgment scored 0 of 3 while every trial consulted the second model; with turn 1 reduced to an explanation and the judgment moved to turn 2, it scored 3 of 3. Put only the setup — the permission, the context — in turn 1, and the first decision point in `query`.
-
-**Write cases against the skill's own Do NOT clauses.** `explain-diff` excludes changes small enough to say out loud; measured with a 3-file/6-line diff it did not fire 3 times out of 3 — correct behaviour, nearly misdiagnosed as regression. It fired 3 out of 3 on 21 files/760 lines. Give a positive case a target the skill is actually supposed to accept, and where size or kind is part of the rule, measure both ends so the non-firing side is evidence too.
+Adding or editing cases has its own rules — `expect_text` vs a skill call, what a `prior_turn` may contain, measuring both ends of a size rule. Read `references/writing-cases.md` before writing one.
 
 ## Running it
 
@@ -57,11 +51,11 @@ A CLAUDE.md rule has no skill directory to live under, so its cases go in `claud
 ~/.claude/skills/trigger-check/scripts/run_trigger_eval.py --skill <name> --seed-repo <repo> [--runs 3] [--only 2,7] [--model opus|sonnet] [--jobs 8] [--dry-run]
 ```
 
-**Pass `--seed-repo`.** Without it each trial starts in a near-empty directory, and a prompt like "explain the diff" has nothing to refer to — so the trial goes looking, finds the real repository and the real `~/.claude`, and spends its turns there. Measured 2026-08-03: 8 of 20 trials escaped that way, which burns the turn budget and makes the result depend on the state of the machine that day. Seeding copies the working tree and `.git` into each trial, so uncommitted work is present and every trial is self-contained. Point it at the repository the prompts talk about. Each copy has its `origin` removed, so a skill whose work needs a remote — opening a PR is the case — hits "remote が無い" and stops before the behaviour being measured; give those cases a `setup` that adds a placeholder origin pointing at a repository that does not exist.
+**Pass `--seed-repo`.** Without it each trial starts in a near-empty directory, and a prompt like "explain the diff" has nothing to refer to — so the trial goes looking, finds the real repository and the real `~/.claude`, and spends its turns there. Measured 2026-08-03: 8 of 20 trials escaped that way, which burns the turn budget and makes the result depend on the state of the machine that day. Seeding copies the working tree and `.git` into each trial, so uncommitted work is present and every trial is self-contained. Point it at the repository the prompts talk about. Each copy has its `origin` removed, so a skill whose work needs a remote (opening a PR) stops before the behaviour being measured; give those cases a `setup` that adds a placeholder origin pointing at a repository that does not exist.
 
-The script owns the parts that used to fail every time — the real `claude` binary path, closed stdin, no `timeout`, broad `--allowedTools`, throwaway per-trial repositories outside its own output directory. Read the header comment before changing any of it; each line there cost a wasted paid batch.
+The script owns the parts that used to fail every time: the real `claude` binary path, closed stdin, no `timeout`, broad `--allowedTools`, throwaway per-trial repositories outside its own output directory. Read its header comment before changing any of it.
 
-**This costs real money. Show the command and an estimate in chat and get approval before the first run of a session.** `--dry-run` prints the plan and the exact command without spending anything.
+**This costs real money. Show the command and an estimate in chat and get approval before each run that spends — the narrow second run as well as the first.** `--dry-run` prints the plan and the exact command without spending anything. Base the estimate on what past runs in `trigger-eval-out` actually cost; with nothing to go on, give a range and say it is an estimate.
 
 ### Two stages, not one
 
@@ -90,13 +84,13 @@ idx  期待       試行  発動  pass  測定不能  判定  query
 
 `判定` is `安定` (every valid trial agreed and passed), `安定(不合格)` (agreed and all failed — a real defect), `割れ` (send it to stage 2), or `測定不能` (nothing valid survived). `発動` counts the trials where the skill fired; `pass` counts the trials that matched what the case expected, so on a case expecting no firing the two move in opposite directions.
 
-Each run clears and re-collects only the trials in its own plan, so the narrow second run shows those cases alone instead of carrying the first run's rows forward. The per-trial columns are documented above `summary.tsv`'s assembly in the script.
+Each run clears and re-collects only the trials in its own plan, so the narrow second run shows those cases alone instead of carrying the first run's rows forward.
 
 **`測定不能` is the column to look at first.** A trial that measured nothing is dropped rather than counted, because counting it produces a wrong diagnosis. Trials are dropped when the case's `setup` failed, so the situation the prompt assumes was never created; when the run exits 127 (wrong `claude` path — every run silently produces an empty transcript that looks like a clean finish); when no result line arrives at all; when a `prior_turn` case produced no answer in turn 1 so there was no conclusion for turn 2 to react to; when the judge returned no verdict on an `expect_text` case; or when a case that expects firing runs out of turns. **Running out of turns is not "did not fire"** — it is the one thing a small cap makes indistinguishable from it. Several of them mean the case needs a bigger cap, or a `setup` that gives the trial something concrete to work with.
 
-A case that expects **no** firing is scored even when the cap runs out, and flagged `turn_capped` in the summary: the trial spent every turn on the work it was asked for and never reached for this skill, which is the observation wanted — but the claim it supports is only "did not fire within the cap", so the flag stays visible. A trial that picks a *different* skill is stopped there and scored the same way, since the prompt has already been routed elsewhere. Leaving those to run produced the opposite of the truth: a trial that correctly chose `empirical-prompt-tuning` in turn 1 worked for three more turns and was then discarded as unmeasurable.
+A case that expects **no** firing is scored even when the cap runs out, and flagged `turn_capped` in the summary: the trial spent every turn on the work it was asked for and never reached for this skill, which is the observation wanted — but the claim it supports is only "did not fire within the cap", so the flag stays visible. A trial that picks a *different* skill is stopped there and scored the same way, since the prompt has already been routed elsewhere — leaving it to run burns the cap and ends up discarded as unmeasurable.
 
-The reported cost excludes trials stopped at the moment of firing; those never reach the API's own accounting. Stopping there is deliberate — the verdict is already known, and letting one run to completion has cost $1.39 and nine minutes.
+The reported cost excludes trials stopped at the moment of firing — they never reach the API's own accounting. The verdict is already known by then, and one trial left to run cost $1.39 and nine minutes.
 
 ## After the run
 
