@@ -90,7 +90,7 @@ Each run clears and re-collects only the trials in its own plan, so the narrow s
 
 A case that expects **no** firing is scored even when the cap runs out, and flagged `turn_capped` in the summary: the trial spent every turn on the work it was asked for and never reached for this skill, which is the observation wanted — but the claim it supports is only "did not fire within the cap", so the flag stays visible. A trial that picks a *different* skill is stopped there and scored the same way, since the prompt has already been routed elsewhere — leaving it to run burns the cap and ends up discarded as unmeasurable.
 
-The reported cost excludes trials stopped at the moment of firing — they never reach the API's own accounting. The verdict is already known by then, and one trial left to run cost $1.39 and nine minutes.
+The reported cost excludes trials stopped at the moment of firing — they never reach the API's own accounting. The verdict is already known by then, and one trial left to run cost 1.39 USD and nine minutes.
 
 ## After the run
 
