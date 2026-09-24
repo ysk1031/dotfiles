@@ -19,7 +19,7 @@ Generate a commit message for staged changes and let the user review/edit before
 Call the Agent tool with:
 - subagent_type: "commit-composer"
 - description: "analyze staged changes"
-- prompt: Replace `$ARGUMENTS` in the agent's loaded prompt with the actual user arguments and execute.
+- prompt: the arguments the user passed to this skill, verbatim (empty when there are none).
 
 The subagent will return the proposed commit message (or an error/warning).
 
