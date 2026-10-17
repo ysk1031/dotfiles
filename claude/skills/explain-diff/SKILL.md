@@ -1,7 +1,8 @@
 ---
 name: explain-diff
+disable-model-invocation: true
 description: >-
-  Generates a self-contained HTML explainer page, written in Japanese, that helps a human deeply understand a code change (a working-tree diff, a branch, a commit range, or a PR). Triggers on: "この変更を解説して", "この PR / diff / ブランチを理解したい", "explain this diff/PR", "前に作った解説ページを最新のコミットに合わせて更新して", or any request whose goal is understanding a change rather than judging it. Proactively suggest this before a user reviews/approves an AI-implemented change. Do NOT use for: bug-hunting code review, judging whether review comments are worth acting on (review-triage), writing commit messages or PR descriptions (commit / pr), or a change small enough to explain in a sentence out loud.
+  Generates a self-contained HTML explainer page, written in Japanese, that helps a human deeply understand a code change (a working-tree diff, a branch, a commit range, or a PR).
 ---
 
 # Explain Diff

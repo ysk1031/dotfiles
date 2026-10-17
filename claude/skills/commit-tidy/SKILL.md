@@ -2,7 +2,7 @@
 name: commit-tidy
 disable-model-invocation: true
 description: >-
-  Rewrite the commit history of a branch that is not yet merged: regroup, reorder, squash, drop and reword commits so the log reads as one clean sequence, prove the resulting tree is identical to the original, then force-push. Manual invocation only, because it rewrites history. Use when the user says 「コミットログを綺麗に整理して」「コミット履歴を整理したい」「紆余曲折があったので綺麗なコミットログにしてほしい」「コミットのメッセージが変遷を書きすぎなのでスリムにして」「PRのコミットログが汚いので force push して整えて」「まだ push してないコミットを整理したい、案を考えて」, or asks to squash / reword / reorder / split commits, or to clean up a branch's log before opening or updating a pull request. A new commit layout is proposed and the turn ends there; nothing is rewritten until the user approves it. Do NOT use for committing working-tree changes (that is commit), for opening or rewriting a pull request (pr), for explaining what a change does (explain-diff), or for rewriting commits that are already merged into the default branch.
+  Rewrite the commit history of a branch that is not yet merged: regroup, reorder, squash, drop and reword commits so the log reads as one clean sequence, prove the resulting tree is identical to the original, then force-push.
 allowed-tools: AskUserQuestion, Bash
 argument-hint: "[range: defaults to @{u}..HEAD; also accepts origin/main..HEAD, HEAD~5, or a PR number] [--push to force-push after verification] [--no-push to hand the push to the user]"
 metadata:

@@ -1,6 +1,6 @@
 [
-  {"query": "explain-diff の description をさっき書き換えた。コミット前に、狙ったときに発動するか測っておいて", "should_trigger": true,
-   "setup": "perl -pi -e 's/Generates a self-contained HTML explainer page/Generates a standalone HTML explainer page/' claude/skills/explain-diff/SKILL.md",
+  {"query": "pr スキルの description をさっき書き換えた。コミット前に、狙ったときに発動するか測っておいて", "should_trigger": true,
+   "setup": "perl -pi -e 's/Create a GitHub Pull Request with/Open a GitHub Pull Request with/' claude/skills/pr/SKILL.md",
    "note": "直球。setup で description に未コミットの変更を作り、「さっき書き換えた」を実在させる。"},
 
   {"query": "review-triage のトリガー検証して。お題は evals に入ってるやつでいい", "should_trigger": true,
