@@ -140,5 +140,12 @@
     "max_turns": 6,
     "setup": "git config user.email eval@local && git config user.name eval && git remote add origin https://github.com/ysk1031/dotfiles-trigger-eval-nonexistent.git && git add -A && git commit -qm 'chore: baseline' --allow-empty && git switch -q -c docs/readme-setup-notes && printf '\\n## トラブルシュート\\n\\nmise のシムが効かないときは `mise reshim` を実行する。\\n' >> README.md && printf '\\n[alias]\\n\\tst = status -sb\\n' >> .gitconfig && git commit -aqm 'docs: add a troubleshooting note and a git st alias'",
     "note": "green-api の文面そのまま。"
+  },
+  {
+    "query": "PR #12 と #13 の本文に書いた prompt_hash が古いので、それぞれ 3f9a1c に直してください",
+    "should_trigger": true,
+    "max_turns": 6,
+    "setup": "git config user.email eval@local && git config user.name eval && git remote add origin https://github.com/ysk1031/dotfiles-trigger-eval-nonexistent.git && git add -A && git commit -qm 'chore: baseline' --allow-empty && git switch -q -c docs/readme-setup-notes && printf '\\n## トラブルシュート\\n\\nmise のシムが効かないときは `mise reshim` を実行する。\\n' >> README.md && printf '\\n[alias]\\n\\tst = status -sb\\n' >> .gitconfig && git commit -aqm 'docs: add a troubleshooting note and a git st alias'",
+    "note": "既存 PR 本文の部分修正。green-api で全文確認が長すぎると言われた依頼の形。"
   }
 ]

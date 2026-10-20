@@ -101,4 +101,4 @@ Show the PR URL from the output. Under `--auto`, add 「自律作成のためdra
 
 ## Rewriting the description of an existing PR
 
-Everything above holds with a few differences — which base to use, why the new body is written before the old one is read, and which `gh` command replaces `gh pr create`. Read `references/rewriting-a-description.md` before starting one.
+Everything above holds with a few differences — which base to use, why the new body is written before the old one is read, which `gh` command replaces `gh pr create`, and why a fix to a few lines is confirmed with a diff instead of the full body. Read `references/rewriting-a-description.md` before starting one.
