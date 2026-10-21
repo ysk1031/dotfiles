@@ -73,7 +73,10 @@ def make_work_tree(cfg, work):
         def skip_out(directory, names):
             return {n for n in names if Path(directory, n).resolve() == cfg.out}
 
-        shutil.copytree(cfg.seed_repo, work, symlinks=True, ignore=skip_out)
+        if (cfg.seed_repo / ".git").is_file():
+            seed_worktree(cfg.seed_repo, work, skip_out)
+        else:
+            shutil.copytree(cfg.seed_repo, work, symlinks=True, ignore=skip_out)
         # The copy carries .git, so it also carries `origin` and whatever
         # credentials reach it. No case needs a remote, and a trial that decides
         # to push should not be able to reach the real one.
@@ -87,6 +90,43 @@ def make_work_tree(cfg, work):
         subprocess.run([*git, "add", "README.md"], capture_output=True)
         subprocess.run([*git, "-c", "user.email=eval@local", "-c", "user.name=eval",
                         "commit", "-qm", "init"], capture_output=True)
+
+
+def seed_worktree(seed, work, skip_out):
+    """Seed from a linked worktree without sharing its repository.
+
+    A worktree's .git is a one-line file pointing at the main repository's
+    gitdir, so copying it gives every trial the real repository: on 2026-10-20 a
+    trial's `remote remove origin` and its case `setup` rewrote the real
+    origin, upstream, [user] and the worktree's HEAD. Each trial gets its own
+    repository with every local branch, the seed's HEAD and its index instead.
+    """
+    git_seed = ["git", "-C", str(seed)]
+    head = subprocess.run([*git_seed, "symbolic-ref", "-q", "HEAD"],
+                          capture_output=True, text=True).stdout.strip()
+    if not head:
+        head = subprocess.run([*git_seed, "rev-parse", "HEAD"],
+                              capture_output=True, text=True, check=True).stdout.strip()
+    index = Path(subprocess.run([*git_seed, "rev-parse", "--path-format=absolute",
+                                 "--git-path", "index"],
+                                capture_output=True, text=True, check=True).stdout.strip())
+
+    dot_git = work / ".git"
+    subprocess.run(["git", "clone", "-q", "--bare", "--no-hardlinks", str(seed), str(dot_git)],
+                   capture_output=True, check=True)
+    git = ["git", "--git-dir", str(dot_git)]
+    subprocess.run([*git, "config", "core.bare", "false"], check=True)
+    if head.startswith("refs/"):
+        subprocess.run([*git, "symbolic-ref", "HEAD", head], check=True)
+    else:
+        subprocess.run([*git, "update-ref", "--no-deref", "HEAD", head], check=True)
+    if index.exists():
+        shutil.copy2(index, dot_git / "index")
+
+    def skip(directory, names):
+        return skip_out(directory, names) | ({".git"} if Path(directory) == seed else set())
+
+    shutil.copytree(seed, work, symlinks=True, ignore=skip, dirs_exist_ok=True)
 
 
 def judge(expect_text, reply):
