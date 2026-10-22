@@ -46,6 +46,7 @@ uv = "latest"
 "brew:git" = "latest"                      # newer than the Apple Git bundled with Xcode CLT
 "brew:mysql-client@8.0" = "latest"         # mise only offers the conda backend, and defaults to 9.x
 "brew:pkgconf" = "latest"                  # C library, has to be compiled
+"brew:redis" = "latest"                    # mise only offers vfox/asdf, which compile from source
 "brew:trash" = "latest"                    # backs the `rm` alias in zsh/my.zsh
 "brew:zsh-syntax-highlighting" = "latest"  # zsh plugin rather than a binary
 
