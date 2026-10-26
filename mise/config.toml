@@ -16,7 +16,6 @@ dive = "latest"
 fzf = "latest"
 gh = "latest"
 ghq = "latest"
-herdr = "latest"
 jq = "latest"
 lazydocker = "latest"
 lazygit = "latest"
@@ -32,10 +31,6 @@ uv = "latest"
 
 # Not in mise's registry under a short name, so the aqua backend is named directly.
 "aqua:aws/session-manager-plugin" = "latest"
-
-# Used to live in PNPM_HOME via `pnpm add -g`. ~/.claude.json's mcpServers
-# refers to it by name, so it has to stay resolvable on PATH.
-"npm:chrome-devtools-mcp" = "latest"
 
 # Packages mise cannot install well yet, so Homebrew still provides them.
 # Re-check as mise's registry grows -- the goal is to empty this section.
