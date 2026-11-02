@@ -66,8 +66,6 @@ One table, most consequential first:
 
 ## Step 5: Record the run
 
-```bash
-date +%Y-%m-%d > ~/.claude/.config-audit-last-run
-```
+Write today's date (`YYYY-MM-DD` and a newline) to `~/.claude/.config-audit-last-run` with the Write tool, reading the file first. A shell redirect fails there: the sandbox denies Bash writes under `~/.claude`.
 
 This write belongs to the audit itself, not to Step 4's approved rows — run it even when the user approved nothing, and even when the table was empty. It is the only thing keeping a manually-invoked audit from being forgotten.

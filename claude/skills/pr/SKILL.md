@@ -85,17 +85,20 @@ Then the unpushed-commit status — either 「リモートにpushされていな
 
 Any other push failure: show the error and stop.
 
-**Create.** The body goes through a HEREDOC — a plain string mangles markdown line breaks and special characters — and always carries the footer, which keeps the PR's origin traceable.
+**Create.** Write the body with the Write tool to a file under the scratchpad directory's absolute path, then pass it with `--body-file`. A plain `--body` string mangles markdown line breaks and special characters, and `--body "$(cat <<'EOF' …)"` fails: the command substitution makes the sandbox run `gh`, which then cannot read its own credentials. The body always carries the footer, which keeps the PR's origin traceable.
 
-```bash
-gh pr create --base <base from Phase 1> --title "<confirmed title>" --body "$(cat <<'EOF'
+```markdown
 <confirmed body>
 
 ---
 🤖 Generated with [Claude Code](https://claude.com/claude-code)
-EOF
-)" [--draft if requested, or always under --auto]
 ```
+
+```bash
+gh pr create --base <base from Phase 1> --title "<confirmed title>" --body-file <scratchpad>/pr-body.md [--draft if requested, or always under --auto]
+```
+
+Keep `gh` at the head of the command and run it alone — no `cd … &&`, no `;`-chained commands — for the same sandbox reason.
 
 Show the PR URL from the output. Under `--auto`, add 「自律作成のためdraftで作成した。レビューして問題なければ GitHub で Ready for review に切り替えてほしい。」 and any questions the body left open — with the confirmation step skipped, this report is the only place the human sees them.
 
