@@ -63,7 +63,7 @@
 
   {"query": "この trigger-check スキル追加の差分、何をやってるのか解説して", "should_trigger": false,
    "setup": "git add claude/skills/trigger-check && git -c user.email=eval@local -c user.name=eval commit -qm 'feat(trigger-check): スキル発動の検証ランナーを追加' > /dev/null 2>&1 || true",
-   "note": "スキル名が出てくるが依頼は差分の解説。explain-diff の領分。setup で解説対象の差分を HEAD に実在させる。"},
+   "note": "スキル名が出てくるが依頼は差分の解説。setup で解説対象の差分を HEAD に実在させる。"},
 
   {"query": "ステージした変更をコミットして。メッセージはいつもの Conventional Commits で", "should_trigger": false,
    "setup": "printf '\\n# scratch\\n' >> README.md && git add README.md",

@@ -121,7 +121,7 @@
     "should_trigger": false,
     "setup": "git config user.email eval@local && git config user.name eval && git remote add origin https://github.com/ysk1031/dotfiles-trigger-eval-nonexistent.git && git add -A && git commit -qm 'chore: baseline' --allow-empty && git switch -q -c fix/usage-cache-lock && printf '\\nstale_lock_seconds=900\\n' >> claude/usage-cache.sh && git commit -aqm 'raise stale lock window'",
     "max_turns": 6,
-    "note": "explain-diff の領分。PR という語があるだけで発動しないかを見る近接ケース。"
+    "note": "差分の解説依頼。PR という語があるだけで発動しないかを見る近接ケース。"
   },
   {
     "query": "shellcheck が claude/usage-cache.sh に対してこう出しています。「SC2086: Double quote to prevent globbing and word splitting」。直すべきか見てください。",
