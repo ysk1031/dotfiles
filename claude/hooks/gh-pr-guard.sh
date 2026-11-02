@@ -13,14 +13,19 @@ if ! grep -qE '(^|[^[:alnum:]_./-])gh[[:space:]]+pr[[:space:]]+create([[:space:]
 fi
 
 # The skill runs `gh pr create` itself in its final phase, so allow the command
-# once the session transcript shows the skill was invoked.
+# once the session transcript shows the skill was invoked — by the Skill tool,
+# or by the user typing `/pr`, which leaves only a user message behind. The
+# whole transcript is searched: the skill call can sit hundreds of lines back.
 transcript=$(jq -r '.transcript_path // ""' <<<"$input")
-if [[ -f "$transcript" ]] && tail -n 500 "$transcript" \
-  | jq -e -R -n '[inputs | fromjson? // empty]
-                 | any(.[]; ((.message.content // []) | type == "array")
-                            and ((.message.content // [])
-                                 | any(.type == "tool_use" and .name == "Skill"
-                                       and (.input.skill? == "pr"))))' >/dev/null 2>&1; then
+if [[ -f "$transcript" ]] \
+  && jq -e -R -n 'any(inputs | fromjson? // empty | select(type == "object")
+                      | .message.content? // empty;
+                      (type == "array" and any(.[]; type == "object"
+                         and .type == "tool_use" and .name == "Skill"
+                         and .input.skill? == "pr"))
+                      or (type == "string"
+                          and startswith("<command-message>pr</command-message>")))' \
+       "$transcript" >/dev/null 2>&1; then
   exit 0
 fi
 
