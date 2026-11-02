@@ -1,0 +1,22 @@
+[
+  {"query": "ローカルブランチすべてについて、それぞれのブランチにある src/app.py の最終行を一覧にして。",
+   "should_trigger": true,
+   "setup": "git switch -q -c feature/a && printf 'X = 1\\n' >> src/app.py && git commit -qam a && git switch -q main && git switch -q -c feature/b && printf 'Y = 2\\n' >> src/app.py && git commit -qam b && git switch -q main",
+   "expect_text": "main・feature/a・feature/b の3ブランチについて、src/app.py の最終行を示している。",
+   "max_turns": 5,
+   "note": "ブランチ名をループ変数にして git show $b:src/app.py と書きたくなる場面。:s は zsh の置換修飾子。"},
+
+  {"query": "直近3コミットそれぞれの時点で src/util.py が何行あったかを、コミットごとに一覧にして。",
+   "should_trigger": true,
+   "setup": "for i in 1 2 3; do printf 'x%s = %s\\n' $i $i >> src/util.py && git commit -qam \"step $i\"; done",
+   "expect_text": "直近3コミットそれぞれについて、src/util.py の行数を示している。",
+   "max_turns": 5,
+   "note": "コミット ID をループ変数にして git show $c:src/util.py と書きたくなる場面。"},
+
+  {"query": "main・feature/a・feature/b の各ブランチで、src/util.py と docs/guide.md の行数を表にして。",
+   "should_trigger": true,
+   "setup": "git switch -q -c feature/a && printf 'X = 1\\n' >> src/util.py && git commit -qam a && git switch -q main && git switch -q -c feature/b && printf 'More.\\n' >> docs/guide.md && git commit -qam b && git switch -q main",
+   "expect_text": "3ブランチそれぞれについて、src/util.py と docs/guide.md の行数を示している。",
+   "max_turns": 5,
+   "note": "ブランチ変数のあとに :src/… と :docs/… が続く場面。:s と :d。"}
+]

@@ -6,8 +6,11 @@ set -uo pipefail
 input=$(cat)
 cmd=$(jq -r '.tool_input.command // ""' <<<"$input")
 
-if ! grep -qE '(^|[^[:alnum:]_./-])gh[[:space:]]+pr[[:space:]]+create([[:space:]]|$)' <<<"$cmd" \
-  && ! { grep -qE '(^|[^[:alnum:]_./-])gh[[:space:]]+pr[[:space:]]+edit([[:space:]]|$)' <<<"$cmd" \
+# Match `gh` only where a command starts, so the words inside a quoted string,
+# a SQL LIKE pattern or a heredoc body don't trip the guard.
+at_cmd='(^|[;&|({]|\$\(|(^|[[:space:]])(then|do|else)[[:space:]])[[:space:]]*([A-Za-z_][A-Za-z0-9_]*=[^[:space:]]*[[:space:]]+)*gh[[:space:]]+pr[[:space:]]+'
+if ! grep -qE "${at_cmd}create([[:space:]]|\$)" <<<"$cmd" \
+  && ! { grep -qE "${at_cmd}edit([[:space:]]|\$)" <<<"$cmd" \
          && grep -qE -- '--body' <<<"$cmd"; }; then
   exit 0
 fi

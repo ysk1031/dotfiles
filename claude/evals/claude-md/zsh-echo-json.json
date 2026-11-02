@@ -1,0 +1,20 @@
+[
+  {"query": "この JSON を jq に標準入力で渡して、各要素の body を生の文字列（-r）で出して: [{\"path\": \"src/app.py\", \"body\": \"1行目\\n2行目\"}]",
+   "should_trigger": true,
+   "expect_text": "body の中身が「1行目」「2行目」の2行で出たことを示している。",
+   "max_turns": 4,
+   "note": "文字列に \\n を含む JSON を標準入力で渡す場面。echo '…' | jq と書きたくなる典型。"},
+
+  {"query": "src/util.py へのレビューコメントを [{\"path\": …, \"body\": …}] の形の JSON で作って、python3 -m json.tool に標準入力で渡して正しい JSON か確かめて。body は「add に型ヒントを付けてください」と「例: def add(a: int, b: int) -> int」の2行にして。",
+   "should_trigger": true,
+   "expect_text": "作った JSON が python3 -m json.tool で正しく解析できたことを示している。",
+   "max_turns": 4,
+   "note": "2行の body を \\n で JSON に埋める場面。"},
+
+  {"query": "tools/post_comment.py は、標準入力から JSON 配列（各要素に path と body）を受け取ってレビューコメントを登録するスクリプト。src/app.py へのコメントを1件登録して。body は2行で、1行目「print より logging を使ってください」、2行目「理由: 本番でログレベルを切り替えたい」。",
+   "should_trigger": true,
+   "setup": "mkdir -p tools && printf 'import sys, json\\nd = json.load(sys.stdin)\\nfor c in d:\\n    print(c[\"path\"], repr(c[\"body\"]))\\n' > tools/post_comment.py",
+   "expect_text": "スクリプトが JSON を解析してコメントを1件出力した（エラーにならなかった）ことを示している。",
+   "max_turns": 5,
+   "note": "crit comment --json と同じ形の場面。"}
+]

@@ -1,0 +1,22 @@
+[
+  {"query": "src/slow.py を実行して。終わらないかもしれないので、5秒で打ち切って結果を教えて。",
+   "should_trigger": true,
+   "setup": "printf 'import time\\ntime.sleep(100)\\nprint(\"done\")\\n' > src/slow.py",
+   "expect_text": "src/slow.py を実行し、時間内に終わらず打ち切った（または打ち切られた）ことを報告している。",
+   "max_turns": 4,
+   "note": "timeout 5 python3 src/slow.py と書きたくなる典型。"},
+
+  {"query": "src/slow.py を3回実行して、それぞれ2秒で打ち切ったときの終了コードを教えて。",
+   "should_trigger": true,
+   "setup": "printf 'import time\\ntime.sleep(100)\\nprint(\"done\")\\n' > src/slow.py",
+   "expect_text": "3回の実行それぞれについて、打ち切ったときの終了コード（または打ち切った結果）を示している。",
+   "max_turns": 6,
+   "note": "1回ごとに時間を区切る必要があり、Bash ツールの timeout 引数では1回の呼び出しにまとめられない場面。"},
+
+  {"query": "python3 -m unittest discover tests でテストを走らせて。ハングすると困るので、60秒を超えたら打ち切って。",
+   "should_trigger": true,
+   "setup": "mkdir -p tests && printf 'import unittest, time\\nclass T(unittest.TestCase):\\n    def test_slow(self):\\n        time.sleep(3)\\n        self.assertEqual(1, 1)\\n' > tests/test_slow.py",
+   "expect_text": "テストを実行し、その結果（成功・失敗の件数など）を報告している。",
+   "max_turns": 4,
+   "note": "テスト実行に時間の上限をつける場面。"}
+]
