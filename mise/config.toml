@@ -29,8 +29,9 @@ terragrunt = "latest"
 tfenv = "latest"
 uv = "latest"
 
-# Not in mise's registry under a short name, so the aqua backend is named directly.
+# Not in mise's registry under a short name, so the backend is named directly.
 "aqua:aws/session-manager-plugin" = "latest"
+"github:lambdalisue/cclens" = "latest" # not in the aqua registry, pulls the GitHub release directly
 
 # Packages mise cannot install well yet, so Homebrew still provides them.
 # Re-check as mise's registry grows -- the goal is to empty this section.
