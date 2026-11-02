@@ -78,22 +78,21 @@ Sensitive path list (high-precision filename/path patterns only — deliberately
 **Determine Co-Authored-By name**: Never skip the Co-Authored-By trailer — it is what makes AI-generated commits auditable.
 Format: `Co-Authored-By: Claude <model> <noreply@anthropic.com>` where `<model>` is your own model name exactly as your system prompt states it, parenthetical included (e.g. "Opus 5 (1M context)") — read it off the prompt each time rather than reusing a name you have seen in the history.
 
-Execute the commit:
+Write the message with the Write tool to a file under the scratchpad directory's absolute path, then pass it with `-F`. `git commit -m "$(cat <<'EOF' …)"` fails: the command substitution makes the sandbox run `git`. Drop the `<body>` line and the blank line above it when there is no body.
 
-Drop the `<body>` line and the blank line above it when there is no body.
-
-```bash
-git commit -m "$(cat <<'EOF'
+```text
 <type>: <description>
 
 <body>
 
 Co-Authored-By: Claude <model> <noreply@anthropic.com>
-EOF
-)"
 ```
 
-Then verify: `git status && git log -1`
+```bash
+git commit -F <scratchpad>/commit-msg.txt
+```
+
+Then verify with `git status` and `git log -1`, each as its own Bash call.
 
 **Auto path only (Phase 2 Step 4a)**: after committing, print the message and undo hints so the user can review after the fact:
 ```
