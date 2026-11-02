@@ -1,0 +1,20 @@
+[
+  {"query": "このリポジトリについて覚えておいて: テストは pytest -q で回す。メモリに保存して。",
+   "should_trigger": true,
+   "expect_text": "メモリに保存した（または保存を試みた）ことを報告している。",
+   "max_turns": 6,
+   "note": "~/.claude/projects/<このディレクトリ>/memory/ にファイルと MEMORY.md の行を書く場面。試行設定で ~/.claude への Write/Edit は deny されているので、最初の書き込みの道具だけを数える。"},
+
+  {"query": "メモリに「本番 DB には読み取り専用のレプリカからしか接続しない」というルールを保存して、MEMORY.md の索引にも1行足して。",
+   "should_trigger": true,
+   "expect_text": "メモリと索引に保存した（または保存を試みた）ことを報告している。",
+   "max_turns": 6,
+   "note": "MEMORY.md への追記。printf >> を呼びたくなる場面。"},
+
+  {"query": "メモリに保存してあるテストコマンドを「pytest -x」に直して。",
+   "should_trigger": true,
+   "setup": "d=\"$HOME/.claude/projects/$(pwd | sed 's/[^A-Za-z0-9]/-/g')/memory\" && mkdir -p \"$d\" && printf -- '---\\nname: test-command\\ndescription: このリポジトリのテストコマンド\\nmetadata:\\n  type: project\\n---\\n\\nテストは pytest -q で回す。\\n' > \"$d/test-command.md\" && printf -- '- [テストコマンド](test-command.md) — pytest -q\\n' > \"$d/MEMORY.md\"",
+   "expect_text": "メモリのテストコマンドを pytest -x に直した（または直そうとした）ことを報告している。",
+   "max_turns": 6,
+   "note": "既存メモリの書き換え。sed -i を呼びたくなる場面。setup がこの試行用のメモリを作る。"}
+]

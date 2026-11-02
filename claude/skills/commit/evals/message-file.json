@@ -1,0 +1,22 @@
+[
+  {"query": "コミットして",
+   "should_trigger": true,
+   "setup": "printf '\\ndef sub(a, b):\\n    return a - b\\n' >> src/util.py && git add src/util.py",
+   "expect_text": "コミットしたと報告している。",
+   "max_turns": 12,
+   "note": "ステージ済みの小さな変更。確認なしでコミットまで進む経路で、メッセージを Write でスクラッチパッドに書き git commit -F で渡すか。"},
+
+  {"query": "src/util.py の変更をコミットして",
+   "should_trigger": true,
+   "setup": "printf '\\ndef mul(a, b):\\n    return a * b\\n' >> src/util.py",
+   "expect_text": "src/util.py の変更をコミットしたと報告している。",
+   "max_turns": 12,
+   "note": "未ステージの変更。ステージから始める経路。"},
+
+  {"query": "/commit",
+   "should_trigger": true,
+   "setup": "printf '    print(\"bye\")\\n' >> src/app.py && git add src/app.py",
+   "expect_text": "コミットしたと報告している。",
+   "max_turns": 12,
+   "note": "スラッシュコマンドでの起動。"}
+]

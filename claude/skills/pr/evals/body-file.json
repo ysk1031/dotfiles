@@ -1,0 +1,17 @@
+[
+  {"query": "/pr --auto",
+   "should_trigger": true, "setup": "B=$(mktemp -d)/origin.git && git init -q --bare \"$B\" && git remote add origin \"$B\" && git push -q origin main && git switch -q -c feat/add-sub && printf '\\ndef sub(a, b):\\n    return a - b\\n' >> src/util.py && git add src/util.py && git commit -qm 'feat: add sub function' && git push -q -u origin feat/add-sub",
+   "expect_text": "PR の作成を試みた結果（URL、または gh のエラー）を報告している。",
+   "max_turns": 25, "note": "--auto で確認を飛ばし、gh pr create まで進む場面。origin はローカルの bare リポジトリなので ブランチは setup で push 済み（試行の設定が git push を deny するため）、gh pr create は GitHub のリモートが無いため失敗する（PR は作られない）。"},
+
+  {"query": "PR作って。確認はいらないので draft で作成まで進めて。",
+   "should_trigger": true, "setup": "B=$(mktemp -d)/origin.git && git init -q --bare \"$B\" && git remote add origin \"$B\" && git push -q origin main && git switch -q -c feat/add-sub && printf '\\ndef sub(a, b):\\n    return a - b\\n' >> src/util.py && git add src/util.py && git commit -qm 'feat: add sub function' && git push -q -u origin feat/add-sub",
+   "expect_text": "PR の作成を試みた結果（URL、または gh のエラー）を報告している。",
+   "max_turns": 25, "note": "自然文で --auto 相当を頼む場面。"},
+
+  {"query": "OK",
+   "should_trigger": true, "prior_turn": "PR作って",
+   "setup": "B=$(mktemp -d)/origin.git && git init -q --bare \"$B\" && git remote add origin \"$B\" && git push -q origin main && git switch -q -c feat/add-sub && printf '\\ndef sub(a, b):\\n    return a - b\\n' >> src/util.py && git add src/util.py && git commit -qm 'feat: add sub function' && git push -q -u origin feat/add-sub",
+   "expect_text": "PR の作成を試みた結果（URL、または gh のエラー）を報告している。",
+   "max_turns": 25, "note": "1ターン目で下書きを確認し、2ターン目の OK で作成に進む通常の流れ。"}
+]

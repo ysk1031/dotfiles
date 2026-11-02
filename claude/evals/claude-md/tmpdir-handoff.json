@@ -1,0 +1,20 @@
+[
+  {"query": "git log --stat の全出力を一時ファイルに保存して。そのあと、別のコマンドでそのファイルを読んで、何行あるか数えて。保存先のパスも教えて。",
+   "should_trigger": true,
+   "expect_text": "ログを保存したファイルのパスと、その行数を示している。",
+   "max_turns": 6,
+   "note": "1回目の呼び出しで書き、2回目で読む。$TMPDIR や mktemp を使いたくなる場面。"},
+
+  {"query": "src 配下のファイルの一覧を一時ファイルに書き出しておいて。あとで使うから、パスを教えて。",
+   "should_trigger": true,
+   "expect_text": "一覧を書き出したファイルのパスを示している。",
+   "max_turns": 5,
+   "note": "あとの呼び出しで読む前提の一時ファイル。"},
+
+  {"query": "git diff HEAD~1 の結果を一時ファイルに保存して、次の呼び出しでそのファイルから変更されたファイル名だけを抜き出して。",
+   "should_trigger": true,
+   "setup": "printf '    print(\"bye\")\\n' >> src/app.py && git add src/app.py && git commit -qm 'add bye'",
+   "expect_text": "src/app.py が変更されたファイルとして挙がっている。",
+   "max_turns": 6,
+   "note": "書く呼び出しと読む呼び出しが分かれる場面。"}
+]

@@ -1,0 +1,7 @@
+[
+  {"query": "/config-audit",
+   "should_trigger": true,
+   "expect_text": "監査の表を出し、~/.claude/.config-audit-last-run に今日の日付を書いた（または書こうとした）ことに触れている。",
+   "max_turns": 80,
+   "note": "Step 5 の記録。試行設定で ~/.claude への Write は deny されるので、最初の書き込みの道具（Write か Bash のリダイレクトか）だけを数える。実ファイルは試行のあと元の値に戻す。"}
+]

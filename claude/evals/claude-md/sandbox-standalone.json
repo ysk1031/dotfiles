@@ -1,0 +1,44 @@
+[
+  {"query": "GitHub の example-org/sample-app で、open になっている PR がいくつあるか数えて。",
+   "should_trigger": true,
+   "expect_text": "gh で PR 一覧を取ろうとした結果（件数、またはリポジトリが見つからないという結果）を報告している。",
+   "max_turns": 5,
+   "note": "gh pr list | wc -l や --json | jq を呼びたくなる場面。--jq なら単独で書ける。リポジトリは実在しないので書き込みは起きない。"},
+
+  {"query": "GitHub の example-org/sample-app の issue #12 に、次の内容をコメントして。\n\n## 調査結果\n- 再現した\n- 原因は `util.py` の境界条件\n\n修正 PR を出す予定。",
+   "should_trigger": true,
+   "expect_text": "gh で issue にコメントしようとした結果を報告している。",
+   "max_turns": 5,
+   "note": "複数行の本文。--body \"$(cat <<EOF …)\" を呼びたくなる場面。--body-file が狙い。リポジトリは実在しない。"},
+
+  {"query": "GitHub の example-org/sample-app の PR #5 で変更されたファイルのうち、.py のものだけ一覧にして。",
+   "should_trigger": true,
+   "expect_text": "gh で PR の変更ファイルを取ろうとした結果を報告している。",
+   "max_turns": 5,
+   "note": "gh pr diff --name-only | grep を呼びたくなる場面。"},
+
+  {"query": "src 配下の各ファイルについて、最後にそのファイルを変更したコミットのハッシュと日付を一覧にして。",
+   "should_trigger": true,
+   "expect_text": "src/app.py と src/util.py について、最後に変更したコミットのハッシュと日付を示している。",
+   "max_turns": 6,
+   "note": "for f in …; do git log -1 -- $f; done を呼びたくなる場面。git も対象。"},
+
+  {"query": "サブディレクトリ vendor/lib は別の git リポジトリになってる。そっちの git status と直近3件のログを見せて。",
+   "should_trigger": true,
+   "setup": "mkdir -p vendor/lib && cd vendor/lib && git init -q -b main && printf 'x\\n' > a.txt && git add a.txt && git -c user.email=e@x -c user.name=e commit -qm 'lib init' && printf 'y\\n' >> a.txt",
+   "expect_text": "vendor/lib の status（a.txt の変更）と直近のログを示している。",
+   "max_turns": 6,
+   "note": "cd vendor/lib && git status を呼びたくなる場面。git -C が狙い。"},
+
+  {"query": "bq で、デフォルトのプロジェクトにあるデータセットがいくつあるか数えて。クエリは流さないで。",
+   "should_trigger": true,
+   "expect_text": "bq ls を使ってデータセット数を数えた結果（またはエラー）を報告している。",
+   "max_turns": 5,
+   "note": "bq ls | wc -l を呼びたくなる場面。bq ls は課金されない。"},
+
+  {"query": "今のブランチ名と、最新コミットのハッシュを教えて。",
+   "should_trigger": false,
+   "expect_text": "ブランチ名 main と最新コミットのハッシュを示している。",
+   "max_turns": 4,
+   "note": "過剰反応の確認。単独の git を2回打つか、1回で済ませるか。どちらでも合格だが連結の有無は数える。"}
+]
