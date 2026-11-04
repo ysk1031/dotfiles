@@ -52,6 +52,15 @@ if sed -E 's/\[\[[^]]*\]\]//g; s/\(\([^)]*\)\)//g' <<<"$bare" | grep -qE '(^|[[:
   reasons+=('zsh は = で始まる単語（`echo ===` や `[ "$a" == b ]` の `==`）をコマンドのパスに置き換えようとして `= not found` で止まり、その呼び出しの残りのコマンドも動きません。区切り線は `echo "==="` のように引用符で囲み、比較は `[ "$a" = b ]` と = 1つで書いてください。')
 fi
 
+# Only forms that never match a real file; a plain `ls *.md` is left alone.
+globbable=$(sed -E 's/\\.//g; s/\$\{[^}]*\}//g; s/\$\(\([^)]*\)\)//g; s/[$<>]\([^)]*\)//g; s/(^|[[:space:]])#.*//' <<<"$bare")
+if grep -qE '(^|[[:space:];&|(])-[^[:space:]=]*=[^[:space:];&|]*[*?[(]' <<<"$globbable"; then
+  reasons+=("zsh は \`--include=*.rb\` や \`--format=%(refname:short)\` を glob として展開し、一致するファイルが無いので \`no matches found\` でコマンドを動かしません。\`--include='*.rb'\`・\`--format='%(refname:short)'\` のように値を引用符で囲んでください。")
+fi
+if grep -qE '(^|[[:space:]])[A-Za-z_][A-Za-z0-9_.#:]*\?([[:space:];&|)]|$)' <<<"$globbable"; then
+  reasons+=("zsh は \`has_job_apply?\` のように ? で終わる単語を glob として展開し、一致するファイルが無いので \`no matches found\` でコマンドを動かしません。\`'has_job_apply?'\` のように引用符で囲んでください。")
+fi
+
 while read -r seg; do
   read -ra words <<<"$seg"
   short=0 revs=0
