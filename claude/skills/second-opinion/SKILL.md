@@ -34,6 +34,7 @@ Think of it as a blind review: the reviewer sees the code and the question, neve
 Agent(
   subagent_type: "general-purpose",
   model: "fable",
+  effort: "medium" | "high",
   description: "Second opinion on <topic>",
   prompt: <the bias-stripped prompt>
 )
@@ -41,7 +42,7 @@ Agent(
 
 `general-purpose` lets it open a file if your excerpt turns out to be insufficient.
 
-The Agent tool exposes no reasoning-effort parameter, so control depth through the prompt: tell it to *"think hard"* / *"ultrathink"* for a weighty decision, omit that for a quick sanity check, and translate the user's request if they asked for a specific level.
+Control depth with the `effort` parameter, not with words in the prompt: `"medium"` for a quick sanity check, `"high"` for a weighty decision (security, data loss, a design that is hard to undo). If the user asked for a level, pass that level. Do not write "think hard" or "ultrathink" in the prompt: Claude Code passes "think hard" through as plain text, and "ultrathink" is a keyword for the user's own prompt, so what it does inside an Agent prompt is not a level you can set or compare.
 
 Ask for a structured answer so it is comparable to yours: its recommendation, its reasoning, risks or options it sees that you may have missed, and its confidence with what would change its mind.
 
